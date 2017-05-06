@@ -29,12 +29,19 @@ slices. Applications processing voxels individually, for instance
 histogram computation or k-means clustering, could work on either
 slices or blocks.
 
+Related work: nothing found on this exact problem. Lot of things on
+parallel image processing but assumes that images fit in memory or do
+not consider split-and-merge as an issue.
+
 We consider a file format where voxels are written after
 alphanumerical sorting of their (x,y,z) representation. That is, x
 slices are written one after the other, and in every x slice, y rows
 are written one after the other. Nifti [ref] is such a format, used by
 90\% of the neuroimaging community. In the remainder, we use the term
 "slice" for "x slice".
+
+Algorithms
+----------
 
 In our context, split and merge relate to the same dual problem. Without
 loss of generality, we focus here on merging for the sake of
@@ -43,8 +50,8 @@ reconstructed 3D image with $F$ voxels of size $u$. We assume that all
 chunks are of identical size and that slices are squares and blocks
 are cubes. 
 
-Slices vs blocks
-----------------
+  Slices vs blocks
+  ----------------
 
 Algorithm 1 is the naive solution to merge slices and blocks. 
 
@@ -66,8 +73,8 @@ $(F/N)^{1/3}$. The total number of seeks, considering $N$ blocks is
 thus N^{2/3}.F^{1/3}. In practice, this could lead to a tremendous
 slowdown.
 
-Sorted blocks
--------------
+  Sorted blocks
+  -------------
 
 Sorting blocks alphanumerically by (x,y,z) as shown on Algorithm 2 reduces the seek time
 between blocks.
@@ -80,8 +87,8 @@ Algo 2: reconstruction from sorted blocks.
 
 The number of seeks is not reduced but the length of seeks is.
 
-Cluster reads
--------------
+  Cluster reads
+  -------------
 
 We fill memory with as many blocks as possible to write in slices. A
 given block is read only once. Slices may be written partially.
@@ -95,8 +102,8 @@ Algo 3: reconstruction from blocks using cluster reads and sorted blocks
   * For each partially reconstructed slice:
     - Write in reconstructed image
 
-Multiple reads
---------------
+  Multiple reads
+  --------------
 
 We fill memory with as many voxels as possible to write groups of
 entire slices. A given block may be read multiple times.
@@ -110,8 +117,8 @@ Algo 4: reconstruction from blocks using multiple reads
      - reconstruct $s_1$, ..., $s_n$ in memory
      - write $s_1$, ..., $s_n$
 
-Benchmark
----------
+  Benchmark
+  ---------
 
 As a running example to benchmark our algorithms, we use the 76~GB
 BigBrain image split in 125 chunks. The data is available [here]. We
