@@ -1,0 +1,249 @@
+\documentclass[10pt, conference, compsocconf]{IEEEtran}
+
+% packages
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{color}
+\usepackage[pdftex]{graphicx}
+\usepackage{hyperref}
+
+% new commands
+\newcommand{\todo}[1]{
+  \color{red}\emph{[#1]}
+  \color{black}
+}
+
+
+\begin{document}
+
+\title{Sequential algorithms to split and merge large 3D images}
+
+\maketitle
+
+\begin{abstract}
+\todo{The abstract goes here. DO NOT USE SPECIAL CHARACTERS, SYMBOLS, OR MATH IN YOUR TITLE OR ABSTRACT.}
+\end{abstract}
+
+
+\section{Introduction}
+
+Three-dimensional images that cannot be loaded in memory are
+increasingly found in a variety of disciplines. BigBrain, for
+instance, is a 3D histological image of the human brain that
+represents 1~TB of data organized in 3600 planes at full resolution
+(1$\mu$m in-plane), and 76~GB at a 40$\mu$m isotropic resolution
+commonly used in neurosciences~\cite{amunts2013bigbrain}. Other
+examples found in medical imaging, our primary domain of interest,
+include \todo{electromicroscopy,spectroscopy-francoise-peyrin}. As
+such images would typically be processed on a computing cluster,
+possibly using locality-aware file systems such as HDFS, software
+libraries are needed to split and merged such images efficiently. We
+introduce and compare a family of algorithms to address this problem
+in a sequential environment made of a single storage disk. We are
+aware of the need for parallel algorithms that would split and merge
+images to and from an array of disks but we plan to describe such
+algorithms in a subsequent paper based on the results of the present
+one.
+
+A disk is modeled by its read and write rates ($\alpha_r$ and
+$\alpha_w$, in MB/s), and its seek speed ($\beta$, also in
+MB/s).
+
+Images are split into chunks representing 3D blocks or 2D slices. We
+assume that a block or slice fits in memory. The BigBrain would
+perhaps be split into 125 chunks of 600~MB. The decision to split an
+image into slices or blocks, and the size of the resulting chunks, may
+be constrained by the application. Some applications, for instance
+spatial filtering, would commonly require blocks while other ones such
+as acquisition artifact removal would rather work on
+slices. Flexibility is thus required in the splitting
+scheme. Applications processing voxels individually, for instance
+histogram computation or k-means clustering, could work on either
+slices or blocks.
+
+The main problem encountered in the context of this paper is the fact
+that, if not ordered properly, data reads and writes might result in
+extensive seek times that, as we illustrate below, drastically limit
+the I/O performance. This problem is obviously related to the ordering
+of data bytes in image files, which we assume is arbitrary but known
+to the algorithm. The problem is also related to the geometry of the
+chunks to extract or merge, which we again assume arbitrary but known
+to the algorithm. In a nutshell, we are seeking for algorithms to
+reduce seek times while allowing for arbitrary chunk geometries and
+arbitrary byte orders in data files. The main idea of the variations
+presented in the remainder of the paper is to convert data orderings
+in memory before writing them on disk. 
+
+The literature looks remarkably scarce on the problem described
+above. Parallel processing of 3D images has obviously been extensively
+studied, but methods have focused more on geometrical approaches to
+partition images and on load-balancing and task scheduling techniques
+while we aim at algorithms to efficiently split or merge images
+regardless of the geometry of the chunks \todo{do a serious literature
+review on this topic}. Perhaps this lack of related works could be
+attributed to the fact that disk I/O weren't a bottleneck until image
+resolution reached a certain threshold. A relevant reference is the
+description of the Open Connectome Data Cluster~\cite{burns2013open},
+a data warehouse system that allows users to retrieve specific chunks
+of large datasets. In this work, the problem of long seek times is
+addressed by designing a specific file format based on space-filling
+curves, that elegantly preserves spatial proximity on disk. However,
+addressing the problem using a specific data organization optimizes
+the system for specific chunk geometries, volumetric in this case,
+while we aim at algorithms that support multiple types of geometries.
+
+
+\section{Algorithms}
+
+In our context, split and merge relate to the same dual
+problem \todo{not so sure about this actually}. Without loss of
+generality, we focus here on merging for the sake of concision. Our
+goal then is to merge a set of $N$ chunks into a single reconstructed
+3D image with $F$ voxels of size $u$. We assume that all chunks are of
+identical size and that slices are squares and blocks are cubes.
+
+Without loss of generality, we consider a file format where voxels are
+written after alphanumerical sorting of their (x,y,z)
+representation. That is, x slices are written one after the other, and
+in every x slice, y rows are written one after the other. NifTI, the
+file format defined by the Neuroimaging Informatics Technology
+Initiative Nifti\footnote{\url{https://nifti.nimh.nih.gov}} is such a
+format, used by the vast majority of the neuroimaging community. In
+the remainder, we use the term "slice" for "x slice".
+
+
+\subsection{Slices vs blocks}
+
+Algorithms~\ref{algo:naive-slices} and~\ref{algo:naive-blocks} are the
+naive solutions to reconstruct large images from slices or blocks.
+\begin{algorithm}{tbh}
+\caption{Naive merging of slices.}
+\label{algo:naive-slices} 
+\begin{algorithmic}
+  \FOR{each slice}
+    \STATE read slice
+    \STATE write slice in reconstructed image
+  \ENDFOR      
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}{tbh}
+\caption{Naive merging of blocks.}
+\label{algo:naive-blocks}
+\begin{algorithmic}
+  \FOR{each block}
+    \STATE read block
+    \STATE write block in reconstructed image
+  \ENDFOR 
+\end{algorithmic}
+\end{algorithm}
+
+Although simplistic, Algorithms~\ref{algo:naive-slices}
+and~\ref{algo:naive-blocks} actually exhibit very different
+performance due to the amount of seeks performed by Algorithm 1.b. The
+number of seeks performed in Algo 1.b for each block is indeed the
+number of rows in a slice, that is, $(F/N)^{1/3}$. The total number of
+seeks, considering $N$ blocks is thus $N^{2/3}.F^{1/3}$. In practice,
+this could lead to a tremendous slowdown.
+
+\subsection{Sorted blocks}
+
+Sorting blocks alphanumerically by (x,y,z) as shown on Algorithm 2 reduces the seek time
+between blocks.
+
+Algo 2: reconstruction from sorted blocks.
+* Sort blocks according to (x,y,z)
+* For each block in sorted list:
+  - read block
+  - write block in reconstructed image
+
+The number of seeks is not reduced but the length of seeks is.
+
+\subsection{Cluster reads}
+
+We fill memory with as many blocks as possible to write in slices. A
+given block is read only once. Slices may be written partially.
+
+Algo 3: reconstruction from blocks using cluster reads and sorted blocks
+* Sort blocks according to (x,y,z)
+* While there are unread blocks:
+  * While there is memory available:
+    - read next block in sorted list
+  * (Partially) reconstruct slices from blocks (in memory).
+  * For each partially reconstructed slice:
+    - Write in reconstructed image
+
+\subsection{Multiple reads}
+
+We fill memory with as many voxels as possible to write groups of
+entire slices. A given block may be read multiple times.
+
+Algo 4: reconstruction from blocks using multiple reads
+* While there are empty slices in the reconstructed image:
+  * Determine $n$ so that $n$ slices fit in memory
+  * Reconstruct next slices $s_1$, ...,  $s_n$:
+     - list the blocks contributing to $s_1$, $s_n$
+     - for each block in the list, read the voxels of interest
+     - reconstruct $s_1$, ..., $s_n$ in memory
+     - write $s_1$, ..., $s_n$
+
+\subsection{Benchmark}
+
+As a running example to benchmark our algorithms, we use the 76~GB
+BigBrain image split in 125 chunks. The data is available [here]. We
+perform experiments using the two disks below:
+- HD ...
+- SSD ...
+Our algorithms are implemented in Python using the Nibabel library. 
+
+\section{Results}
+
+-- Splitting, 125 blocks, HD vs SSD.
+Figure 1: on HD, 5 algorithms, 10 repetitions per algorithm.
+Figure 2: on SSD, 5 algorithms, 10 repetitions per algorithm. 
+
+-- Merging, 125 blocks, HD vs SSD.
+Figure 3: on HD, 5 algorithms, 10 repetitions per algorithm.
+Figure 4: on SSD, 5 algorithms, 10 repetitions per algorithm. 
+
+-- HD, 250 blocks vs 125 blocks. 
+Figure 5: different block sizes
+
+-- HD, 125 blocks, F vs F/2
+- Figure 6: Different images sizes, with constant memory.
+
+\section{Discussion}
+
+What is the best algorithm (between 3 and 4), in which context. Did we
+solve the seek problem or is there any issue remaining?
+
+File formats:
+\begin{itemize}
+\item would MINC~\cite{vincent2016minc} support such algorithms? See on-going email discussion
+with P. Bellec.
+\item some formats optimize the storage for particular split shapes. See
+  ndstore~\cite{burns2013open}. Such formats would behave equally
+  poorly with splits that do not comply to this geometry. Our
+  algorithms would work equally well with such formats.
+\end{itemize}
+
+Reconstructing (therefore splitting) a complete 3D image may not
+always be necessary. Re-splitting, for instance, could be done from
+existing splits.
+
+\section{Conclusion}
+
+Future work:
+- obliques
+- parallel algorithms
+- re-splitting
+- model
+
+\section*{Acknowledgment}
+
+(If not added as co-authors): Greg Kiar, Pierre Bellec.
+
+\bibliographystyle{IEEEtran}
+\bibliography{IEEEabrv,biblio.bib}
+
+\end{document}
