@@ -21,7 +21,10 @@
 \maketitle
 
 \begin{abstract}
-\todo{The abstract goes here. DO NOT USE SPECIAL CHARACTERS, SYMBOLS, OR MATH IN YOUR TITLE OR ABSTRACT.}
+  \todo{The abstract goes here. DO NOT USE SPECIAL CHARACTERS,
+    SYMBOLS, OR MATH IN YOUR TITLE OR ABSTRACT.}  Authors (final order
+  to be discussed when the paper shapes up): Yongping/Val\'erie,
+  Yuhong Yan, Tristan. Perhaps Pierre Bellec.
 \end{abstract}
 
 
@@ -187,7 +190,17 @@ Algo 4: reconstruction from blocks using multiple reads
      - reconstruct $s_1$, ..., $s_n$ in memory
      - write $s_1$, ..., $s_n$
 
-\subsection{Benchmark}
+\subsection{Lossless compression}
+     
+Lossless compression might reduce overall read and write times by
+reducing seek time and data sizes. However, it needs to be implemented
+on-the-fly, i.e., in chunks. See the work in~\cite{rajna2015speeding}
+and \href{https://github.com/pauldmccarthy/indexed\_gzip}{corresponding
+  implementation}.
+     
+\subsection{Implementation and Benchmark}
+
+
 
 As a running example to benchmark our algorithms, we use the 76~GB
 BigBrain image split in 125 chunks. The data is available [here]. We
