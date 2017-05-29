@@ -195,8 +195,12 @@ Algo 4: reconstruction from blocks using multiple reads
 Lossless compression might reduce overall read and write times by
 reducing seek time and data sizes. However, it needs to be implemented
 on-the-fly, i.e., in chunks. See the work in~\cite{rajna2015speeding}
-and \href{https://github.com/pauldmccarthy/indexed\_gzip}{corresponding
-  implementation}.
+and
+\href{https://github.com/pauldmccarthy/indexed\_gzip}{corresponding
+  implementation}. This is straightforward to apply for random reads
+but not for random writes. Multiple reads is the only merging strategy
+that works with literally no seek in the reconstructed image which
+could therefore potentially use in-memory compression.
      
 \subsection{Implementation and Benchmark}
 
