@@ -6,6 +6,9 @@
 \usepackage{color}
 \usepackage[pdftex]{graphicx}
 \usepackage{hyperref}
+\usepackage{mathtools}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
 
 % new commands
 \newcommand{\todo}[1]{
@@ -96,7 +99,7 @@ the system for specific chunk geometries, volumetric in this case,
 while we aim at algorithms that support multiple types of geometries.
 
 
-\section{Algorithms}
+\section{Algorithms and Models}
 
 In our context, split and merge relate to the same dual
 problem \todo{not so sure about this actually}. Without loss of
@@ -114,6 +117,36 @@ Initiative Nifti\footnote{\url{https://nifti.nimh.nih.gov}} is such a
 format, used by the vast majority of the neuroimaging community. In
 the remainder, we use the term "slice" for "x slice".
 
+\subsection{Notations}
+
+We adopt the following notations:
+\begin{itemize}
+\item $R$: number of voxels in the reconstructed images.
+\item $b$: bytes per voxel in the reconstructed images and splits (in B).
+\item $n$: number of splits (blocks or slices).
+\item $\alpha_r$: data read rate from disk (in B/s).
+\item $\alpha_w$: data write rate to disk (in B/s).
+\item $\beta$: disk access time (in s).
+\item $m$: amount of RAM available (in B).
+\end{itemize}
+
+The following properties are straightforward applications of these
+definitions:
+\begin{itemize}
+\item bytes per chunk: $\frac{Rb}{n}$
+\item number of chunks that can fit in memory: $\frac{m.n}{Rb}$
+\end{itemize}
+For the sake of mathematical simplicity, the models below assume that
+the reconstructed image and blocks are cubic. Under this assumption,
+we have the following definitions and properties:
+\begin{itemize}
+\item Number of slices in a block: $\sqrt[3]{\frac{R}{n}}$
+\item Number of blocks required to fully cover a slice in the
+  reconstructed image: $\sqrt[3]{n}^2=n^{\frac{2}{3}}$
+  \item Number of full slices that can be reconstructed from $k$
+    blocks: $\floor*{\frac{k}{n^{\frac{2}{3}}}}\sqrt[3]{\frac{R}{n}}$
+\end{itemize}
+\todo{Make a figure to illustrate the notations.}
 
 \subsection{Slices vs blocks}
 
@@ -145,9 +178,18 @@ Although simplistic, Algorithms~\ref{algo:naive-slices}
 and~\ref{algo:naive-blocks} actually exhibit very different
 performance due to the amount of seeks performed by Algorithm 1.b. The
 number of seeks performed in Algo 1.b for each block is indeed the
-number of rows in a slice, that is, $(F/N)^{1/3}$. The total number of
-seeks, considering $N$ blocks is thus $N^{2/3}.F^{1/3}$. In practice,
+number of rows in a slice, that is, $(R/n)^{1/3}$. The total number of
+seeks, considering $n$ blocks is thus $N^{2/3}.F^{1/3}$. In practice,
 this could lead to a tremendous slowdown.
+
+For slices, the total merge time is expressed as follows:
+\begin{equation}
+T_\mathrm{slices} = \frac{bR}{\alpha_r}+\frac{bR}{\alpha_w}+2\beta n
+\end{equation}
+and for blocks:
+\begin{equation}
+  T_\mathrm{blocks} = \frac{bR}{\alpha_r}+\frac{bR}{\alpha_w}+\beta n\left(1+\sqrt[3]{\frac{R}{n}}\right)
+\end{equation}
 
 \subsection{Sorted blocks}
 
@@ -162,7 +204,14 @@ Algo 2: reconstruction from sorted blocks.
 
 The number of seeks is not reduced but the length of seeks is.
 
-\subsection{Cluster reads}
+\subsection{Buffered slices}
+
+\begin{equation}
+T_\mathrm{buff\_slices} = \frac{bR}{\alpha_r}+\frac{bR}{\alpha_w}+\beta\left( n + \ceil*{\frac{bR}{m}}\right)
+\end{equation}
+
+
+\subsection{Buffered blocks: Cluster reads}
 
 We fill memory with as many blocks as possible to write in slices. A
 given block is read only once. Slices may be written partially.
@@ -176,7 +225,21 @@ Algo 3: reconstruction from blocks using cluster reads and sorted blocks
   * For each partially reconstructed slice:
     - Write in reconstructed image
 
-\subsection{Multiple reads}
+    \begin{equation}
+      \begin{multlined}
+  T_\mathrm{cluster\_reads} = \frac{bR}{\alpha_r}+\frac{bR}{\alpha_w} +\\
+  \beta
+  \left[n+ 
+  \ceil*{\frac{bR}{m}} \left[
+           \sqrt[3]{\frac{R}{n}} \left(
+              \ceil*{\frac{m\sqrt[3]{n}}{bR}} - \floor*{\frac{m\sqrt[3]{n}}{bR}}
+           \right)+1
+             \right]
+             \right]
+             \end{multlined}
+\end{equation}
+    
+\subsection{Buffered blocks: Multiple reads}
 
 We fill memory with as many voxels as possible to write groups of
 entire slices. A given block may be read multiple times.
@@ -190,6 +253,10 @@ Algo 4: reconstruction from blocks using multiple reads
      - reconstruct $s_1$, ..., $s_n$ in memory
      - write $s_1$, ..., $s_n$
 
+     \begin{equation}
+       T_\mathrm{multiple\_reads}= \frac{bR}{\alpha_r}+\frac{bR}{\alpha_w} + \beta\ceil*{\frac{bR}{m}}\left(1+ \ceil*{\frac{m.n}{bR}}\right)\\
+\end{equation}
+     
 \subsection{Lossless compression}
      
 Lossless compression might reduce overall read and write times by
@@ -202,32 +269,62 @@ but not for random writes. Multiple reads is the only merging strategy
 that works with literally no seek in the reconstructed image which
 could therefore potentially use in-memory compression.
      
-\subsection{Implementation and Benchmark}
+\subsection{Benchmark}
+\label{sec:benchmark}
 
-
-
+\subsubsection{Data}
 As a running example to benchmark our algorithms, we use the 76~GB
-BigBrain image split in 125 chunks. The data is available [here]. We
+BigBrain image split in 125 chunks. The data is available
+\todo{[here]}.
+
+\subsubsection{Infrastructure}
+ We
 perform experiments using the two disks below:
 - HD ...
 - SSD ...
-Our algorithms are implemented in Python using the Nibabel library. 
+
+\todo{Benchmark the disks to measure $\alpha_r$, $\alpha_w$ and $\beta$.}
+
+\subsubsection{Software implementation}
+
+Our algorithms are implemented in Python using the Nibabel
+library. \todo{Software release.}
 
 \section{Results}
 
--- Splitting, 125 blocks, HD vs SSD.
-Figure 1: on HD, 5 algorithms, 10 repetitions per algorithm.
-Figure 2: on SSD, 5 algorithms, 10 repetitions per algorithm. 
+\subsection{Slices vs blocks}
 
--- Merging, 125 blocks, HD vs SSD.
-Figure 3: on HD, 5 algorithms, 10 repetitions per algorithm.
-Figure 4: on SSD, 5 algorithms, 10 repetitions per algorithm. 
+\todo{Valerie's results at PERFORM + model.}
 
--- HD, 250 blocks vs 125 blocks. 
-Figure 5: different block sizes
+\subsection{Sorted blocks vs blocks}
 
--- HD, 125 blocks, F vs F/2
-- Figure 6: Different images sizes, with constant memory.
+\subsection{Buffered slices vs slices}
+
+
+\subsection{Cluster reads vs Multiple reads vs Buffered slices}
+
+\subsection{Model-based comparisons}
+
+Figure~\ref{fig:models} plots the total merge time obtained with the
+different algorithms, using the values in~\ref{sec:benchmark} and
+different amounts of available memory. Multiple reads behave
+consistently better regardless of the amount of available
+memory. Cluster reads reach similar performance as available memory
+increases.
+\begin{figure}
+  \includegraphics[width=\columnwidth]{figures/model.pdf}
+  % see function.py
+  \caption{Model comparison}
+  \label{fig:models}
+\end{figure}
+\todo{redraw the figure. Benchmark $\alpha$ and $\beta$ more
+  accurately on the HDD or SSD. In the previous sections, compare the
+  model with real experiments, to validate the model.}
+
+\subsection{Lossless Compression}
+
+\subsection{Splitting}
+
 
 \section{Discussion}
 
