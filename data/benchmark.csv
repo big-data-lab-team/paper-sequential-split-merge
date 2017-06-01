@@ -1,3 +1,5 @@
+# Benchmark of HDD on consider, obtained with scripts/disk-benchmark.py
+# format: file_size(B),write_time(s),read_time(s)
 1879048192,0.572358131409,0.330450773239
 5905580032,38.6017520428,1.07482409477
 5905580032,46.6834669113,45.196146965
