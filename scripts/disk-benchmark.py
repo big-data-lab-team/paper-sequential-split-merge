@@ -37,7 +37,9 @@ while(True):
     os.remove(filename)
     
     # Print result
-    print len(buff),filename,write_end-write_start,read_end-read_start
+    f = open("benchmark.csv","a")
+    f.write(''+str(len(buff))+","+str(write_end-write_start)+","+str(read_end-read_start)+"\n")
+    f.close()
     # Just in case...
     time.sleep(1)
     
