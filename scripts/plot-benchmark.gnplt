@@ -4,4 +4,4 @@ set datafile separator ","
 set key left
 set xlabel "Data size (MB)"
 set ylabel "Time (s)"
-plot [256:] "data/benchmark.csv" u ($1/(1024*1024)):2 title "Write", "" u ($1/(1024*1024)):3 title "Read"
+plot [0:] "data/benchmark.csv" u ($1/(1024*1024)):2 title "Write", "" u ($1/(1024*1024)):3 title "Read"
