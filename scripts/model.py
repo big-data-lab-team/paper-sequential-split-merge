@@ -32,11 +32,12 @@ def t_cluster_reads(N,F,alpha_r,alpha_w,beta,m,b):
     return b*F/alpha_r+b*F/alpha_w+beta*(N+math.ceil(F*b/m)*(cubic_root(F/N)*(math.ceil(a)-math.floor(a))+1))
   
 N=125.0
-b=8.0
+b=2.0
 F=76000000000.0/b
-alpha_r=145000000.0
-alpha_w=alpha_r
-beta=20*10**(-3)
+alpha_w=68*1024*1024 #109506075.558291 # according to benchmark on May 31st
+alpha_r=alpha_w
+alpha_w=1000000000000000000000000000000000000
+beta=15*10**(-3)
 m=F/125.0 
 print "Slices",t_slices(N,F,alpha_r,alpha_w,beta,b)
 print "Buffered slices",t_buff_slices(N,F,alpha_r,alpha_w,beta,m,b)

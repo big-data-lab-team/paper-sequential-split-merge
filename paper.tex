@@ -24,7 +24,7 @@
 
 \begin{document}
 
-\title{Sequential algorithms to split and merge large 3D images}
+\title{Sequential algorithms to split and merge terabyte-scale 3D images}
 
 \maketitle
 
@@ -38,7 +38,7 @@
 
 \section{Introduction}
 
-Three-dimensional images that cannot be loaded in memory are
+Three-dimensional images that exceed typical memory size are
 increasingly found in a variety of disciplines. BigBrain, for
 instance, is a 3D histological image of the human brain that
 represents 1~TB of data organized in 3600 planes at full resolution
@@ -57,8 +57,9 @@ algorithms in a subsequent paper based on the results of the present
 one.
 
 A disk is modeled by its read and write rates ($\alpha_r$ and
-$\alpha_w$, in MB/s), and its seek speed ($\beta$, also in
-MB/s).
+$\alpha_w$, in MB/s), and its access time ($\beta$, in seconds).
+%also in
+%MB/s).
 
 Images are split into chunks representing 3D blocks or 2D slices. We
 assume that a block or slice fits in memory. The BigBrain would
@@ -103,14 +104,29 @@ addressing the problem using a specific data organization optimizes
 the system for specific chunk geometries, volumetric in this case,
 while we aim at algorithms that support multiple types of geometries.
 
+This paper makes the following contributions:
+\begin{itemize}
+  \item We propose a set of algorithms to split and merge 3D images
+    that do not fit in memory.
+  \item We model the performance (execution time) of these algorithms,
+    based on a simple but realistic disk I/O model.
+  \item We evaluate our model and algorithms on a representative
+    use-case involving a 1~TB image a hard drive and a solid-state
+    drive.
+  \item We compare the algorithms in a variety of conditions based on the validated model.
+\end{itemize}
+Section~\ref{sec:algos} presents our algorithms and models,
+Section~\ref{sec:results} details the results and
+Sections~\ref{sec:discussion} discusses them.
 
 \section{Algorithms and Models}
+\label{sec:algos}
 
 In our context, split and merge relate to the same dual
 problem \todo{not so sure about this actually}. Without loss of
 generality, we focus here on merging for the sake of concision. Our
-goal then is to merge a set of $N$ chunks into a single reconstructed
-3D image with $F$ voxels of size $u$. We assume that all chunks are of
+goal then is to merge a set of $n$ chunks into a single reconstructed
+3D image with $R$ voxels of size $b$. We assume that all chunks are of
 identical size and that slices are squares and blocks are cubes.
 
 Without loss of generality, we consider a file format where voxels are
@@ -120,25 +136,25 @@ in every x slice, y rows are written one after the other. NifTI, the
 file format defined by the Neuroimaging Informatics Technology
 Initiative Nifti\footnote{\url{https://nifti.nimh.nih.gov}} is such a
 format, used by the vast majority of the neuroimaging community. In
-the remainder, we use the term "slice" for "x slice".
+the remainder, we use the term ``slice" for ``x slice".
 
 \subsection{Notations}
 
 We adopt the following notations:
 \begin{itemize}
-\item $R$: number of voxels in the reconstructed images.
-\item $b$: bytes per voxel in the reconstructed images and splits (in B).
-\item $n$: number of splits (blocks or slices).
+\item $R$: number of voxels in the reconstructed image.
+\item $b$: number of bytes per voxel in the reconstructed image and chunks (in B).
+\item $n$: number of chunks (blocks or slices).
 \item $\alpha_r$: data read rate from disk (in B/s).
 \item $\alpha_w$: data write rate to disk (in B/s).
 \item $\beta$: disk access time (in s).
-\item $m$: amount of RAM available (in B).
+\item $m$: amount of available RAM (in B).
 \end{itemize}
 
 The following properties are straightforward applications of these
 definitions:
 \begin{itemize}
-\item bytes per chunk: $\frac{Rb}{n}$
+\item number of bytes per chunk: $\frac{Rb}{n}$
 \item number of chunks that can fit in memory: $\frac{m.n}{Rb}$
 \end{itemize}
 For the sake of mathematical simplicity, the models below assume that
@@ -156,8 +172,8 @@ we have the following definitions and properties:
 \subsection{Slices vs blocks}
 
 Algorithms~\ref{algo:naive-slices} and~\ref{algo:naive-blocks} are the
-naive solutions to reconstruct large images from slices or blocks.
-\begin{algorithm}{tbh}
+naive merging methods for slices and blocks.
+\begin{algorithm}[h]
 \caption{Naive merging of slices.}
 \label{algo:naive-slices} 
 \begin{algorithmic}
@@ -168,7 +184,7 @@ naive solutions to reconstruct large images from slices or blocks.
 \end{algorithmic}
 \end{algorithm}
 
-\begin{algorithm}{tbh}
+\begin{algorithm}[h]
 \caption{Naive merging of blocks.}
 \label{algo:naive-blocks}
 \begin{algorithmic}
@@ -179,15 +195,22 @@ naive solutions to reconstruct large images from slices or blocks.
 \end{algorithmic}
 \end{algorithm}
 
-Although simplistic, Algorithms~\ref{algo:naive-slices}
-and~\ref{algo:naive-blocks} actually exhibit very different
-performance due to the amount of seeks performed by Algorithm 1.b. The
-number of seeks performed in Algo 1.b for each block is indeed the
-number of rows in a slice, that is, $(R/n)^{1/3}$. The total number of
-seeks, considering $n$ blocks is thus $N^{2/3}.F^{1/3}$. In practice,
-this could lead to a tremendous slowdown.
-
-For slices, the total merge time is expressed as follows:
+Algorithms~\ref{algo:naive-slices} and~\ref{algo:naive-blocks}
+actually have very different performance even though blocks and slices
+have identical sizes. This is due to the number of seeks performed by
+Algorithm~\ref{algo:naive-blocks} to write a block, which equals the
+total number of rows in all slices of a block, that is (since the
+blocks are cubic): $\sqrt[3]{\frac{R}{n}}^2$. \note{Note the square
+  which is omitted in equation 2 below and in model.py. Adding the
+  square to the model just makes the runtime aberrant. This is because
+  not all seeks are equal: only ``long'' seeks between block slices
+  are significant; seeks between rows of a given block slice are much
+  shorter. The way to model this is to replace $\beta$ by $\beta +
+  \frac{s}{\gamma}$ where $\beta$ is in seconds, $\gamma$ is in B/s
+  and $s$ is the seek ``distance'' in bytes. I bet $\gamma$ is very
+  high on the SSD. } In practice, this could lead to a tremendous
+slowdown as we will show later. For slices, the total merge time is
+modeled as follows:
 \begin{equation}
 T_\mathrm{slices} = \frac{bR}{\alpha_r}+\frac{bR}{\alpha_w}+2\beta n
 \end{equation}
@@ -296,6 +319,7 @@ Our algorithms are implemented in Python using the Nibabel
 library. \todo{Software release.}
 
 \section{Results}
+\label{sec:results}
 
 \subsection{Slices vs blocks}
 
@@ -332,6 +356,7 @@ increases.
 
 
 \section{Discussion}
+\label{sec:discussion}
 
 What is the best algorithm (between 3 and 4), in which context. Did we
 solve the seek problem or is there any issue remaining?
@@ -342,13 +367,17 @@ File formats:
 with P. Bellec.
 \item some formats optimize the storage for particular split shapes. See
   ndstore~\cite{burns2013open}. Such formats would behave equally
-  poorly with splits that do not comply to this geometry. Our
+  poorly with chunks that do not comply to this geometry. Our
   algorithms would work equally well with such formats.
 \end{itemize}
 
+The performance model might be dependent on the particular
+infrastructure (disks, OS and filesystem) used in the experiments. In
+particular, caching might behave differently in a different setup.
+
 Reconstructing (therefore splitting) a complete 3D image may not
 always be necessary. Re-splitting, for instance, could be done from
-existing splits.
+existing chunks.
 
 \section{Conclusion}
 
