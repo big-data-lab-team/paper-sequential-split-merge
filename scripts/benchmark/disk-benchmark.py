@@ -22,23 +22,32 @@ while(True):
         buff += s
         n += 1
 
-    # Creates temp file and writes buffer
+    # Creates temp file
     fd, filename = tempfile.mkstemp(dir=os.getcwd())
+    # write file
     f = open(filename,"w")
     write_start = time.time()
     f.write(buff)
     write_end = time.time()
     f.close()
+    # read file
     f = open(filename,"r")
     read_start = time.time()
     f.read(len(buff))
     read_end = time.time()
     f.close()
+    # open file and seek to the end
+    f = open(filename,"w")
+    seek_start = time.time()
+    f.seek(len(buff))
+    seek_end = time.time()
+    f.close()
+    
     os.remove(filename)
     
     # Print result
     f = open("benchmark.csv","a")
-    f.write(''+str(len(buff))+","+str(write_end-write_start)+","+str(read_end-read_start)+"\n")
+    f.write(''+str(len(buff))+","+str(write_end-write_start)+","+str(read_end-read_start)+","+str(seek_end-seek_start)+"\n")
     f.close()
     # Just in case...
     time.sleep(1)
