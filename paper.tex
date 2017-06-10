@@ -80,7 +80,7 @@ the I/O performance. This problem is obviously related to the ordering
 of data bytes in image files, which we assume is arbitrary but known
 to the algorithm. The problem is also related to the geometry of the
 chunks to extract or merge, which we again assume arbitrary but known
-to the algorithm. In a nutshell, we are seeking for algorithms to
+to the algorithm. In a nutshell, we are looking for algorithms to
 reduce seek times while allowing for arbitrary chunk geometries and
 arbitrary byte orders in data files. The main idea of the variations
 presented in the remainder of the paper is to convert data orderings
@@ -175,18 +175,28 @@ we have the following definitions and properties:
 
 \subsection{Disk model}
 
-A disk is modeled by its read and write rates ($\alpha_r$ and
-$\alpha_w$, in B/s), its access time $\beta$ (in s) and its seek time,
-a function $\sigma$ of the seek distance (in B). More precisely,
-$\sigma$ would typically be in the order of $\beta$ when an opened
-file is seeked to a random position, but it would be much smaller when
-a file is seeked to a nearby position.
+We use a simplistic disk model where a disk is characterized by its
+read and write rates ($\alpha_r$ and $\alpha_w$, in B/s) and its
+access time $\beta$ (in s). In particular, we assume that seeks
+require a constant amount of time, regardless of the position seeked
+to. In practice, large variations would be expected, but modeling such
+variations would inevitably lead to models specific to the hardware,
+file system or operating system, which we intentionally avoid
+here. Thus, our goal is to find algorithms that minimize the
+\emph{number} of seek operations. Likewise, in modern systems, read
+and write times are greatly impacted by caching occurring at several
+levels, which we do not model here.
 
-The disk model encompasses file systems, kernel modules and disk
-controllers required to access the disk from a program run in user
-space. In modern systems, this often includes caching at various
-levels \todo{\cite{x}}, which we will model by zeroing $\alpha_r$ or
-$\alpha_w$ values depending on the application.
+%% and its seek time,
+%% a function $\sigma$ of the seek distance (in B). More precisely,
+%% $\sigma$ would typically be in the order of $\beta$ when an opened
+%% file is seeked to a random position, but it would be much smaller when
+%% a file is seeked to a nearby position.
+%% The disk model encompasses file systems, kernel modules and disk
+%% controllers required to access the disk from a program run in user
+%% space. In modern systems, this often includes caching at various
+%% levels \todo{\cite{x}}, which we will model by zeroing $\alpha_r$ or
+%% $\alpha_w$ values depending on the application.
 
 \subsection{Slices vs blocks}
 
@@ -297,16 +307,15 @@ N_\mathrm{buff\_slices} =  n + \ceil*{\frac{bR}{m}}
 \subsection{Buffered blocks: Cluster reads}
 
 
-See Algorithm~\ref{algo:cluster-reads}. As many blocks as possible are
-loaded in memory, concatenated in a buffer and written as sequentially
-as possible from the buffer. Although the Algorithm looks very similar
-to Algorithm~\ref{algo:buffered-slices}, it should be noted that in
-Algorithm~\ref{algo:cluster-reads} the buffer should actually be a
-more complex data structure capable of storing multiple disjoint
-sequences of contiguous bytes without having to allocate memory to
-store the ``holes'' between such sequences \todo{a figure showing the
-  buffer and how it fillus up would help}.  \note{More on
-  defragmentation might be needed here.}
+As detailed in Algorithm~\ref{algo:cluster-reads}, cluster reads load
+multiple blocks in memory, concatenate them in a buffer and write the
+buffer as sequentially as possible. The buffer is a slightly complex
+data structure, for instance an associative array or Python
+dictionary, capable of storing multiple disjoint sequences of
+contiguous bytes without having to allocate memory to store the
+``holes'' between such sequences \todo{a figure showing the buffer and
+  how it fillus up would help}.  \note{More on defragmentation might
+  be needed here.}
 \begin{algorithm}[h]
   \caption{Buffered merging from blocks using cluster reads}
   \label{algo:cluster-reads}
