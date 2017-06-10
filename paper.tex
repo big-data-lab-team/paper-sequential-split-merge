@@ -3,6 +3,7 @@
 % packages
 \usepackage{algorithm}
 \usepackage{algorithmic}
+\usepackage{amsfonts} % for R symbol (the set of real numbers)
 \usepackage{color}
 \usepackage[pdftex]{graphicx}
 \usepackage{hyperref}
@@ -56,8 +57,7 @@ images to and from an array of disks but we plan to describe such
 algorithms in a subsequent paper based on the results of the present
 one.
 
-A disk is modeled by its read and write rates ($\alpha_r$ and
-$\alpha_w$, in MB/s), and its access time ($\beta$, in seconds).
+
 %also in
 %MB/s).
 
@@ -142,12 +142,14 @@ the remainder, we use the term ``slice" for ``x slice".
 
 We adopt the following notations:
 \begin{itemize}
-\item $R$: number of voxels in the reconstructed image.
+\item $R=D^3$: number of voxels in the reconstructed image.
 \item $b$: number of bytes per voxel in the reconstructed image and chunks (in B).
 \item $n$: number of chunks (blocks or slices).
 \item $\alpha_r$: data read rate from disk (in B/s).
 \item $\alpha_w$: data write rate to disk (in B/s).
 \item $\beta$: disk access time (in s).
+\item $\sigma: \mathbb{R}^{+} \rightarrow \mathbb{R}^{+}$: seek time (in s), function of the seek
+  distance (in B).
 \item $m$: amount of available RAM (in B).
 \end{itemize}
 
@@ -161,13 +163,30 @@ For the sake of mathematical simplicity, the models below assume that
 the reconstructed image and blocks are cubic. Under this assumption,
 we have the following definitions and properties:
 \begin{itemize}
-\item Number of slices in a block: $\sqrt[3]{\frac{R}{n}}$
+\item Number of slices in a block: $\sqrt[3]{\frac{R}{n}}=d$. This is
+  also the number of rows and columns in a slice and the number of
+  voxel in a row or column.
 \item Number of blocks required to fully cover a slice in the
   reconstructed image: $\sqrt[3]{n}^2=n^{\frac{2}{3}}$
   \item Number of full slices that can be reconstructed from $k$
     blocks: $\floor*{\frac{k}{n^{\frac{2}{3}}}}\sqrt[3]{\frac{R}{n}}$
 \end{itemize}
 \todo{Make a figure to illustrate the notations.}
+
+\subsection{Disk model}
+
+A disk is modeled by its read and write rates ($\alpha_r$ and
+$\alpha_w$, in B/s), its access time $\beta$ (in s) and its seek time,
+a function $\sigma$ of the seek distance (in B). More precisely,
+$\sigma$ would typically be in the order of $\beta$ when an opened
+file is seeked to a random position, but it would be much smaller when
+a file is seeked to a nearby position.
+
+The disk model encompasses file systems, kernel modules and disk
+controllers required to access the disk from a program run in user
+space. In modern systems, this often includes caching at various
+levels \todo{\cite{x}}, which we will model by zeroing $\alpha_r$ or
+$\alpha_w$ values depending on the application.
 
 \subsection{Slices vs blocks}
 
@@ -197,32 +216,39 @@ naive merging methods for slices and blocks.
 
 Algorithms~\ref{algo:naive-slices} and~\ref{algo:naive-blocks}
 actually have very different performance even though blocks and slices
-have identical sizes. This is due to the number of seeks performed by
-Algorithm~\ref{algo:naive-blocks} to write a block, which equals the
-total number of rows in all slices of a block, that is (since the
-blocks are cubic): $\sqrt[3]{\frac{R}{n}}^2$. \note{Note the square
-  which is omitted in equation 2 below and in model.py. Adding the
-  square to the model just makes the runtime aberrant. This is because
-  not all seeks are equal: only ``long'' seeks between block slices
-  are significant; seeks between rows of a given block slice are much
-  shorter. The way to model this is to replace $\beta$ by $\beta +
-  \frac{s}{\gamma}$ where $\beta$ is in seconds, $\gamma$ is in B/s
-  and $s$ is the seek ``distance'' in bytes. I bet $\gamma$ is very
-  high on the SSD. } In practice, this could lead to a tremendous
-slowdown as we will show later. For slices, the total merge time is
-modeled as follows:
+have identical sizes. Since slices are stored contiguously in the
+reconstructed image, the number of seeks in
+Algorithm~\ref{algo:naive-slices} is only $2n$:
 \begin{equation}
-T_\mathrm{slices} = \frac{bR}{\alpha_r}+\frac{bR}{\alpha_w}+2\beta n
+  N_\mathrm{slices} = 2n 
 \end{equation}
-and for blocks:
+However,
+Algorithm~\ref{algo:naive-blocks} has to do extra seeks for each row
+in each slice of each block. That is, the total number of seeks
+performed by Algorithm~\ref{algo:naive-blocks} is:
 \begin{equation}
-  T_\mathrm{blocks} = \frac{bR}{\alpha_r}+\frac{bR}{\alpha_w}+\beta n\left(1+\sqrt[3]{\frac{R}{n}}\right)
+N_\mathrm{blocks} = 2n+nd^2 = n\left(1+\sqrt[3]{\frac{R}{n}}^2\right)
 \end{equation}
+In
+practice, this difference could lead to a tremendous slowdown as we will show
+later.
+
+%%  For slices, the total merge time is modeled as follows:
+%% \begin{equation}
+%% T_\mathrm{slices} = \frac{bR}{\alpha_r}+\frac{bR}{\alpha_w}+2\beta n
+%% \end{equation}
+%% and for blocks:
+%% \begin{equation}
+%%   \begin{multlined}
+%%     T_\mathrm{blocks} = \frac{bR}{\alpha_r}+\frac{bR}{\alpha_w}+ 2\beta n + \\
+%%     n\left({\sigma(bR/2)} + d(d-1)\sigma\left((D-d)b\right)+d\sigma\left((D^2-d^2)b\right) \right)
+%%     \end{multlined}
+%% \end{equation}
 
 \subsection{Sorted blocks}
 
-Sorting blocks alphanumerically by (x,y,z) as shown on Algorithm 2 reduces the seek time
-between blocks.
+Sorting blocks alphanumerically by (x,y,z) as shown on Algorithm 2
+reduces the seek time between blocks. 
 
 \begin{algorithm}[h]
   \caption{Merging from sorted blocks.}
@@ -236,9 +262,13 @@ between blocks.
   \end{algorithmic}
   \end{algorithm}
 
-The number of seeks is not reduced but the length of seeks is.
+\todo{Not sure what we are measuring here. The number of seeks will be identical. The difference in seek time is supposed to be very minimal.}
 
 \subsection{Buffered slices}
+
+The algorithms presented up to now are in fact particular cases of
+memory buffering where the amount of available memory equals the
+maximum size of a chunk. 
 
 \begin{algorithm}[h]
   \caption{Buffered merging from slices}
@@ -260,7 +290,7 @@ The number of seeks is not reduced but the length of seeks is.
 \end{algorithm}
 
 \begin{equation}
-T_\mathrm{buff\_slices} = \frac{bR}{\alpha_r}+\frac{bR}{\alpha_w}+\beta\left( n + \ceil*{\frac{bR}{m}}\right)
+N_\mathrm{buff\_slices} =  n + \ceil*{\frac{bR}{m}}
 \end{equation}
 
 
@@ -287,7 +317,7 @@ store the ``holes'' between such sequences \todo{a figure showing the
     \WHILE{index\textless n}
       \WHILE{sizeof(buffer)\textless m}
         \STATE block = list[index]
-        \STATE read block and append it to buffer
+        \STATE read block and insert it in buffer
         \STATE index += 1
         \ENDWHILE
        \STATE write buffer in reconstructed image
@@ -297,17 +327,16 @@ store the ``holes'' between such sequences \todo{a figure showing the
 \end{algorithm}
 
 \begin{equation}
-  \begin{multlined}
-    T_\mathrm{cluster\_reads} = \frac{bR}{\alpha_r}+\frac{bR}{\alpha_w} +\\
-    \beta
-    \left[n+ 
-      \ceil*{\frac{bR}{m}} \left[
-        \sqrt[3]{\frac{R}{n}} \left(
-        \ceil*{\frac{m\sqrt[3]{n}}{bR}} - \floor*{\frac{m\sqrt[3]{n}}{bR}}
-        \right)+1
-        \right]
-      \right]
-  \end{multlined}
+  N_\mathrm{cluster\_reads}= n + \ceil*{\frac{bR}{m}}f(m,n,R)
+\end{equation}
+where:
+\begin{equation}
+  f(m,n,R)=
+  \begin{cases}
+    d^2 & $if there is an incomplete line$\\
+    d   & $if there is an incomplete slice$\\
+    1   & $otherwise$
+\end{cases}
 \end{equation}
     
 \subsection{Buffered blocks: Multiple reads}
@@ -338,10 +367,10 @@ block will be read multiple times.
   \end{algorithmic}
 \end{algorithm}
 
-     \begin{equation}
-       T_\mathrm{multiple\_reads}= \frac{bR}{\alpha_r}+\frac{bR}{\alpha_w} + \beta\ceil*{\frac{bR}{m}}\left(1+ \ceil*{\frac{m.n}{bR}}\right)\\
+\begin{equation}
+  N_\mathrm{multiple\_reads}= n \max\left(1,\ceil*{\frac{d}{\ceil*{\frac{m}{nd^2b}}}}\right)+ \ceil*{\frac{bR}{m}}
 \end{equation}
-     
+
 \subsection{Lossless compression}
      
 Lossless compression might reduce overall read and write times by
