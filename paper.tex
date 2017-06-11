@@ -310,12 +310,16 @@ N_\mathrm{buff\_slices} =  n + \ceil*{\frac{bR}{m}}
 As detailed in Algorithm~\ref{algo:cluster-reads}, cluster reads load
 multiple blocks in memory, concatenate them in a buffer and write the
 buffer as sequentially as possible. The buffer is a slightly complex
-data structure, for instance an associative array or Python
+data structure, for instance an associative array or a Python
 dictionary, capable of storing multiple disjoint sequences of
-contiguous bytes without having to allocate memory to store the
-``holes'' between such sequences \todo{a figure showing the buffer and
-  how it fillus up would help}.  \note{More on defragmentation might
-  be needed here.}
+contiguous bytes without having to allocate memory for the bytes
+between such sequences. Implementation details about the buffer are
+given later in the document.
+
+\todo{a figure showing the buffer and how it
+  fillus up would help}.
+%\note{More on defragmentation might be
+%  needed here.}
 \begin{algorithm}[h]
   \caption{Buffered merging from blocks using cluster reads}
   \label{algo:cluster-reads}
@@ -335,6 +339,15 @@ contiguous bytes without having to allocate memory to store the
   \end{algorithmic}
 \end{algorithm}
 
+The number of seeks performed by cluster reads depends on the way that
+blocks loaded in memory arrange in the reconstructed image. In the
+best case, blocks in memory completely cover slices in the
+reconstructed image. In this case, slices of the reconstructed images
+can be written without seeking at all. If the blocks in memory
+completely cover rows in the reconstructed image but do not cover
+entire slices, then the blocks are written with $d$ seeks, one per
+slice. And if the blocks do not cover entire rows, then they are
+written with $d^2$ seeks, one per row and per slice.  In conclusion:
 \begin{equation}
   N_\mathrm{cluster\_reads}= n + \ceil*{\frac{bR}{m}}f(m,n,R)
 \end{equation}
@@ -342,8 +355,8 @@ where:
 \begin{equation}
   f(m,n,R)=
   \begin{cases}
-    d^2 & $if there is an incomplete line$\\
-    d   & $if there is an incomplete slice$\\
+    d^2 & $if there is an incomplete row$\\
+    d   & $if there is an incomplete slice but not incomplete row$\\
     1   & $otherwise$
 \end{cases}
 \end{equation}
