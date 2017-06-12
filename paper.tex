@@ -122,6 +122,8 @@ Sections~\ref{sec:discussion} discusses them.
 \section{Algorithms and Models}
 \label{sec:algos}
 
+\todo{Overlapping blocks. non-cubic blocks.}
+
 In our context, split and merge relate to the same dual
 problem \todo{not so sure about this actually}. Without loss of
 generality, we focus here on merging for the sake of concision. Our
@@ -166,10 +168,8 @@ we have the following definitions and properties:
 \item Number of slices in a block: $\sqrt[3]{\frac{R}{n}}=d$. This is
   also the number of rows and columns in a slice and the number of
   voxel in a row or column.
-\item Number of blocks required to fully cover a slice in the
-  reconstructed image: $\sqrt[3]{n}^2=n^{\frac{2}{3}}$
-  \item Number of full slices that can be reconstructed from $k$
-    blocks: $\floor*{\frac{k}{n^{\frac{2}{3}}}}\sqrt[3]{\frac{R}{n}}$
+\item Number of blocks required to fill a row of the reconstructed
+  image: $\sqrt[3]{n}=\nu$.
 \end{itemize}
 \todo{Make a figure to illustrate the notations.}
 
@@ -237,7 +237,7 @@ Algorithm~\ref{algo:naive-blocks} has to do extra seeks for each row
 in each slice of each block. That is, the total number of seeks
 performed by Algorithm~\ref{algo:naive-blocks} is:
 \begin{equation}
-N_\mathrm{blocks} = 2n+nd^2 = n\left(1+\sqrt[3]{\frac{R}{n}}^2\right)
+N_\mathrm{blocks} = n+nd^2 
 \end{equation}
 In
 practice, this difference could lead to a tremendous slowdown as we will show
@@ -309,32 +309,22 @@ N_\mathrm{buff\_slices} =  n + \ceil*{\frac{bR}{m}}
 
 As detailed in Algorithm~\ref{algo:cluster-reads}, cluster reads load
 multiple blocks in memory, concatenate them in a buffer and write the
-buffer sequentially in the reconstructed image. The buffer is a slightly complex
-data structure, for instance an associative array or a Python
-dictionary, capable of storing multiple disjoint sequences of
+buffer sequentially in the reconstructed image. The buffer is a
+slightly complex data structure, for instance an associative array or
+a Python dictionary, capable of storing multiple disjoint sequences of
 contiguous bytes without having to allocate memory for the bytes
-between such sequences. Implementation details about the buffer are
-given later in the document.
-
+between such sequences. Figure~\ref{fig:cluster-reads-buffer}
+illustrates how the buffer would fill up when two blocks of one slice
+and three rows per slice are loaded. Implementation details about the
+buffer are given later in the document.
 \begin{figure}
 \centering
-\def\svgwidth{0.3\columnwidth}
-\input{figures/no-seek.pdf_tex}
-\def\svgwidth{0.3\columnwidth}
-\input{figures/d-seeks.pdf_tex}
-\def\svgwidth{0.3\columnwidth}
-\input{figures/d2-seeks.pdf_tex}
-\caption{Left: complete slices and rows are reconstructed in memory:
-  no seeking is required. Center: complete rows but incomplete slices
-  are reconstructed: $d$ seeks are required. Right: incomplete rows
-  are reconstructed: $d^2$ seeks are required.}
-\label{fig:cluster-reads}
+\def\svgwidth{\columnwidth}
+\input{figures/buffer-cluster-reads.pdf_tex}
+\caption{Illustration of the buffer used in cluster reads. White
+  portions are not allocated. [a,b] refers to block a, row b.}
+\label{fig:cluster-reads-buffer}
 \end{figure}
-
-\todo{a figure showing the buffer and how it
-  fill up would help}.
-%\note{More on defragmentation might be
-%  needed here.}
 \begin{algorithm}[h]
   \caption{Buffered merging of blocks with cluster reads}
   \label{algo:cluster-reads}
@@ -362,7 +352,7 @@ rows in the reconstructed image are not covered by blocks loaded in
 memory: $d^2$ seeks are then required, one for every partial row in
 every partial slice. In the intermediary case, rows are complete but
 some slices can only be partially reconstructed: $d$ seeks are then
-required. In summary:
+required. See also Figure~\ref{fig:cluster-reads}. In summary:
 \begin{equation}
   N_\mathrm{cluster\_reads}= n + \ceil*{\frac{bR}{m}}f(m,n,R)
 \end{equation}
@@ -371,10 +361,44 @@ where:
   f(m,n,R)=
   \begin{cases}
     d^2 & $if there is an incomplete row$\\
-    d   & $if there is an incomplete slice but not incomplete row$\\
+    d   & $if there is an incomplete slice$\\
+        & $but not incomplete row$\\
     1   & $otherwise$
 \end{cases}
 \end{equation}
+\begin{figure}
+\centering
+\def\svgwidth{0.3\columnwidth}
+\input{figures/no-seek.pdf_tex}
+\def\svgwidth{0.3\columnwidth}
+\input{figures/d-seeks.pdf_tex}
+\def\svgwidth{0.3\columnwidth}
+\input{figures/d2-seeks.pdf_tex}
+\caption{Left: complete slices and rows are reconstructed in memory:
+  no seeking is required. Center: complete rows but incomplete slices
+  are reconstructed: $d$ seeks are required. Right: incomplete rows
+  are reconstructed: $d^2$ seeks are required.}
+\label{fig:cluster-reads}
+\end{figure}
+
+If $\frac{Rb}{\sqrt[3]{n}}>m\geq\frac{Rb}{\sqrt[3]{n}^2}$, i.e., a
+full row of blocks fits in memory but a full slice does not, then a
+variant of cluster reads consists in adjusting the memory load to the
+highest value that makes sure that only full rows are written. In this
+case:
+\begin{equation}
+  N_\mathrm{cluster\_reads\_v1}= n + \frac{bR}{m|}d
+\end{equation}
+where $m|=\frac{Rb}{\sqrt[3]{n}^2}\floor*{\frac{m\sqrt[3]{n}^2}{Rb}}$
+
+And if $m\geq\frac{Rb}{\sqrt[3]{n}}$, i.e., a full slice of blocks
+fits in memory, then a second variant adjusts
+the memory load to the highest value that makes sure that only full
+slices are written. In this case:
+\begin{equation}
+  N_\mathrm{cluster\_reads\_v2}= n + \frac{bR}{m||}d
+\end{equation}
+where $m||=\frac{Rb}{\sqrt[3]{n}}\floor*{\frac{m\sqrt[3]{n}}{Rb}}$
     
 \subsection{Buffered blocks: Multiple reads}
 
@@ -419,7 +443,9 @@ and
 but not for random writes. Multiple reads is the only merging strategy
 that works with literally no seek in the reconstructed image which
 could therefore potentially use in-memory compression.
-     
+
+\todo{could we merge without de-compressing?}
+
 \subsection{Benchmark}
 \label{sec:benchmark}
 

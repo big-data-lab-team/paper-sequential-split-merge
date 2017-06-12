@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for name in d2-seeks d-seeks no-seek 
+for name in d2-seeks d-seeks no-seek buffer-cluster-reads
 do
   echo "Exporting ${name}.svg"
   inkscape -D -z --file=figures/${name}.svg --export-pdf=figures/${name}.pdf --export-latex
