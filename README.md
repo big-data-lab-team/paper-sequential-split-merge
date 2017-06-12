@@ -20,9 +20,10 @@ authors should be amended.
 
 # How to generate the pdf
 
-0. Install ```pdflatex``` and ```bibtex```
-1. Compile the document: ```pdflatex paper ; pdflatex ``` (yes, twice).
-2. Generate the bibliography: ```bibtex paper ; pdflatex paper``` (yes, once again).
+0. Install ```pdflatex```, ```inkscape``` and ```bibtex```
+1. Generate the figures: ```figures/export.sh``` (requires ```inkscape```)
+2. Compile the document: ```pdflatex paper ; pdflatex ``` (yes, twice).
+3. Generate the bibliography: ```bibtex paper ; pdflatex paper``` (yes, once again).
 
 # Latex installation
 

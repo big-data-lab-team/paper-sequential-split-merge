@@ -309,19 +309,34 @@ N_\mathrm{buff\_slices} =  n + \ceil*{\frac{bR}{m}}
 
 As detailed in Algorithm~\ref{algo:cluster-reads}, cluster reads load
 multiple blocks in memory, concatenate them in a buffer and write the
-buffer as sequentially as possible. The buffer is a slightly complex
+buffer sequentially in the reconstructed image. The buffer is a slightly complex
 data structure, for instance an associative array or a Python
 dictionary, capable of storing multiple disjoint sequences of
 contiguous bytes without having to allocate memory for the bytes
 between such sequences. Implementation details about the buffer are
 given later in the document.
 
+\begin{figure}
+\centering
+\def\svgwidth{0.3\columnwidth}
+\input{figures/no-seek.pdf_tex}
+\def\svgwidth{0.3\columnwidth}
+\input{figures/d-seeks.pdf_tex}
+\def\svgwidth{0.3\columnwidth}
+\input{figures/d2-seeks.pdf_tex}
+\caption{Left: complete slices and rows are reconstructed in memory:
+  no seeking is required. Center: complete rows but incomplete slices
+  are reconstructed: $d$ seeks are required. Right: incomplete rows
+  are reconstructed: $d^2$ seeks are required.}
+\label{fig:cluster-reads}
+\end{figure}
+
 \todo{a figure showing the buffer and how it
-  fillus up would help}.
+  fill up would help}.
 %\note{More on defragmentation might be
 %  needed here.}
 \begin{algorithm}[h]
-  \caption{Buffered merging from blocks using cluster reads}
+  \caption{Buffered merging of blocks with cluster reads}
   \label{algo:cluster-reads}
   \begin{algorithmic}
     \STATE list = sort blocks by increasing (x,y,z) values
@@ -339,15 +354,15 @@ given later in the document.
   \end{algorithmic}
 \end{algorithm}
 
-The number of seeks performed by cluster reads depends on the way that
-blocks loaded in memory arrange in the reconstructed image. In the
-best case, blocks in memory completely cover slices in the
-reconstructed image. In this case, slices of the reconstructed images
-can be written without seeking at all. If the blocks in memory
-completely cover rows in the reconstructed image but do not cover
-entire slices, then the blocks are written with $d$ seeks, one per
-slice. And if the blocks do not cover entire rows, then they are
-written with $d^2$ seeks, one per row and per slice.  In conclusion:
+The number of seeks performed by cluster reads depends on how blocks
+loaded in memory arrange in the reconstructed image. In the best case,
+complete contiguous slices of the reconstructed image can be assembled
+in memory and written without seeking at all. In the worst case, some
+rows in the reconstructed image are not covered by blocks loaded in
+memory: $d^2$ seeks are then required, one for every partial row in
+every partial slice. In the intermediary case, rows are complete but
+some slices can only be partially reconstructed: $d$ seeks are then
+required. In summary:
 \begin{equation}
   N_\mathrm{cluster\_reads}= n + \ceil*{\frac{bR}{m}}f(m,n,R)
 \end{equation}
