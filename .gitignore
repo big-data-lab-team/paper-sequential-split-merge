@@ -6,3 +6,5 @@ paper.log
 paper.out
 paper.pdf
 x.log
+figures/*.pdf
+figures/*.pdf_tex
