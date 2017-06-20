@@ -369,16 +369,29 @@ where:
 \begin{figure}
 \centering
 \def\svgwidth{0.3\columnwidth}
-\input{figures/no-seek.pdf_tex}
+\input{figures/case1.pdf_tex}
 \def\svgwidth{0.3\columnwidth}
-\input{figures/d-seeks.pdf_tex}
+\input{figures/case2.pdf_tex}
 \def\svgwidth{0.3\columnwidth}
-\input{figures/d2-seeks.pdf_tex}
-\caption{Left: complete slices and rows are reconstructed in memory:
-  no seeking is required. Center: complete rows but incomplete slices
-  are reconstructed: $d$ seeks are required. Right: incomplete rows
-  are reconstructed: $d^2$ seeks are required.}
+\input{figures/case3-a.pdf_tex}
+\def\svgwidth{0.3\columnwidth}
+\input{figures/case3-b.pdf_tex}
+\def\svgwidth{0.3\columnwidth}
+\input{figures/case4.pdf_tex}
+\def\svgwidth{0.3\columnwidth}
+\input{figures/case5.pdf_tex}
+\def\svgwidth{0.3\columnwidth}
+\input{figures/case6-a.pdf_tex}
+\def\svgwidth{0.3\columnwidth}
+\input{figures/case6-b.pdf_tex}
+\def\svgwidth{0.3\columnwidth}
+\input{figures/case7.pdf_tex}
+
+\caption{Cluster reads configurations leading to different number of
+  seeks.}
 \label{fig:cluster-reads}
+% See source files in
+% https://drive.google.com/drive/folders/0BzT7pbvPDUdQRXppVlhfdS0ycGc?usp=sharing
 \end{figure}
 
 If $\frac{Rb}{\sqrt[3]{n}}>m\geq\frac{Rb}{\sqrt[3]{n}^2}$, i.e., a
