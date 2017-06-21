@@ -8,6 +8,7 @@
 \usepackage[pdftex]{graphicx}
 \usepackage{hyperref}
 \usepackage{mathtools}
+\usepackage{multirow}
 \DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
 \DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
 
@@ -316,7 +317,7 @@ contiguous bytes without having to allocate memory for the bytes
 between such sequences. Figure~\ref{fig:cluster-reads-buffer}
 illustrates how the buffer would fill up when two blocks of one slice
 and three rows per slice are loaded. Implementation details about the
-buffer are given later in the document.
+buffer are given later.
 \begin{figure}
 \centering
 \def\svgwidth{\columnwidth}
@@ -347,25 +348,36 @@ buffer are given later in the document.
 The number of seeks performed by cluster reads depends on how blocks
 loaded in memory arrange in the reconstructed image. In the best case,
 complete contiguous slices of the reconstructed image can be assembled
-in memory and written without seeking at all. In the worst case, some
+in memory and written without any seeking. In the worst case, some
 rows in the reconstructed image are not covered by blocks loaded in
-memory: $d^2$ seeks are then required, one for every partial row in
-every partial slice. In the intermediary case, rows are complete but
-some slices can only be partially reconstructed: $d$ seeks are then
-required. See also Figure~\ref{fig:cluster-reads}. In summary:
+memory: O($d^2$) seeks are then required to write the memory load, one
+for every partial row in every partial slice. In the intermediary
+case, rows are complete but some slices can only be partially
+reconstructed: O($d$) seeks are then
+required. We have:
 \begin{equation}
-  N_\mathrm{cluster\_reads}= n + \ceil*{\frac{bR}{m}}f(m,n,R)
+  N_\mathrm{cluster\_reads}= n + \sum_{i=1}^{\ceil*{\frac{bR}{m}}}f_i
 \end{equation}
-where:
+where $f_i$ is the number of seeks done in the $i^{th}$ memory
+load. Figure~\ref{fig:cluster-reads} lists the possible block
+arrangements and the corresponding values of $f_i$. \todo{Val\'erie: Check that
+  ordering is consistent with Nifti's.}
+%% In case (1) on
+%% this Figure, the memory load completely fills rows and slices in the
+%% reconstructed image. Thus it can be written with a single seek,
+%% $f_i$=1. In case (2), all the rows are complete but $d$ slices are
+%% incomplete; one seek is required for each slices, $f_i=d$. In case
+%% (3), $d$ rows of $d$ slices are incomplete, $f_i=d^2$. In case (4),
+%% $2d$ rows of $d$ slices are incomplete, $f_i=2d^2-d$. In case (5),
+%% $2d$ slices are incomplete but no row is incomplete, $f_i=2d$. In case
+%% (6), $d$ rows of $d$ slices are incomplete, and $d$ additional slices
+%% are incomplete, $f_i$=$d^2+d-1$. And in case (7), $d$ rows of $2d$
+%% slices are incomplete, $f_i$=$2d^2-1$.
+In general:
 \begin{equation}
-  f(m,n,R)=
-  \begin{cases}
-    d^2 & $if there is an incomplete row$\\
-    d   & $if there is an incomplete slice$\\
-        & $but not incomplete row$\\
-    1   & $otherwise$
-\end{cases}
+  N_\mathrm{cluster\_reads}= n + \ceil*{\frac{bR}{m}}O(d^2)
 \end{equation}
+
 \begin{figure}
 \centering
 \def\svgwidth{0.3\columnwidth}
@@ -387,31 +399,39 @@ where:
 \def\svgwidth{0.3\columnwidth}
 \input{figures/case7.pdf_tex}
 
-\caption{Cluster reads configurations leading to different number of
-  seeks.}
+\caption{In-memory block arrangements leading to different number of
+  seeks in cluster reads. Blue blocks need seeking before each of
+  their slices ($d$ seeks in total). Red blocks need seeking before
+  each of their rows ($d^2$ seeks). Purple blocks require seeking
+  before each row and each slice ($d^2$ seeks). Green blocks are
+  written with no seeking.}
 \label{fig:cluster-reads}
 % See source files in
 % https://drive.google.com/drive/folders/0BzT7pbvPDUdQRXppVlhfdS0ycGc?usp=sharing
 \end{figure}
 
-If $\frac{Rb}{\sqrt[3]{n}}>m\geq\frac{Rb}{\sqrt[3]{n}^2}$, i.e., a
-full row of blocks fits in memory but a full slice does not, then a
-variant of cluster reads consists in adjusting the memory load to the
-highest value that makes sure that only full rows are written. In this
-case:
+If $m\geq\frac{Rb}{\sqrt[3]{n}^2}$, i.e., a
+full row of blocks fits in memory, then a
+variant adjusts the memory load to the
+highest value for which only full rows are written. In this
+case, $f_i \in \{1,d,2d\}$ and:
 \begin{equation}
-  N_\mathrm{cluster\_reads\_v1}= n + \frac{bR}{m|}d
+  N_\mathrm{cluster\_reads\_v1}= n + \frac{bR}{m|}O(d)
 \end{equation}
-where $m|=\frac{Rb}{\sqrt[3]{n}^2}\floor*{\frac{m\sqrt[3]{n}^2}{Rb}}$
+where
+$m|=\frac{Rb}{\sqrt[3]{n}^2}\floor*{\frac{m\sqrt[3]{n}^2}{Rb}}$. It
+should be noted that $m|$ is lower than $m$, therefore
+$N_\mathrm{cluster\_reads\_v1}$ might be greater than
+$N_\mathrm{cluster\_reads}$ for small values of $d$.
 
-And if $m\geq\frac{Rb}{\sqrt[3]{n}}$, i.e., a full slice of blocks
+If $m\geq\frac{Rb}{\sqrt[3]{n}}$, i.e., a full slice of blocks
 fits in memory, then a second variant adjusts
-the memory load to the highest value that makes sure that only full
+the memory load to the highest value for which only full
 slices are written. In this case:
 \begin{equation}
-  N_\mathrm{cluster\_reads\_v2}= n + \frac{bR}{m||}d
+  N_\mathrm{cluster\_reads\_v2}= n + \frac{bR}{m||}
 \end{equation}
-where $m||=\frac{Rb}{\sqrt[3]{n}}\floor*{\frac{m\sqrt[3]{n}}{Rb}}$
+where $m||=\frac{Rb}{\sqrt[3]{n}}\floor*{\frac{m\sqrt[3]{n}}{Rb}}$.
     
 \subsection{Buffered blocks: Multiple reads}
 
