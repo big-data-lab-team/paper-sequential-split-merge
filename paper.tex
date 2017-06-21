@@ -514,23 +514,6 @@ library. \todo{Software release.}
 
 \subsection{Cluster reads vs Multiple reads vs Buffered slices}
 
-\subsection{Model-based comparisons}
-
-Figure~\ref{fig:models} plots the total merge time obtained with the
-different algorithms, using the values in~\ref{sec:benchmark} and
-different amounts of available memory. Multiple reads behave
-consistently better regardless of the amount of available
-memory. Cluster reads reach similar performance as available memory
-increases.
-\begin{figure}
-  \includegraphics[width=\columnwidth]{figures/model.pdf}
-  % see function.py
-  \caption{Model comparison}
-  \label{fig:models}
-\end{figure}
-\todo{redraw the figure. Benchmark $\alpha$ and $\beta$ more
-  accurately on the HDD or SSD. In the previous sections, compare the
-  model with real experiments, to validate the model.}
 
 \subsection{Lossless Compression}
 
