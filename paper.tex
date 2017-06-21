@@ -116,11 +116,11 @@ This paper makes the following contributions:
     drive.
   \item We compare the algorithms in a variety of conditions based on the validated model.
 \end{itemize}
-Section~\ref{sec:algos} presents our algorithms and models,
+Section~\ref{sec:algos} presents our algorithms and their complexity,
 Section~\ref{sec:results} details the results and
 Sections~\ref{sec:discussion} discusses them.
 
-\section{Algorithms and Models}
+\section{Algorithms}
 \label{sec:algos}
 
 \todo{Overlapping blocks. non-cubic blocks.}
@@ -162,7 +162,7 @@ definitions:
 \item number of bytes per chunk: $\frac{Rb}{n}$
 \item number of chunks that can fit in memory: $\frac{m.n}{Rb}$
 \end{itemize}
-For the sake of mathematical simplicity, the models below assume that
+For the sake of mathematical simplicity, we assume that
 the reconstructed image and blocks are cubic. Under this assumption,
 we have the following definitions and properties:
 \begin{itemize}
@@ -479,26 +479,34 @@ could therefore potentially use in-memory compression.
 
 \todo{could we merge without de-compressing?}
 
-\subsection{Benchmark}
+\section{Benchmark}
 \label{sec:benchmark}
 
-\subsubsection{Data}
-As a running example to benchmark our algorithms, we use the 76~GB
-BigBrain image split in 125 chunks. The data is available
-\todo{[here]}.
-
-\subsubsection{Infrastructure}
- We
-perform experiments using the two disks below:
-- HD ...
-- SSD ...
-
-\todo{Benchmark the disks to measure $\alpha_r$, $\alpha_w$ and $\beta$.}
-
-\subsubsection{Software implementation}
+\subsubsection{Implementation}
 
 Our algorithms are implemented in Python using the Nibabel
-library. \todo{Software release.}
+library. \todo{Val\'erie and Yongping: (1) extract ImageUtils from
+  mapreduce repository (preserve git history; just copy the repo and
+  remove the mapreduce stuff in the copy). Link to the github
+  repo. (2) Describe the code briefly, in particular the
+  implementation tricks used for each implementation.}
+
+\subsubsection{Data}
+To benchmark our library we use the 76~GB BigBrain image split in 125
+non-overlapping chunks. The data is available \todo{[here]}.
+
+\subsubsection{Infrastructure}
+
+We run experiments using a Dell Precision Tower 3620 with CentOS Linux release
+7.3.1611, 32~GB of RAM and two disks:
+\begin{itemize}
+  \item Hard disk drive (HDD): HGST Travelstar 7K1000, 7200~rpm, 931GiB (1TB), firmware version JB0OA3W0.
+    \item Solid-state drive (SSD): SanDisk X400 2.5, 238GiB (256GB),
+      firmware version X4130012.
+\end{itemize}
+Both drives used 512-byte logical sectors, 4096-byte physical sectors,
+SATA >3.1 (6.0 Gb/s) and were accessed through the XFS file system.
+%smartctl --xall /dev/sda
 
 \section{Results}
 \label{sec:results}
