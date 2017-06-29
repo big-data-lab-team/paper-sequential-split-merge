@@ -120,6 +120,10 @@ Section~\ref{sec:algos} presents our algorithms and their complexity,
 Section~\ref{sec:results} details the results and
 Sections~\ref{sec:discussion} discusses them.
 
+%\href{http://dl.acm.org/citation.cfm?id=218395}
+
+\newpage
+
 \section{Algorithms}
 \label{sec:algos}
 
@@ -462,7 +466,7 @@ block will be read multiple times.
 \end{algorithm}
 
 \begin{equation}
-  N_\mathrm{multiple\_reads}= n \max\left(1,\ceil*{\frac{d}{\ceil*{\frac{m}{nd^2b}}}}\right)+ \ceil*{\frac{bR}{m}}
+  N_\mathrm{multiple\_reads}= n\left( \ceil*{\frac{\left((d-1)D^2+dD\right)b}{m}}\right) + 2\ceil*{\frac{bR}{m}}
 \end{equation}
 
 \subsection{Lossless compression}
@@ -527,6 +531,7 @@ SATA >3.1 (6.0 Gb/s) and were accessed through the XFS file system.
 
 \subsection{Splitting}
 
+\newpage
 
 \section{Discussion}
 \label{sec:discussion}
