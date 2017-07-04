@@ -448,20 +448,23 @@ block will be read multiple times.
     \todo{improve notations and algo}.}
   \label{algo:multiple-reads}
   \begin{algorithmic}
-    \STATE list = sort blocks by increasing (x,y,z) values
-    \STATE initialize buffer
-    \STATE pointer = 0, max\_index=(m-1)
-    \WHILE{max\_index \textless sizeof(reconstructed\_image)}
-    \WHILE{pointer \textless max\_index}
-        \STATE block = read block that contains voxel index\_to\_voxel(pointer)
-        \STATE insert in buffer all voxels (x,y,z) of block where voxel\_to\_index(x,y,z) \textless max\_index
-        \STATE update pointer to point to the next unassigned element in buffer
-        \ENDWHILE
-       \STATE write buffer in reconstructed image
-       \STATE clear buffer
-       \STATE pointer = max\_index + 1
-       \STATE max\_index += m
-    \ENDWHILE
+  \STATE sorted\_split\_name\_list = sort blocks by increasing (x,y,z) values 
+  \STATE start\_index = 0, end\_index=(m-1)
+  \WHILE{end\_index \textless sizeof(reconstructed\_image)}
+    \STATE initialize data\_buffer
+    \FOR{split\_name in sorted\_split\_name\_list}
+      \IF{indexes of split\_name is in next\_write\_range}
+        \STATE read split;
+        \STATE extract all indexes in next write range;
+        \STATE assgin the corresponding data to the data\_buffer
+      \ENDIF
+    \ENDFOR
+    \STATE write data\_buffer in reconstructed\_image 
+    \STATE clear data\_buffer
+    \STATE start\_index = end\_index + 1
+    \STATE end\_index += mem
+  \ENDWHILE
+ 
   \end{algorithmic}
 \end{algorithm}
 
