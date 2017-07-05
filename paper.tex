@@ -465,9 +465,18 @@ block will be read multiple times.
   \end{algorithmic}
 \end{algorithm}
 
+In multiple reads, a given chunk will be accessed $k$ times and we have: 
+\begin{equation*}
+   N_\mathrm{multiple\_reads}= nk + \ceil*{\frac{bR}{m}}
+\end{equation*}
+$k$ depends on the span of memory offsets covered by a chunk in the
+reconstructed image, that is, $\left[(d-1)D^2+dD\right]b$. 
+
+Finally:
 \begin{equation}
-  N_\mathrm{multiple\_reads}= n\left( \ceil*{\frac{\left((d-1)D^2+dD\right)b}{m}}\right) + 2\ceil*{\frac{bR}{m}}
+   N_\mathrm{multiple\_reads}= n\left( \ceil*{\frac{\left((d-1)D^2+dD\right)b}{m}}\right) + 2\ceil*{\frac{bR}{m}}
 \end{equation}
+
 
 \subsection{Lossless compression}
      
