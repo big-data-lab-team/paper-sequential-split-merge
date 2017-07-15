@@ -12,7 +12,7 @@ set datafile separator ","
 
  
 
-set xtics ("6g-hdd" 1, "6g-ssd" 2, "9g-hdd" 3, "9g-ssd" 4, "12g-hdd" 5, "12g-ssd" 6)
+set xtics ("3g-hdd" 1, "3g-ssd" 2, "9g-hdd" 3, "9g-ssd" 4)
 unset format y
 unset ydata
 unset xrange
@@ -21,8 +21,8 @@ unset format x
 set boxwidth 0.5
 set xlabel "Merging strategy - Multiple Reads: Seek Time on HDD and SSD"
 set ylabel "Seek Time (s)"
-set output "../figures/benchmark-mreads-hdd-ssd-seek-time.pdf"
-plot '../data/data_hdd.csv' using (1):2, '' using (3):7, '' using (5):12, '../data/data_ssd.csv' using (2):2, '' using (4):7, '' using (6):12
+set output "../../../figures/benchmark-mreads/seek-time.pdf"
+plot '../../../data/benchmark/mreads/hdd.csv' using (1):3, '' using (3):8, '../../../data/benchmark/mreads/ssd.csv' using (2):3, '' using (4):8
 
  
  
