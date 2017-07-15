@@ -12,7 +12,7 @@ set datafile separator ","
 
  
 
-set xtics ("6g-hdd" 1, "6g-ssd" 2, "9g-hdd" 3, "9g-ssd" 4, "12g-hdd" 5, "12g-ssd" 6)
+set xtics ("3g-hdd" 1, "3g-ssd" 2, "9g-hdd" 3, "9g-ssd" 4)
 unset format y
 unset ydata
 unset xrange
@@ -21,6 +21,6 @@ unset format x
 set boxwidth 0.5
 set xlabel "Merging strategy - Multiple Reads Total Time on HDD and SSD"
 set ylabel "Total Time (s)"
-set output "../figures/benchmark-mreads-hdd-ssd-total-time.pdf"
-plot '../data/data_hdd.csv' using (1):5, '' using (3):10, '' using (5):15, '../data/data_ssd.csv' using (2):5, '' using (4):10, '' using (6):15
+set output "../../../figures/benchmark-mreads/total-time.pdf"
+plot '../../../data/benchmark/mreads/hdd.csv' using (1):5, '' using (3):10, '../../../data/benchmark/mreads/ssd.csv' using (2):5, '' using (4):10
  
