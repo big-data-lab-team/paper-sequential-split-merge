@@ -597,31 +597,37 @@ def extract_rows(split, data_list, write_index, Y_size, Z_size):
     """
     extract_all the rows that in the write range, and write the data to a numpy array
     """
+    read_time_one_r = 0
     write_start, write_end = write_index
-    st = time()
     split_data = split.split_proxy.get_data()
-    read_time_one_r = time() - st
     for i in range(0, split.split_x):
         for j in range(0, split.split_z):
             index_start = int(split.split_pos[-3]) + (int(split.split_pos[-2]) + j) * Y_size + (int(split.split_pos[-1]) + i) * Y_size * Z_size
             index_end = index_start + split.split_y
             # if split's one row is in the write range.
             if index_start >= write_start and index_end <= write_end:
+                st = time()
                 data = split_data[..., j, i]
+                read_time_one_r += time() - st
                 data_list[index_start - write_start: index_end - write_start] = data
             # if split's one row's start index is in the write range, but end index is outside of write range.
             elif index_start <= write_end <= index_end:
+                st = time()
                 data = split_data[: (write_end - index_start + 1), j, i]
+                read_time_one_r += time() - st
                 data_list[index_start - write_start: ] = data
 
             # if split's one row's end index is in the write range, but start index is outside of write range.
             elif index_start <= write_start <= index_end:
+                st = time()
                 data = split_data[write_start - index_start :, j, i]
+                read_time_one_r += time() - st
                 data_list[: index_end - write_start] = data
 
             # if not in the write range
             else:
                 continue
+
     return read_time_one_r
 
 def get_offsets_of_all_splits(legend, Y_size, Z_size):
