@@ -26,7 +26,7 @@
 
 \begin{document}
 
-\title{Sequential algorithms to split and merge terabyte-scale 3D images}
+\title{Sequential algorithms to split and merge ultra-high resolution 3D images}
 
 \maketitle
 
@@ -50,7 +50,7 @@ examples found in medical imaging, our primary domain of interest,
 include \todo{electromicroscopy,spectroscopy-francoise-peyrin}. As
 such images would typically be processed on a computing cluster,
 possibly using locality-aware file systems such as HDFS, software
-libraries are needed to split and merged such images efficiently. We
+libraries are needed to split and merge such images efficiently. We
 introduce and compare a family of algorithms to address this problem
 in a sequential environment made of a single storage disk. We are
 aware of the need for parallel algorithms that would split and merge
@@ -158,6 +158,7 @@ We adopt the following notations:
 \item $\sigma: \mathbb{R}^{+} \rightarrow \mathbb{R}^{+}$: seek time (in s), function of the seek
   distance (in B).
 \item $m$: amount of available RAM (in B).
+  \item $m'$: amount of used RAM (in B). $m'\leq m$.
 \end{itemize}
 
 The following properties are straightforward applications of these
@@ -312,9 +313,14 @@ N_\mathrm{buff\_slices} =  n + \ceil*{\frac{bR}{m}}
 \subsection{Buffered blocks: Cluster reads}
 
 
-As detailed in Algorithm~\ref{algo:cluster-reads}, cluster reads load
-multiple blocks in memory, concatenate them in a buffer and write the
-buffer sequentially in the reconstructed image. The buffer is a
+The main idea of cluster reads is to load multiple blocks in memory,
+concatenate them in a buffer and write the buffer in the reconstructed
+image. Seeking is reduced compared to naive block merging since
+contiguous parts of the buffer will be written without seeking. In
+cluster reads, a given block is accessed only once. That is, the
+amount of used memory $m'$ is such that $m'=kd^3b, k \in \mathbb{N}$.
+
+The buffer is a
 slightly complex data structure, for instance an associative array or
 a Python dictionary, capable of storing multiple disjoint sequences of
 contiguous bytes without having to allocate memory for the bytes
@@ -330,24 +336,6 @@ buffer are given later.
   portions are not allocated. [a,b] refers to block a, row b.}
 \label{fig:cluster-reads-buffer}
 \end{figure}
-\begin{algorithm}[h]
-  \caption{Buffered merging of blocks with cluster reads}
-  \label{algo:cluster-reads}
-  \begin{algorithmic}
-    \STATE list = sort blocks by increasing (x,y,z) values
-    \STATE initialize buffer
-    \STATE index = 0
-    \WHILE{index\textless n}
-      \WHILE{sizeof(buffer)\textless m}
-        \STATE block = list[index]
-        \STATE read block and insert it in buffer
-        \STATE index += 1
-        \ENDWHILE
-       \STATE write buffer in reconstructed image
-       \STATE clear buffer
-    \ENDWHILE
-  \end{algorithmic}
-\end{algorithm}
 
 The number of seeks performed by cluster reads depends on how blocks
 loaded in memory arrange in the reconstructed image. In the best case,
@@ -358,14 +346,59 @@ memory: O($d^2$) seeks are then required to write the memory load, one
 for every partial row in every partial slice. In the intermediary
 case, rows are complete but some slices can only be partially
 reconstructed: O($d$) seeks are then
-required. We have:
+required. In the general case, we have:
 \begin{equation}
   N_\mathrm{cluster\_reads}= n + \sum_{i=1}^{\ceil*{\frac{bR}{m}}}f_i
 \end{equation}
 where $f_i$ is the number of seeks done in the $i^{th}$ memory
 load. Figure~\ref{fig:cluster-reads} lists the possible block
-arrangements and the corresponding values of $f_i$. \todo{Val\'erie: Check that
-  ordering is consistent with Nifti's.}
+arrangements and the corresponding values of $f_i$. \todo{Val\'erie:
+  Check that ordering in the Figure is consistent with Nifti's.}  From
+this first analysis, we conjecture that incomplete block rows and
+incomplete block slices should be avoided whenever possible. That is,
+our implementation of cluster reads will consider only three cases:
+\begin{itemize}
+  \item Case 1: $m<d^3\sqrt[3]{n}b=\frac{D^3}{\sqrt[3]{n}^2b}$, that is, a
+    row of blocks does not fit in memory. Incomplete rows of
+    blocks will be merged, with complexity O($d^2$).
+  \item Case 2: $\frac{D^3}{\sqrt[3]{n}^2}b\leq m<\frac{D^3}{\sqrt[3]{n}}b$,
+    that is, a row of blocks fits in memory but a slice of blocks does
+    not. Only complete rows of blocks will be merged, with
+    complexity O(d). We have $m'=\floor*{\frac{m}{d^3\sqrt[3]{n}b}}$.
+    \item Case 3: $\frac{D^3}{\sqrt[3]{n}}b \leq m < D^3b$, that is, a slice
+      of blocks fits in memory. Only complete slices of blocks
+      will be merged, with complexity O(1). We have
+      $m'=\floor*{\frac{m}{d^3\sqrt[3]{n}^2b}}$.
+\end{itemize}
+
+Algorithm~\ref{algo:cluster-reads} shows the resulting cluster reads
+method. Function \texttt{adjust\_memory} (line 4) returns $m'$
+according to the three cases above. Function \texttt{sizeof} (line 6)
+returns the memory used by the buffer, including only its allocated
+segments. It should be noted that writing the buffer to the
+reconstructed image (line 11) might involve some manipulation in the
+buffer to merge its continuous segments. 
+\begin{algorithm}[h]
+  \caption{Buffered merging of blocks with cluster reads}
+  \label{algo:cluster-reads}
+  \begin{algorithmic}[1]
+    \STATE list = sort blocks by increasing (x,y,z) values
+    \STATE initialize buffer
+    \STATE index = 0
+    \STATE m'=adjust\_memory(m)    
+    \WHILE{index\textless n}
+      \WHILE{sizeof(buffer)\textless m'}
+        \STATE block = list[index]
+        \STATE read block and insert it in buffer
+        \STATE index += 1
+        \ENDWHILE
+       \STATE write buffer in reconstructed image
+       \STATE clear buffer
+    \ENDWHILE
+  \end{algorithmic}
+\end{algorithm}
+
+
 %% In case (1) on
 %% this Figure, the memory load completely fills rows and slices in the
 %% reconstructed image. Thus it can be written with a single seek,
@@ -377,10 +410,6 @@ arrangements and the corresponding values of $f_i$. \todo{Val\'erie: Check that
 %% (6), $d$ rows of $d$ slices are incomplete, and $d$ additional slices
 %% are incomplete, $f_i$=$d^2+d-1$. And in case (7), $d$ rows of $2d$
 %% slices are incomplete, $f_i$=$2d^2-1$.
-In general:
-\begin{equation}
-  N_\mathrm{cluster\_reads}= n + \ceil*{\frac{bR}{m}}O(d^2)
-\end{equation}
 
 \begin{figure}
 \centering
@@ -414,28 +443,29 @@ In general:
 % https://drive.google.com/drive/folders/0BzT7pbvPDUdQRXppVlhfdS0ycGc?usp=sharing
 \end{figure}
 
-If $m\geq\frac{Rb}{\sqrt[3]{n}^2}$, i.e., a
-full row of blocks fits in memory, then a
-variant adjusts the memory load to the
-highest value for which only full rows are written. In this
-case, $f_i \in \{1,d,2d\}$ and:
+The number of seeks performed by cluster reads depends on the three
+cases listed above. In case 1, $f_i$ might be (a) $d^2$
+ or (b) $2d^2$
+depending whether the memory load
+overlaps on multiple block slices, which will happen
+$\alpha$
+times where:
+\begin{equation*}
+  \alpha=\sqrt[3]{n}-1-\floor*{\frac{n-\sqrt[3]{n}^2}{LCM\left(\frac{m'}{d^3},\sqrt[3]{n}^2\right)}}
+\end{equation*}
+ We have:
 \begin{equation}
-  N_\mathrm{cluster\_reads\_v1}= n + \frac{bR}{m|}O(d)
+  N_\mathrm{cluster\_reads\_v1}= n + \frac{bR}{m'}d^2+d^2\alpha
 \end{equation}
-where
-$m|=\frac{Rb}{\sqrt[3]{n}^2}\floor*{\frac{m\sqrt[3]{n}^2}{Rb}}$. It
-should be noted that $m|$ is lower than $m$, therefore
-$N_\mathrm{cluster\_reads\_v1}$ might be greater than
-$N_\mathrm{cluster\_reads}$ for small values of $d$.
+Similarly, in Case 2 we have:
+\begin{equation}
+  N_\mathrm{cluster\_reads\_v2}= n + \frac{bR}{m'}d+d\alpha
+\end{equation}
+And in Case 3:
+\begin{equation}
+  N_\mathrm{cluster\_reads\_v3}= n + \frac{bR}{m'}
+\end{equation}
 
-If $m\geq\frac{Rb}{\sqrt[3]{n}}$, i.e., a full slice of blocks
-fits in memory, then a second variant adjusts
-the memory load to the highest value for which only full
-slices are written. In this case:
-\begin{equation}
-  N_\mathrm{cluster\_reads\_v2}= n + \frac{bR}{m||}
-\end{equation}
-where $m||=\frac{Rb}{\sqrt[3]{n}}\floor*{\frac{m\sqrt[3]{n}}{Rb}}$.
     
 \subsection{Buffered blocks: Multiple reads}
 
@@ -456,7 +486,7 @@ block will be read multiple times.
       \IF{indexes of split\_name is in next\_write\_range}
         \STATE read split;
         \STATE extract all indexes in next write range;
-        \STATE assgin the corresponding data to the data\_buffer
+        \STATE write the corresponding data to the data\_buffer
       \ENDIF
     \ENDFOR
     \STATE write data\_buffer in reconstructed\_image 
