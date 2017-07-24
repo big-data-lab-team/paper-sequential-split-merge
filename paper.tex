@@ -414,30 +414,25 @@ buffer to merge its continuous segments.
 \begin{figure}
 \centering
 \def\svgwidth{0.3\columnwidth}
-\input{figures/case1.pdf_tex}
+\input{figures/case1-a.pdf_tex}
 \def\svgwidth{0.3\columnwidth}
-\input{figures/case2.pdf_tex}
+\input{figures/case1-b.pdf_tex}
 \def\svgwidth{0.3\columnwidth}
-\input{figures/case3-a.pdf_tex}
+\input{figures/case1-c.pdf_tex}
 \def\svgwidth{0.3\columnwidth}
-\input{figures/case3-b.pdf_tex}
+\input{figures/case2-a.pdf_tex}
 \def\svgwidth{0.3\columnwidth}
-\input{figures/case4.pdf_tex}
+\input{figures/case2-b.pdf_tex}
 \def\svgwidth{0.3\columnwidth}
-\input{figures/case5.pdf_tex}
-\def\svgwidth{0.3\columnwidth}
-\input{figures/case6-a.pdf_tex}
-\def\svgwidth{0.3\columnwidth}
-\input{figures/case6-b.pdf_tex}
-\def\svgwidth{0.3\columnwidth}
-\input{figures/case7.pdf_tex}
+\input{figures/case3.pdf_tex}
 
 \caption{In-memory block arrangements leading to different number of
   seeks in cluster reads. Blue blocks need seeking before each of
   their slices ($d$ seeks in total). Red blocks need seeking before
   each of their rows ($d^2$ seeks). Purple blocks require seeking
   before each row and each slice ($d^2$ seeks). Green blocks are
-  written with no seeking.}
+  written with no seeking. Grey, transparent blocks are added for the sake of
+  visualization but are not part of the memory load.}
 \label{fig:cluster-reads}
 % See source files in
 % https://drive.google.com/drive/folders/0BzT7pbvPDUdQRXppVlhfdS0ycGc?usp=sharing
