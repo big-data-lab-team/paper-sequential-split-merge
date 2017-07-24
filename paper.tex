@@ -320,7 +320,7 @@ contiguous parts of the buffer will be written without seeking. In
 cluster reads, a given block is accessed only once. That is, the
 amount of used memory $m'$ is such that $m'=kd^3b, k \in \mathbb{N}$.
 
-The buffer is a
+The buffer might be a
 slightly complex data structure, for instance an associative array or
 a Python dictionary, capable of storing multiple disjoint sequences of
 contiguous bytes without having to allocate memory for the bytes
@@ -340,34 +340,30 @@ buffer are given later.
 The number of seeks performed by cluster reads depends on how blocks
 loaded in memory arrange in the reconstructed image. In the best case,
 complete contiguous slices of the reconstructed image can be assembled
-in memory and written without any seeking. In the worst case, some
-rows in the reconstructed image are not covered by blocks loaded in
-memory: O($d^2$) seeks are then required to write the memory load, one
-for every partial row in every partial slice. In the intermediary
-case, rows are complete but some slices can only be partially
-reconstructed: O($d$) seeks are then
-required. In the general case, we have:
-\begin{equation}
-  N_\mathrm{cluster\_reads}= n + \sum_{i=1}^{\ceil*{\frac{bR}{m}}}f_i
-\end{equation}
-where $f_i$ is the number of seeks done in the $i^{th}$ memory
-load. Figure~\ref{fig:cluster-reads} lists the possible block
-arrangements and the corresponding values of $f_i$. \todo{Val\'erie:
-  Check that ordering in the Figure is consistent with Nifti's.}  From
-this first analysis, we conjecture that incomplete block rows and
-incomplete block slices should be avoided whenever possible. That is,
-our implementation of cluster reads will consider only three cases:
+in memory and written without any seeking. In the worst case, the
+memory load only partially covers rows in the reconstructed image:
+O($d^2$) seeks are then required during writing, one for every partial
+row in every partial slice. In the intermediary case, rows are
+complete but some slices can only be partially reconstructed: O($d$)
+seeks are then required.
+
+\todo{Check that ordering in the Figure is consistent with Nifti's.}
+
+Incomplete block rows and incomplete block slices lead to extra
+seeking and should be avoided as much as possible.  Thus, cluster
+reads consider only three cases, represented in
+Figure~\ref{fig:cluster-reads}:
 \begin{itemize}
   \item Case 1: $m<d^3\sqrt[3]{n}b=\frac{D^3}{\sqrt[3]{n}^2b}$, that is, a
     row of blocks does not fit in memory. Incomplete rows of
-    blocks will be merged, with complexity O($d^2$).
+    blocks will be merged, with $d^2$ seeks per memory load.
   \item Case 2: $\frac{D^3}{\sqrt[3]{n}^2}b\leq m<\frac{D^3}{\sqrt[3]{n}}b$,
     that is, a row of blocks fits in memory but a slice of blocks does
     not. Only complete rows of blocks will be merged, with
-    complexity O(d). We have $m'=\floor*{\frac{m}{d^3\sqrt[3]{n}b}}$.
+    $d$ seeks per memory load. We have $m'=\floor*{\frac{m}{d^3\sqrt[3]{n}b}}$.
     \item Case 3: $\frac{D^3}{\sqrt[3]{n}}b \leq m < D^3b$, that is, a slice
       of blocks fits in memory. Only complete slices of blocks
-      will be merged, with complexity O(1). We have
+      will be merged, a single seek per memory load. We have
       $m'=\floor*{\frac{m}{d^3\sqrt[3]{n}^2b}}$.
 \end{itemize}
 
@@ -416,39 +412,23 @@ buffer to merge its continuous segments.
 \def\svgwidth{0.3\columnwidth}
 \input{figures/case1-a.pdf_tex}
 \def\svgwidth{0.3\columnwidth}
-\input{figures/case1-b.pdf_tex}
-\def\svgwidth{0.3\columnwidth}
-\input{figures/case1-c.pdf_tex}
-\def\svgwidth{0.3\columnwidth}
 \input{figures/case2-a.pdf_tex}
-\def\svgwidth{0.3\columnwidth}
-\input{figures/case2-b.pdf_tex}
 \def\svgwidth{0.3\columnwidth}
 \input{figures/case3.pdf_tex}
 
-\caption{In-memory block arrangements leading to different number of
-  seeks in cluster reads. Blue blocks need seeking before each of
-  their slices ($d$ seeks in total). Red blocks need seeking before
-  each of their rows ($d^2$ seeks). Purple blocks require seeking
-  before each row and each slice ($d^2$ seeks). Green blocks are
-  written with no seeking. Grey, transparent blocks are added for the sake of
-  visualization but are not part of the memory load.}
+\caption{Memory-load configurations in cluster reads, leading to
+  different number of seeks. Red blocks need seeking before each of
+  their rows ($d^2$ seeks). Blue blocks need seeking before each of
+  their slices ($d$ seeks in total). Green blocks need only a single
+  seek. Grey, dashed, transparent blocks represent the contiguous
+  memory loads and are added for the sake of visualization.}
 \label{fig:cluster-reads}
 % See source files in
 % https://drive.google.com/drive/folders/0BzT7pbvPDUdQRXppVlhfdS0ycGc?usp=sharing
 \end{figure}
 
-The number of seeks performed by cluster reads depends on the three
-cases listed above. In case 1, $f_i$ might be (a) $d^2$
- or (b) $2d^2$
-depending whether the memory load
-overlaps on multiple block slices, which will happen
-$\alpha$
-times where:
-\begin{equation*}
-  \alpha=\sqrt[3]{n}-1-\floor*{\frac{n-\sqrt[3]{n}^2}{LCM\left(\frac{m'}{d^3},\sqrt[3]{n}^2\right)}}
-\end{equation*}
- We have:
+The total number of seeks performed by cluster reads depends on the three
+cases listed above and on the overall number of memory loads.
 \begin{equation}
   N_\mathrm{cluster\_reads\_v1}= n + \frac{bR}{m'}d^2+d^2\alpha
 \end{equation}
