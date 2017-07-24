@@ -6,7 +6,7 @@ import string
 import tempfile
 import os
 
-filename="/data/bigbrain_40microns.nii"
+filename="/home/glatard/code/mapreduce/data/recon.nii"
 
 
 old_offset = 0
