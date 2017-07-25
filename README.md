@@ -25,6 +25,11 @@ authors should be amended.
 2. Compile the document: ```pdflatex paper ; pdflatex ``` (yes, twice).
 3. Generate the bibliography: ```bibtex paper ; pdflatex paper``` (yes, once again).
 
+# Figure sources
+
+See https://drive.google.com/drive/folders/0BzT7pbvPDUdQRXppVlhfdS0ycGc?usp=sharing
+
+
 # Latex installation
 
 * On Linux Fedora 24: ```dnf install texlive-bin texlive-bibtex-bin texlive-minted texlive-pdfcomment texlive-collection-fontsrecommended texlive-algorithmicx texlive-framed```. 
