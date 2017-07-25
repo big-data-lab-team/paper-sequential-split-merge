@@ -362,8 +362,6 @@ seeks are then required.
   seek. Grey, dashed, transparent blocks represent the contiguous
   memory loads and are added for the sake of visualization.}
 \label{fig:cluster-reads}
-% See source files in
-% https://drive.google.com/drive/folders/0BzT7pbvPDUdQRXppVlhfdS0ycGc?usp=sharing
 \end{figure}
 Our cluster reads algorithm focuses on the three memory load
 configurations represented in Figure~\ref{fig:cluster-reads}, that is,
@@ -394,13 +392,13 @@ arithmetic, which we felt were unwieldy to report here.
 \end{figure}
 To summarize, the amount of memory used $m'$ is set as follows in each of the 3 cases:
 %% \begin{equation*}
-%%   m_{case 1}' = \floor*{\frac{m}{d^3b}}; m_{case 2}' = \floor*{\frac{m}{d^3b\sqrt[3]{n}}}; m_{case 3}' = \floor*{\frac{m}{d^3b\sqrt[3]{n}^2}}
+%%   m_{case 1}' = bd^3\floor*{\frac{m}{d^3b}}; m_{case 2}' = bd^3\sqrt[3]{n}\floor*{\frac{m}{d^3b\sqrt[3]{n}}}; m_{case 3}' = bd^3\sqrt[3]{n}^2\floor*{\frac{m}{d^3b\sqrt[3]{n}^2}}
 %% \end{equation*}
 %% which gives:
 \begin{equation*}
-  m_1' = \floor*{\frac{mn}{Rb}};
-  m_2' = \floor*{\frac{m\sqrt[3]{n}^2}{Rb}};
-  m_3' = \floor*{\frac{m\sqrt[3]{n}}{Rb}}
+  m_1' = \frac{Rb}{n}\floor*{\frac{mn}{Rb}};
+  m_2' = \frac{Rb}{\sqrt[3]{n}^2}\floor*{\frac{m\sqrt[3]{n}^2}{Rb}};
+  m_3' = \frac{Rb}{\sqrt[3]{n}}\floor*{\frac{m\sqrt[3]{n}}{Rb}}
 \end{equation*}
 
 In addition, our algorithm avoids configurations where the memory load
