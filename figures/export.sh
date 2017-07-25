@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for name in buffer-cluster-reads case1-a case2-a case3
+for name in buffer case1-a case2-a case3 incomplete-rows overlap
 do
   echo "Exporting ${name}.svg"
   inkscape -D -z --file=figures/${name}.svg --export-pdf=figures/${name}.pdf --export-latex

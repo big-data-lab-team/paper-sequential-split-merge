@@ -13,10 +13,9 @@
 \DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
 
 % new commands
-\newcommand{\todo}[1]{
-  \color{red}\emph{[#1]}
-  \color{black}
-}
+\newcommand{\todo}[1]{\marginpar{\parbox{18mm}{\flushleft\tiny\color{red}\textbf{TODO}:
+      #1}}}
+
 
 \newcommand{\note}[1]{
   \color{blue}\emph{[Note: #1]}
@@ -139,9 +138,9 @@ identical size and that slices are squares and blocks are cubes.
 Without loss of generality, we consider a file format where voxels are
 written after alphanumerical sorting of their (x,y,z)
 representation. That is, x slices are written one after the other, and
-in every x slice, y rows are written one after the other. NifTI, the
+in every x slice, y rows are written one after the other. NIfTI, the
 file format defined by the Neuroimaging Informatics Technology
-Initiative Nifti\footnote{\url{https://nifti.nimh.nih.gov}} is such a
+Initiative NIfTI\footnote{\url{https://nifti.nimh.nih.gov}} is such a
 format, used by the vast majority of the neuroimaging community. In
 the remainder, we use the term ``slice" for ``x slice".
 
@@ -317,23 +316,24 @@ The main idea of cluster reads is to load multiple blocks in memory,
 concatenate them in a buffer and write the buffer in the reconstructed
 image. Seeking is reduced compared to naive block merging since
 contiguous parts of the buffer will be written without seeking. In
-cluster reads, a given block is accessed only once. That is, the
-amount of used memory $m'$ is such that $m'=kd^3b, k \in \mathbb{N}$.
+cluster reads, a given block is accessed only once. 
 
 The buffer might be a
 slightly complex data structure, for instance an associative array or
 a Python dictionary, capable of storing multiple disjoint sequences of
 contiguous bytes without having to allocate memory for the bytes
 between such sequences. Figure~\ref{fig:cluster-reads-buffer}
-illustrates how the buffer would fill up when two blocks of one slice
-and three rows per slice are loaded. Implementation details about the
+illustrates how the buffer would fill up for the two first blocks in a reconstructed image.Implementation details about the
 buffer are given later.
 \begin{figure}
 \centering
-\def\svgwidth{\columnwidth}
-\input{figures/buffer-cluster-reads.pdf_tex}
-\caption{Illustration of the buffer used in cluster reads. White
-  portions are not allocated. [a,b] refers to block a, row b.}
+\def\svgwidth{0.3\columnwidth}
+\input{figures/buffer.pdf_tex}
+\caption{Illustration of the buffer used in cluster reads, showing how
+  the two first 4x4 blocks of a reconstructed image would be arranged
+  in the buffer.  White portions in the buffer are not allocated.  The
+  column-major order is used, similar to the NIfTI format: i is the
+  fastest changing dimension, followed by j, followed by k.}
 \label{fig:cluster-reads-buffer}
 \end{figure}
 
@@ -347,50 +347,125 @@ row in every partial slice. In the intermediary case, rows are
 complete but some slices can only be partially reconstructed: O($d$)
 seeks are then required.
 
-\todo{Check that ordering in the Figure is consistent with Nifti's.}
+\begin{figure}
+\centering
+\def\svgwidth{0.3\columnwidth}
+\input{figures/case1-a.pdf_tex}
+\def\svgwidth{0.3\columnwidth}
+\input{figures/case2-a.pdf_tex}
+\def\svgwidth{0.3\columnwidth}
+\input{figures/case3.pdf_tex}
+\caption{Memory-load configurations in cluster reads, leading to
+  different number of seeks. Red blocks need seeking before each of
+  their rows ($d^2$ seeks). Blue blocks need seeking before each of
+  their slices ($d$ seeks in total). Green blocks need only a single
+  seek. Grey, dashed, transparent blocks represent the contiguous
+  memory loads and are added for the sake of visualization.}
+\label{fig:cluster-reads}
+% See source files in
+% https://drive.google.com/drive/folders/0BzT7pbvPDUdQRXppVlhfdS0ycGc?usp=sharing
+\end{figure}
+Our cluster reads algorithm focuses on the three memory load
+configurations represented in Figure~\ref{fig:cluster-reads}, that is,
+the amount of memory $m'$ used by the algorithm is rounded down to the
+closest number of complete blocks (case 1), complete block rows (case
+2) or complete block slices (case 3). This is in general reasonable
+since adding an incomplete row to a set of complete ones multiplies
+the number of required seeks by $d$, as illustrated in
+Figure~\ref{fig:avoided-configurations}-Left. In some cases though,
+rounding $m$ down to $m'$ might increase the number of required
+memory load to a point that the overall number of seeks also
+increases. However, such cases are a bit pathological and their
+complete description requires extensive calculations involving modulo
+arithmetic, which we felt were unwieldy to report here.
+\begin{figure}[b]
+  \centering
+\def\svgwidth{0.3\columnwidth}
+\input{figures/incomplete-rows.pdf_tex}
+\hfill
+\def\svgwidth{0.3\columnwidth}
+\input{figures/overlap.pdf_tex}
+\caption{Configurations that increase the number of seeks per
+  memory-load and are thus deliberately avoided by cluster
+  reads. Left: configuration with incomplete block rows (multiplies
+  number of seeks by $d$). Right: configuration with block rows that
+  overlap multiple block slices (multiplies number of seeks by $2$).}
+\label{fig:avoided-configurations}
+\end{figure}
+To summarize, the amount of memory used $m'$ is set as follows in each of the 3 cases:
+%% \begin{equation*}
+%%   m_{case 1}' = \floor*{\frac{m}{d^3b}}; m_{case 2}' = \floor*{\frac{m}{d^3b\sqrt[3]{n}}}; m_{case 3}' = \floor*{\frac{m}{d^3b\sqrt[3]{n}^2}}
+%% \end{equation*}
+%% which gives:
+\begin{equation*}
+  m_1' = \floor*{\frac{mn}{Rb}};
+  m_2' = \floor*{\frac{m\sqrt[3]{n}^2}{Rb}};
+  m_3' = \floor*{\frac{m\sqrt[3]{n}}{Rb}}
+\end{equation*}
 
-Incomplete block rows and incomplete block slices lead to extra
-seeking and should be avoided as much as possible.  Thus, cluster
-reads consider only three cases, represented in
-Figure~\ref{fig:cluster-reads}:
-\begin{itemize}
-  \item Case 1: $m<d^3\sqrt[3]{n}b=\frac{D^3}{\sqrt[3]{n}^2b}$, that is, a
-    row of blocks does not fit in memory. Incomplete rows of
-    blocks will be merged, with $d^2$ seeks per memory load.
-  \item Case 2: $\frac{D^3}{\sqrt[3]{n}^2}b\leq m<\frac{D^3}{\sqrt[3]{n}}b$,
-    that is, a row of blocks fits in memory but a slice of blocks does
-    not. Only complete rows of blocks will be merged, with
-    $d$ seeks per memory load. We have $m'=\floor*{\frac{m}{d^3\sqrt[3]{n}b}}$.
-    \item Case 3: $\frac{D^3}{\sqrt[3]{n}}b \leq m < D^3b$, that is, a slice
-      of blocks fits in memory. Only complete slices of blocks
-      will be merged, a single seek per memory load. We have
-      $m'=\floor*{\frac{m}{d^3\sqrt[3]{n}^2b}}$.
-\end{itemize}
+In addition, our algorithm avoids configurations where the memory load
+overlaps multiple block slices in case 2 or multiple block rows in
+case 1, as such overlaps multiply the number of required seeks
+(see Figure~\ref{fig:avoided-configurations}-Right). Thus, the total
+number of memory loads $x$ required to reconstruct the image is:
+\begin{equation*}
+  x_1 = \ceil*{\frac{Rb}{\sqrt[3]{n}^2m_1'}}\sqrt[3]{n}^2;
+  x_2 = \ceil*{\frac{Rb}{\sqrt[3]{n}m_2'}}\sqrt[3]{n};
+  x_3 = \ceil*{\frac{Rb}{m_3'}}
+\end{equation*}
 
-Algorithm~\ref{algo:cluster-reads} shows the resulting cluster reads
-method. Function \texttt{adjust\_memory} (line 4) returns $m'$
-according to the three cases above. Function \texttt{sizeof} (line 6)
-returns the memory used by the buffer, including only its allocated
-segments. It should be noted that writing the buffer to the
-reconstructed image (line 11) might involve some manipulation in the
-buffer to merge its continuous segments. 
+Finally, the total number of seeks performed by cluster reads to reconstruct the image is:
+%% \begin{equation*}
+%% N_\mathrm{cr} =
+%% \begin{cases}
+%%   n + \sqrt[3]{n}^2 \ceil*{\frac{Rb}{\sqrt[3]{n}^2m_1'}}d^2 & \text{if } \frac{m}{d^3b} < \sqrt[3]{n}\\
+%%   n + \sqrt[3]{n} \ceil*{\frac{Rb}{\sqrt[3]{n}m_2'}}d      & \text{if } \sqrt[3]{n} \leq \frac{m}{d^3b} < \sqrt[3]{n}^2\\
+%%   n + \ceil*{\frac{Rb}{m_3'}}                              & \text{if } \sqrt[3]{n}^2 \leq \frac{m}{d^3b} < n\\
+%%   n + 1                                                          & \text{otherwise}
+%% \end{cases} \label{eq:seeks-cluster-reads}
+%% \end{equation*}
+%% And since $d=\frac{D}{\sqrt[3]{n}}$ and $R=D^3$, we finally have:
+\begin{equation}
+N_\mathrm{cr} =
+\begin{cases}
+  n + \ceil*{\frac{Rb}{\sqrt[3]{n}^2m_1'}}\sqrt[3]{R}^2     & \text{if } \frac{mn}{Rb} < \sqrt[3]{n}\\
+  n + \ceil*{\frac{Rb}{\sqrt[3]{n}m_2'}}\sqrt[3]{R}        & \text{if } \sqrt[3]{n} \leq \frac{mn}{Rb} < \sqrt[3]{n}^2\\
+  n + \ceil*{\frac{Rb}{m_3'}}                              & \text{if } \sqrt[3]{n}^2 \leq \frac{mn}{Rb} < n\\
+  n + 1                                                          & \text{otherwise}
+\end{cases} \label{eq:seeks-cluster-reads-1}
+\end{equation}
+
+Cluster reads are described in
+Algorithm~\ref{algo:cluster-reads}. Function \texttt{switch} (line 4)
+selects one of the three cases based on the amount of available memory
+and the number of blocks. It returns \texttt{m'} and \texttt{case},
+the identifier of the selected case. Function \texttt{check\_overlap}
+(line 7) determines whether two blocks overlap multiple block slices
+(case 2) or multiple block rows (case 1). For case 3 it always returns
+true.  Function \texttt{sizeof} (line 8) returns the actual memory
+used by the buffer, including only its allocated segments. It should
+be noted that writing the buffer to the reconstructed image (line 11)
+might involve some manipulation in the buffer to merge its continuous
+segments. \todo{Precise this based on Valerie's final code.}
 \begin{algorithm}[h]
   \caption{Buffered merging of blocks with cluster reads}
   \label{algo:cluster-reads}
   \begin{algorithmic}[1]
-    \STATE list = sort blocks by increasing (x,y,z) values
+    \STATE list = sort blocks by increasing (z,y,x) values
     \STATE initialize buffer
-    \STATE index = 0
-    \STATE m'=adjust\_memory(m)    
-    \WHILE{index\textless n}
-      \WHILE{sizeof(buffer)\textless m'}
-        \STATE block = list[index]
-        \STATE read block and insert it in buffer
-        \STATE index += 1
-        \ENDWHILE
-       \STATE write buffer in reconstructed image
-       \STATE clear buffer
-    \ENDWHILE
+    \STATE (m',case)=\texttt{switch}(m,n,R,b)
+    \STATE old\_block = list[0]
+    \FOR{i = 0 ; i\textless n ; i+=1}
+      \STATE block = list[i]
+      \STATE overlap = \texttt{check\_overlap}(block,old\_block,case)
+      \IF{\texttt{sizeof}(buffer) \textless m' \textbf{and} overlap=false}
+      \STATE read block and insert it in buffer
+      \ELSE
+      \STATE write buffer in reconstructed image
+      \STATE clear buffer
+      \STATE overlap = false
+      \ENDIF
+    \ENDFOR
   \end{algorithmic}
 \end{algorithm}
 
@@ -407,50 +482,15 @@ buffer to merge its continuous segments.
 %% are incomplete, $f_i$=$d^2+d-1$. And in case (7), $d$ rows of $2d$
 %% slices are incomplete, $f_i$=$2d^2-1$.
 
-\begin{figure}
-\centering
-\def\svgwidth{0.3\columnwidth}
-\input{figures/case1-a.pdf_tex}
-\def\svgwidth{0.3\columnwidth}
-\input{figures/case2-a.pdf_tex}
-\def\svgwidth{0.3\columnwidth}
-\input{figures/case3.pdf_tex}
-
-\caption{Memory-load configurations in cluster reads, leading to
-  different number of seeks. Red blocks need seeking before each of
-  their rows ($d^2$ seeks). Blue blocks need seeking before each of
-  their slices ($d$ seeks in total). Green blocks need only a single
-  seek. Grey, dashed, transparent blocks represent the contiguous
-  memory loads and are added for the sake of visualization.}
-\label{fig:cluster-reads}
-% See source files in
-% https://drive.google.com/drive/folders/0BzT7pbvPDUdQRXppVlhfdS0ycGc?usp=sharing
-\end{figure}
-
-The total number of seeks performed by cluster reads depends on the three
-cases listed above and on the overall number of memory loads.
-\begin{equation}
-  N_\mathrm{cluster\_reads\_v1}= n + \frac{bR}{m'}d^2+d^2\alpha
-\end{equation}
-Similarly, in Case 2 we have:
-\begin{equation}
-  N_\mathrm{cluster\_reads\_v2}= n + \frac{bR}{m'}d+d\alpha
-\end{equation}
-And in Case 3:
-\begin{equation}
-  N_\mathrm{cluster\_reads\_v3}= n + \frac{bR}{m'}
-\end{equation}
-
-    
+   
 \subsection{Buffered blocks: Multiple reads}
 
 In multiple reads, blocks are read partially to ensure that the memory
 buffer only contains contiguous bytes, at any time. That is, a given
-block will be read multiple times.
+block will be read multiple times.     \todo{improve notations and algo in algorithm}
 
 \begin{algorithm}[h]
-  \caption{Buffered merging from blocks using multiple reads
-    \todo{improve notations and algo}.}
+  \caption{Buffered merging from blocks using multiple reads.}
   \label{algo:multiple-reads}
   \begin{algorithmic}
   \STATE sorted\_split\_name\_list = sort blocks by increasing (x,y,z) values 
