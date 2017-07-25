@@ -573,10 +573,31 @@ SATA >3.1 (6.0 Gb/s) and were accessed through the XFS file system.
 \section{Results}
 \label{sec:results}
 
-\subsection{Slices vs blocks}
+\subsection{Slices vs Blocks}
 
-\todo{Valerie's results at PERFORM + model.}
-% will be used as reference 
+Figure~\ref{fig:slices-vs-blocks} shows the merging time for Slices vs
+Blocks, on SSD and HDD. Merging with Blocks takes about twice the time
+of Slices, which motivates the need for improved algorithms to merge
+blocks. As expected, seek time is mainly responsible for this
+difference, although differences in read times are also observed,
+perhaps due to a caching effect at the disk or OS level. This behavior is
+reproduced in SSD and HDD, which shows that SSDs might not be the only
+solution to reduce seek time.  \todo{On figure: check that breakdowns
+  add up to total time. Harmonize time formats. Harmonize colors (all
+  slices in purple, all blocks in green). If time permits, try
+  histogram for breakdown, on same figure than total time.}
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.45\columnwidth]{figures/blocks-slices/totalmergetimeSSD1.pdf}
+  \hfill
+  \includegraphics[width=0.45\columnwidth]{figures/blocks-slices/totalmergetimeHDD1.pdf}\\
+  \includegraphics[width=0.45\columnwidth]{figures/blocks-slices/hddBreakDown1.pdf}
+  \hfill
+  \includegraphics[width=0.45\columnwidth]{figures/blocks-slices/ssdBreakDown1.pdf}
+  \caption{Merging time for Slices and Blocks. Left column: SSD. Right column: HDD. Top row: overall merging time. Bottom row: breakdown by read, write and seek time.}
+  % Gnuplot file: scripts/blocks-slices/createboxplot.gnplt
+\label{fig:slices-vs-blocks}
+\end{figure}
 
 \subsection{Sorted blocks vs blocks?}
 
