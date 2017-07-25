@@ -151,16 +151,11 @@ We adopt the following notations:
 \item $R=D^3$: number of voxels in the reconstructed image.
 \item $b$: number of bytes per voxel in the reconstructed image and chunks (in B).
 \item $n$: number of chunks (blocks or slices).
-\item $\alpha_r$: data read rate from disk (in B/s).
-\item $\alpha_w$: data write rate to disk (in B/s).
-\item $\beta$: disk access time (in s).
-\item $\sigma: \mathbb{R}^{+} \rightarrow \mathbb{R}^{+}$: seek time (in s), function of the seek
-  distance (in B).
 \item $m$: amount of available RAM (in B).
-  \item $m'$: amount of used RAM (in B). $m'\leq m$.
+\item $m'$: amount of used RAM (in B). $m'\leq m$.
 \end{itemize}
 
-The following properties are straightforward applications of these
+The following relations are straightforward applications of these
 definitions:
 \begin{itemize}
 \item number of bytes per chunk: $\frac{Rb}{n}$
@@ -176,21 +171,20 @@ we have the following definitions and properties:
 \item Number of blocks required to fill a row of the reconstructed
   image: $\sqrt[3]{n}=\nu$.
 \end{itemize}
-\todo{Make a figure to illustrate the notations.}
+%\todo{Make a figure to illustrate the notations.}
 
 \subsection{Disk model}
 
 We use a simplistic disk model where a disk is characterized by its
-read and write rates ($\alpha_r$ and $\alpha_w$, in B/s) and its
-access time $\beta$ (in s). In particular, we assume that seeks
-require a constant amount of time, regardless of the position seeked
-to. In practice, large variations would be expected, but modeling such
-variations would inevitably lead to models specific to the hardware,
-file system or operating system, which we intentionally avoid
-here. Thus, our goal is to find algorithms that minimize the
-\emph{number} of seek operations. Likewise, in modern systems, read
-and write times are greatly impacted by caching occurring at several
-levels, which we do not model here.
+read and write rates and its access time. In particular, we assume
+that seeks require a constant amount of time, regardless of the
+position seeked to. In practice, large variations would be expected,
+but modeling such variations would inevitably lead to models specific
+to the hardware, file system or operating system, which we
+intentionally avoid here. Thus, our goal is to find algorithms that
+minimize the \emph{number} of seek operations. Likewise, in modern
+systems, read and write times are greatly impacted by caching
+occurring at several levels, which we do not model here.
 
 %% and its seek time,
 %% a function $\sigma$ of the seek distance (in B). More precisely,
@@ -260,25 +254,6 @@ later.
 %%     \end{multlined}
 %% \end{equation}
 
-\subsection{Sorted blocks}
-
-Sorting blocks alphanumerically by (x,y,z) as shown on Algorithm 2
-reduces the seek time between blocks. 
-
-\begin{algorithm}[h]
-  \caption{Merging from sorted blocks.}
-  \label{algo:sorted-blocks}
-  \begin{algorithmic}
-    \STATE list = sort blocks according to (x,y,z)
-    \FOR{each block in list}
-      \STATE read block
-      \STATE write block in reconstructed image
-    \ENDFOR
-  \end{algorithmic}
-  \end{algorithm}
-
-\todo{Not sure what we are measuring here. The number of seeks will be identical. The difference in seek time is supposed to be very minimal.}
-
 \subsection{Buffered slices}
 
 The algorithms presented up to now are in fact particular cases of
@@ -288,19 +263,17 @@ maximum size of a chunk.
 \begin{algorithm}[h]
   \caption{Buffered merging from slices}
   \label{algo:buffered-slices}
-  \begin{algorithmic}
+  \begin{algorithmic}[1]
     \STATE list = sort slices by increasing x values
     \STATE initialize buffer
-    \STATE index = 0
-    \WHILE{index\textless n}
-      \WHILE{sizeof(buffer)\textless m}
-        \STATE slice = list[index]
-        \STATE read slice and append it to buffer
-        \STATE index += 1
-       \ENDWHILE
-       \STATE write buffer in reconstructed image
-       \STATE clear buffer
-    \ENDWHILE
+    \FOR{i = 0 ; i \textless n ; i+=1 }
+      \STATE slice = list[index]
+      \IF{\texttt{sizeof}(buffer)+\texttt{sizeof}(slice) $\geq$ m}
+        \STATE write buffer in reconstructed image
+        \STATE clear buffer
+      \ENDIF
+      \STATE read slice and append it to buffer
+    \ENDFOR
   \end{algorithmic}
 \end{algorithm}
 
@@ -310,7 +283,6 @@ N_\mathrm{buff\_slices} =  n + \ceil*{\frac{bR}{m}}
 
 
 \subsection{Buffered blocks: Cluster reads}
-
 
 The main idea of cluster reads is to load multiple blocks in memory,
 concatenate them in a buffer and write the buffer in the reconstructed
@@ -437,17 +409,18 @@ N_\mathrm{cr} =
 \end{equation}
 
 Cluster reads are described in
-Algorithm~\ref{algo:cluster-reads}. Function \texttt{switch} (line 4)
+Algorithm~\ref{algo:cluster-reads}. Function \texttt{switch} (line 3)
 selects one of the three cases based on the amount of available memory
 and the number of blocks. It returns \texttt{m'} and \texttt{case},
 the identifier of the selected case. Function \texttt{check\_overlap}
 (line 7) determines whether two blocks overlap multiple block slices
 (case 2) or multiple block rows (case 1). For case 3 it always returns
 true.  Function \texttt{sizeof} (line 8) returns the actual memory
-used by the buffer, including only its allocated segments. It should
-be noted that writing the buffer to the reconstructed image (line 11)
-might involve some manipulation in the buffer to merge its continuous
-segments. \todo{Precise this based on Valerie's final code.}
+used by its argument, including only its allocated segments in case
+the argument is a buffer. It should be noted that writing the buffer
+to the reconstructed image (line 11) might involve some manipulation
+in the buffer to merge its continuous segments. \todo{Precise this
+  based on Valerie's final code.}
 \begin{algorithm}[h]
   \caption{Buffered merging of blocks with cluster reads}
   \label{algo:cluster-reads}
@@ -459,14 +432,13 @@ segments. \todo{Precise this based on Valerie's final code.}
     \FOR{i = 0 ; i\textless n ; i+=1}
       \STATE block = list[i]
       \STATE overlap = \texttt{check\_overlap}(block,old\_block,case)
-      \IF{\texttt{sizeof}(buffer) \textless m' \textbf{and} overlap=false}
-      \STATE read block and insert it in buffer
-      \ELSE
+      \IF{\texttt{sizeof}(buffer)+\texttt{sizeof}(block) $\geq$ m' \textbf{or} overlap=true}
       \STATE write buffer in reconstructed image
       \STATE clear buffer
       \STATE overlap = false
       \ENDIF
-    \ENDFOR
+      \STATE read block and insert it in buffer
+      \ENDFOR
   \end{algorithmic}
 \end{algorithm}
 
@@ -493,8 +465,8 @@ block will be read multiple times.     \todo{improve notations and algo in algor
 \begin{algorithm}[h]
   \caption{Buffered merging from blocks using multiple reads.}
   \label{algo:multiple-reads}
-  \begin{algorithmic}
-  \STATE sorted\_split\_name\_list = sort blocks by increasing (x,y,z) values 
+  \begin{algorithmic}[1]
+  \STATE sorted\_split\_name\_list = sort blocks by increasing (z,y,x) values 
   \STATE start\_index = 0, end\_index=(m-1)
   \WHILE{end\_index \textless sizeof(reconstructed\_image)}
     \STATE initialize data\_buffer
@@ -514,17 +486,6 @@ block will be read multiple times.     \todo{improve notations and algo in algor
   \end{algorithmic}
 \end{algorithm}
 
-In multiple reads, a given chunk will be accessed $k$ times and we have: 
-\begin{equation*}
-   N_\mathrm{multiple\_reads}= nk + \ceil*{\frac{bR}{m}}
-\end{equation*}
-$k$ depends on the span of memory offsets covered by a chunk in the
-reconstructed image, that is, $\left[(d-1)D^2+dD\right]b$. 
-
-Finally:
-\begin{equation}
-   N_\mathrm{multiple\_reads}= n\left( \ceil*{\frac{\left((d-1)D^2+dD\right)b}{m}}\right) + 2\ceil*{\frac{bR}{m}}
-\end{equation}
 
 
 \subsection{Lossless compression}
@@ -598,8 +559,6 @@ solution to reduce seek time.  \todo{On figure: check that breakdowns
   % Gnuplot file: scripts/blocks-slices/createboxplot.gnplt
 \label{fig:slices-vs-blocks}
 \end{figure}
-
-\subsection{Sorted blocks vs blocks?}
 
 \subsection{Buffered slices vs slices}
 
