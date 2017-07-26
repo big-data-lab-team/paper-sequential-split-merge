@@ -14,3 +14,4 @@ figures/incomplete-rows.pdf
 figures/overlap.pdf
 figures/buffer.pdf
 figures/*.pdf_tex
+.idea/*
