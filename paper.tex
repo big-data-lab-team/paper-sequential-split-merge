@@ -294,7 +294,7 @@ buffer are given later.
 \begin{figure}
 \centering
 \def\svgwidth{0.3\columnwidth}
-\input{figures/buffer.pdf_tex}
+\input{figures/svg/buffer.pdf_tex}
 \caption{Illustration of the buffer used in cluster reads, showing how
   the two first 4x4 blocks of a reconstructed image would be arranged
   in the buffer.  White portions in the buffer are not allocated.  The
@@ -319,11 +319,11 @@ seeks are then required.
 \begin{figure}
 \centering
 \def\svgwidth{0.3\columnwidth}
-\input{figures/case1-a.pdf_tex}
+\input{figures/svg/case1-a.pdf_tex}
 \def\svgwidth{0.3\columnwidth}
-\input{figures/case2-a.pdf_tex}
+\input{figures/svg/case2-a.pdf_tex}
 \def\svgwidth{0.3\columnwidth}
-\input{figures/case3.pdf_tex}
+\input{figures/svg/case3.pdf_tex}
 \caption{Memory-load configurations in cluster reads, leading to
   different number of seeks. Red blocks need seeking before each of
   their rows ($d^2$ seeks). Blue blocks need seeking before each of
@@ -348,10 +348,10 @@ arithmetic, which we felt were unwieldy to report here.
 \begin{figure}
   \centering
 \def\svgwidth{0.3\columnwidth}
-\input{figures/incomplete-rows.pdf_tex}
+\input{figures/svg/incomplete-rows.pdf_tex}
 \hfill
 \def\svgwidth{0.3\columnwidth}
-\input{figures/overlap.pdf_tex}
+\input{figures/svg/overlap.pdf_tex}
 \caption{Configurations that increase the number of seeks per
   memory-load and are thus deliberately avoided by cluster
   reads. Left: configuration with incomplete block rows (multiplies

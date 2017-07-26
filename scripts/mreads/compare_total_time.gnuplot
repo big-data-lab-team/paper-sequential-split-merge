@@ -1,3 +1,5 @@
+#!/usr/bin/env gnuplot
+
 set terminal pdfcairo color
 set border 3 front lt black linewidth 1.000 dashtype solid
 set boxwidth 0.5 absolute
@@ -22,8 +24,8 @@ set boxwidth 0.5
 set xtics font ", 10"
 set xlabel "Merging strategy - Comparision between multiple reads and naive blocks, slices on HDD" font ",10"
 set ylabel "Total Time (s)" font ",10"
-set output "../../figures/benchmark-mreads/mreads-comparision-hdd.pdf"
-plot '../../data/blocks-slices/totaltime.dat' using (1):7 , '' using (6):6 , '../../data/mreads/mreads_hdd.dat' using (2):5 , '' using (3):10 , '' using (4):15 , '' using (5):20 
+set output "./figures/benchmark-mreads/mreads-comparision-hdd.pdf"
+plot './data/blocks-slices/totaltime.dat' using (1):7 , '' using (6):6 , './data/mreads/mreads_hdd.dat' using (2):5 , '' using (3):10 , '' using (4):15 , '' using (5):20 
 
 
 
@@ -37,5 +39,5 @@ set boxwidth 0.5
 set xtics font ", 10"
 set xlabel "Merging strategy - Comparision between multiple reads and naive blocks, slices on SSD" font ",10"
 set ylabel "Total Time (s)" font ",10"
-set output "../../figures/benchmark-mreads/mreads-comparision-ssd.pdf"
-plot '../../data/blocks-slices/totaltime.dat' using (1):2 , '' using (6):1 , '../../data/mreads/mreads_ssd.dat' using (2):5 , '' using (3):10 , '' using (4):15 , '' using (5):20 
+set output "./figures/benchmark-mreads/mreads-comparision-ssd.pdf"
+plot './data/blocks-slices/totaltime.dat' using (1):2 , '' using (6):1 , './data/mreads/mreads_ssd.dat' using (2):5 , '' using (3):10 , '' using (4):15 , '' using (5):20 

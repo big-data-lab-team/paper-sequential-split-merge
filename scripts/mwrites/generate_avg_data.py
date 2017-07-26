@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 
-input_file_mwrites_ssd = "../../data/mwrites/mwrites_ssd.dat"
-output_file_mwrites_ssd = "../../data/mwrites/mwrites_ssd_avg.dat"
+input_file_mwrites_ssd = "./data/mwrites/mwrites_ssd.dat"
+output_file_mwrites_ssd = "./data/mwrites/mwrites_ssd_avg.dat"
 
-input_file_mwrites_hdd = "../../data/mwrites/mwrites_hdd.dat"
-output_file_mwrites_hdd = "../../data/mwrites/mwrites_hdd_avg.dat"
+input_file_mwrites_hdd = "./data/mwrites/mwrites_hdd.dat"
+output_file_mwrites_hdd = "./data/mwrites/mwrites_hdd_avg.dat"
 
-input_file_naive_ssd = "../../data/blocks-slices/totaltime.dat"
-output_file_naive_ssd = "../../data/blocks-slices/blocks_slices_avg_ssd.dat"
+input_file_naive_ssd = "./data/blocks-slices/totaltime.dat"
+output_file_naive_ssd = "./data/blocks-slices/blocks_slices_avg_ssd.dat"
 
-input_file_naive_hdd = "../../data/blocks-slices/totaltime.dat"
-output_file_naive_hdd = "../../data/blocks-slices/blocks_slices_avg_hdd.dat"
+input_file_naive_hdd = "./data/blocks-slices/totaltime.dat"
+output_file_naive_hdd = "./data/blocks-slices/blocks_slices_avg_hdd.dat"
 
 def avg(l):
     return sum(l) / float(len(l))

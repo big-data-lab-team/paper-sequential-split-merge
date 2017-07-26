@@ -11,8 +11,8 @@ set style data boxplot
 set xtics border in scale 0,0 nomirror norotate  autojustify
 set xtics  norangelimit 
 
-filename='../../data/blocks-slices/totaltime.dat'
-outputdir='../../figures/blocks-slices/'
+filename='./data/blocks-slices/totaltime.dat'
+outputdir='./figures/blocks-slices/'
 
 ####################
 # Slices vs blocks #
