@@ -112,30 +112,56 @@ def get_avg_naive(input_file, output_file):
     calculation_times_blocks = []
 
     with open(input_file, 'r') as f:
-        for line in f:
-            if '#' not in line:
-                items = line.split(' ')
-                read_time = float(items[9])
-                write_time = float(items[10])
-                seek_time = 0
-                total_time = float(items[5])
-                calculation_time = total_time - seek_time - write_time - read_time
+        if "hdd" in output_file:
+            for line in f:
+                if '#' not in line:
+                    items = line.split(' ')
+                    read_time = float(items[9])
+                    write_time = float(items[10])
+                    seek_time = 0
+                    total_time = float(items[5])
+                    calculation_time = total_time - seek_time - write_time - read_time
 
-                read_times_slices.append(read_time)
-                write_times_slices.append(write_time)
-                seek_times_slices.append(seek_time)
-                calculation_times_slices.append(calculation_time)
+                    read_times_slices.append(read_time)
+                    write_times_slices.append(write_time)
+                    seek_times_slices.append(seek_time)
+                    calculation_times_slices.append(calculation_time)
 
-                read_time = float(items[14])
-                write_time = float(items[16])
-                seek_time = float(items[15])
-                total_time = float(items[6])
-                calculation_time = total_time - seek_time - write_time - read_time
+                    read_time = float(items[14])
+                    write_time = float(items[16])
+                    seek_time = float(items[15])
+                    total_time = float(items[6])
+                    calculation_time = total_time - seek_time - write_time - read_time
 
-                read_times_blocks.append(read_time)
-                write_times_blocks.append(write_time)
-                seek_times_blocks.append(seek_time)
-                calculation_times_blocks.append(calculation_time)
+                    read_times_blocks.append(read_time)
+                    write_times_blocks.append(write_time)
+                    seek_times_blocks.append(seek_time)
+                    calculation_times_blocks.append(calculation_time)
+        else:
+            for line in f:
+                if '#' not in line:
+                    items = line.split(' ')
+                    read_time = float(items[7])
+                    write_time = float(items[8])
+                    seek_time = 0
+                    total_time = float(items[0])
+                    calculation_time = total_time - seek_time - write_time - read_time
+
+                    read_times_slices.append(read_time)
+                    write_times_slices.append(write_time)
+                    seek_times_slices.append(seek_time)
+                    calculation_times_slices.append(calculation_time)
+
+                    read_time = float(items[11])
+                    write_time = float(items[13])
+                    seek_time = float(items[12])
+                    total_time = float(items[1])
+                    calculation_time = total_time - seek_time - write_time - read_time
+
+                    read_times_blocks.append(read_time)
+                    write_times_blocks.append(write_time)
+                    seek_times_blocks.append(seek_time)
+                    calculation_times_blocks.append(calculation_time)
     with open(output_file, 'w') as f:
         f.write("time naive-slices naive-blocks")
         f.write('\n')
@@ -146,6 +172,7 @@ def get_avg_naive(input_file, output_file):
         f.write("write-time {} {}".format(avg(write_times_slices), avg(write_times_blocks)))
         f.write('\n')
         f.write("seek-time {} {}".format(avg(seek_times_slices), avg(seek_times_blocks)))
+
 
 def main():
     get_avg_mreads(input_file_mreads_ssd, output_file_mreads_ssd)

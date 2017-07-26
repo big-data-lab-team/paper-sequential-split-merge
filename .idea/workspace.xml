@@ -2,51 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1062d4d1-f5c6-4ff5-bdc7-9888103cd264" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/figures/benchmark-mreads/number_of_seeks.pdf" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/figures/benchmark-mreads/read-time.pdf" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/figures/benchmark-mreads/seek-time.pdf" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/figures/benchmark-mreads/total-time.pdf" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/figures/benchmark-mreads/write-time.pdf" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/scripts/mreads/imageutils.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/scripts/mreads/read_time.gnuplot" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/scripts/mreads/seek_time.gnuplot" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/scripts/mreads/total_time.gnuplot" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/scripts/mreads/write_time.gnuplot" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/figures/benchmark-mreads/mreads-breakdown-hdd.pdf" afterPath="$PROJECT_DIR$/figures/benchmark-mreads/mreads-breakdown-hdd.pdf" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/figures/benchmark-mreads/mreads-breakdown-ssd.pdf" afterPath="$PROJECT_DIR$/figures/benchmark-mreads/mreads-breakdown-ssd.pdf" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/figures/benchmark-mreads/mreads-comparision-hdd.pdf" afterPath="$PROJECT_DIR$/figures/benchmark-mreads/mreads-comparision-hdd.pdf" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/figures/benchmark-mreads/mreads-comparision-ssd.pdf" afterPath="$PROJECT_DIR$/figures/benchmark-mreads/mreads-comparision-ssd.pdf" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/IEEEabrv.bib" afterPath="$PROJECT_DIR$/IEEEabrv.bib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/IEEEtran.bst" afterPath="$PROJECT_DIR$/IEEEtran.bst" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/IEEEtran.cls" afterPath="$PROJECT_DIR$/IEEEtran.cls" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/biblio.bib" afterPath="$PROJECT_DIR$/biblio.bib" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/data/blocks-slices/blocks_slices_avg_hdd.dat" afterPath="$PROJECT_DIR$/data/blocks-slices/blocks_slices_avg_hdd.dat" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/data/blocks-slices/blocks_slices_avg_ssd.dat" afterPath="$PROJECT_DIR$/data/blocks-slices/blocks_slices_avg_ssd.dat" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/data/blocks-slices/totaltime.dat" afterPath="$PROJECT_DIR$/data/blocks-slices/totaltime.dat" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/data/disk-benchmarks/benchmark-seek-hdd.csv" afterPath="$PROJECT_DIR$/data/disk-benchmarks/benchmark-seek-hdd.csv" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/data/disk-benchmarks/benchmark-seek-ssd.csv" afterPath="$PROJECT_DIR$/data/disk-benchmarks/benchmark-seek-ssd.csv" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/data/disk-benchmarks/benchmark.csv" afterPath="$PROJECT_DIR$/data/disk-benchmarks/benchmark.csv" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/data/mreads/mreads_hdd.dat" afterPath="$PROJECT_DIR$/data/mreads/mreads_hdd.dat" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/data/mreads/mreads_hdd_avg.dat" afterPath="$PROJECT_DIR$/data/mreads/mreads_hdd_avg.dat" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/data/mreads/mreads_ssd.dat" afterPath="$PROJECT_DIR$/data/mreads/mreads_ssd.dat" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/data/mreads/mreads_ssd_avg.dat" afterPath="$PROJECT_DIR$/data/mreads/mreads_ssd_avg.dat" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/figures/buffer.svg" afterPath="$PROJECT_DIR$/figures/buffer.svg" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/figures/case1-a.svg" afterPath="$PROJECT_DIR$/figures/case1-a.svg" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/figures/case2-a.svg" afterPath="$PROJECT_DIR$/figures/case2-a.svg" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/figures/case3.svg" afterPath="$PROJECT_DIR$/figures/case3.svg" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/figures/incomplete-rows.svg" afterPath="$PROJECT_DIR$/figures/incomplete-rows.svg" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/figures/overlap.svg" afterPath="$PROJECT_DIR$/figures/overlap.svg" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/paper.tex" afterPath="$PROJECT_DIR$/paper.tex" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/blocks-slices/createboxplot.gnplt" afterPath="$PROJECT_DIR$/scripts/blocks-slices/createboxplot.gnplt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/disk-benchmarks/plot-benchmark-seek.gnplt" afterPath="$PROJECT_DIR$/scripts/disk-benchmarks/plot-benchmark-seek.gnplt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/disk-benchmarks/plot-benchmark.gnplt" afterPath="$PROJECT_DIR$/scripts/disk-benchmarks/plot-benchmark.gnplt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/disk-benchmarks/seek.py" afterPath="$PROJECT_DIR$/scripts/disk-benchmarks/seek.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/mreads/benchmark_mreads.py" afterPath="$PROJECT_DIR$/scripts/mreads/benchmark_mreads.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/mreads/comparasion_break_down.gnuplot" afterPath="$PROJECT_DIR$/scripts/mreads/comparasion_break_down.gnuplot" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/mreads/compare_total_time.gnuplot" afterPath="$PROJECT_DIR$/scripts/mreads/compare_total_time.gnuplot" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/mreads/number_of_seeks.gnuplot" afterPath="$PROJECT_DIR$/scripts/mreads/number_of_seeks.gnuplot" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/mreads/generate_avg_data.py" afterPath="$PROJECT_DIR$/scripts/mreads/generate_avg_data.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -57,15 +17,73 @@
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
-    <leaf>
-      <file leaf-file-name="benchmark_mreads.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/scripts/mreads/benchmark_mreads.py">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="paper.tex" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/paper.tex">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="219">
-              <caret line="43" column="39" lean-forward="true" selection-start-line="43" selection-start-column="39" selection-end-line="43" selection-end-column="39" />
-              <folding>
-                <element signature="e#130#160#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="250">
+              <caret line="487" column="49" lean-forward="false" selection-start-line="487" selection-start-column="48" selection-end-line="487" selection-end-column="49" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="generate_avg_data.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/scripts/mwrites/generate_avg_data.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="44">
+              <caret line="2" column="0" lean-forward="false" selection-start-line="2" selection-start-column="0" selection-end-line="3" selection-end-column="66" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="generate_avg_data.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/scripts/mreads/generate_avg_data.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="3583">
+              <caret line="163" column="58" lean-forward="false" selection-start-line="163" selection-start-column="58" selection-end-line="163" selection-end-column="58" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="mreads_hdd.dat" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/data/mreads/mreads_hdd.dat">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="132">
+              <caret line="6" column="29" lean-forward="false" selection-start-line="6" selection-start-column="29" selection-end-line="6" selection-end-column="29" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="blocks_slices_avg_ssd.dat" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/data/blocks-slices/blocks_slices_avg_ssd.dat">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="blocks_slices_avg_hdd.dat" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/data/blocks-slices/blocks_slices_avg_hdd.dat">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="30" lean-forward="true" selection-start-line="0" selection-start-column="30" selection-end-line="0" selection-end-column="30" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="mwrites_ssd.dat" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/data/mwrites/mwrites_ssd.dat">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="110">
+              <caret line="5" column="204" lean-forward="true" selection-start-line="1" selection-start-column="156" selection-end-line="5" selection-end-column="204" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -87,6 +105,11 @@
       <find>\s+</find>
       <find>\t</find>
       <find>\s</find>
+      <find>TODO</find>
+      <find>Yongping</find>
+      <find>For simplicity, we as</find>
+      <find>$v</find>
+      <find>v</find>
     </findStrings>
     <replaceStrings>
       <replace>s&quot;</replace>
@@ -95,10 +118,8 @@
       <replace>s,</replace>
       <replace>,</replace>
       <replace>totaltime.dat</replace>
-      <replace>totaltime.dat</replace>
       <replace>dat</replace>
       <replace />
-      <replace>6</replace>
       <replace>6</replace>
       <replace>12</replace>
       <replace>seek</replace>
@@ -106,7 +127,6 @@
       <replace>read</replace>
       <replace>mwrites</replace>
       <replace>\s</replace>
-      <replace />
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -129,19 +149,19 @@
         <option value="$PROJECT_DIR$/data/mreads/mreads_ssd.dat" />
         <option value="$PROJECT_DIR$/scripts/mreads/comparasion_break_down.gnuplot" />
         <option value="$PROJECT_DIR$/data/blocks-slices/totaltime.dat" />
-        <option value="$PROJECT_DIR$/scripts/mreads/generate_avg_data.py" />
         <option value="$PROJECT_DIR$/scripts/mreads/benchmark_mreads.py" />
         <option value="$PROJECT_DIR$/scripts/mwrites/compare_total_time.gnuplot" />
         <option value="$PROJECT_DIR$/scripts/mwrites/generate_avg_data.py" />
         <option value="$PROJECT_DIR$/scripts/mwrites/comparasion_break_down.gnuplot" />
         <option value="$PROJECT_DIR$/data/mwrites/mwrites_ssd.dat" />
+        <option value="$PROJECT_DIR$/scripts/mreads/generate_avg_data.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
     <option name="y" value="23" />
     <option name="width" value="1440" />
-    <option name="height" value="828" />
+    <option name="height" value="829" />
   </component>
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
@@ -158,6 +178,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scratches" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -198,24 +220,6 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="mwrites" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="paper-sequential-split-merge" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="paper-sequential-split-merge" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="scripts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
               <option name="myItemId" value="mreads" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -230,61 +234,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="figures" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="paper-sequential-split-merge" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="paper-sequential-split-merge" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="figures" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="benchmark-mwrites" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="paper-sequential-split-merge" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="paper-sequential-split-merge" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="figures" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="benchmark-mreads" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="paper-sequential-split-merge" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="paper-sequential-split-merge" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
               <option name="myItemId" value="data" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="mwrites" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -317,13 +267,15 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="data" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="blocks-slices" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scratches" />
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -507,26 +459,26 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1440" height="828" extended-state="0" />
+    <frame x="0" y="23" width="1440" height="829" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24964234" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2532189" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32971507" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32880434" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.35421687" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
-      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32971507" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
@@ -535,16 +487,33 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="3" />
+      <option name="time" value="5" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/scripts/mreads/benchmark_mreads.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="836">
+          <caret line="43" column="39" lean-forward="false" selection-start-line="43" selection-start-column="39" selection-end-line="43" selection-end-column="39" />
+          <folding>
+            <element signature="e#130#160#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/paper.tex">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/data/blocks-slices/totaltime.dat">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="242">
           <caret line="11" column="0" lean-forward="true" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -552,51 +521,92 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="350">
           <caret line="16" column="0" lean-forward="false" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="20" />
-          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/data/blocks-slices/sb.py">
+    <entry file="file://$PROJECT_DIR$/data/blocks-slices/sb.py" />
+    <entry file="file://$PROJECT_DIR$/scripts/mreads/seek_time.gnuplot" />
+    <entry file="file://$PROJECT_DIR$/data/blocks-slices/a" />
+    <entry file="file://$PROJECT_DIR$/scripts/mreads/test.py" />
+    <entry file="file://$PROJECT_DIR$/scripts/mreads/data.dat" />
+    <entry file="file://$PROJECT_DIR$/data/mreads/mreads_avg.dat" />
+    <entry file="file://$PROJECT_DIR$/scripts/mreads/bar.gnuplot" />
+    <entry file="file://$PROJECT_DIR$/data/blocks-slices/blocks-slices-avg.dat" />
+    <entry file="file://$PROJECT_DIR$/data/blocks-slices/totaltime.dat">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="132">
-          <caret line="6" column="13" lean-forward="true" selection-start-line="6" selection-start-column="13" selection-end-line="6" selection-end-column="13" />
-          <folding />
+        <state relative-caret-position="176">
+          <caret line="8" column="164" lean-forward="false" selection-start-line="8" selection-start-column="164" selection-end-line="8" selection-end-column="164" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/mreads/seek_time.gnuplot">
+    <entry file="file://$PROJECT_DIR$/scripts/mreads/comparasion_break_down.gnuplot">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="537">
+          <caret line="40" column="18" lean-forward="false" selection-start-line="40" selection-start-column="18" selection-end-line="40" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/mwrites/imageutils.py" />
+    <entry file="file://$PROJECT_DIR$/scripts/mreads/read_time.gnuplot" />
+    <entry file="file://$PROJECT_DIR$/scripts/mreads/total_time.gnuplot" />
+    <entry file="file://$PROJECT_DIR$/scripts/mreads/compare_total_time.gnuplot">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="330">
+          <caret line="15" column="14" lean-forward="true" selection-start-line="15" selection-start-column="14" selection-end-line="15" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/mwrites/compare_total_time.gnuplot">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/data/blocks-slices/a">
+    <entry file="file://$PROJECT_DIR$/scripts/model.py" />
+    <entry file="file://$PROJECT_DIR$/scripts/mwrites/comparasion_break_down.gnuplot">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="220">
-          <caret line="10" column="91" lean-forward="true" selection-start-line="0" selection-start-column="0" selection-end-line="10" selection-end-column="190" />
-          <folding />
+        <state relative-caret-position="334">
+          <caret line="32" column="0" lean-forward="true" selection-start-line="32" selection-start-column="0" selection-end-line="32" selection-end-column="0" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/mreads/test.py">
+    <entry file="file://$PROJECT_DIR$/data/mreads/mreads_ssd.dat">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="110">
-          <caret line="5" column="0" lean-forward="true" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
-          <folding />
+          <caret line="5" column="29" lean-forward="false" selection-start-line="5" selection-start-column="29" selection-end-line="5" selection-end-column="29" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/mreads/data.dat">
+    <entry file="file://$PROJECT_DIR$/scripts/model/model.gnplt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="88">
-          <caret line="4" column="36" lean-forward="false" selection-start-line="4" selection-start-column="36" selection-end-line="4" selection-end-column="36" />
+        <state relative-caret-position="-807">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/data/mreads/mreads_avg.dat">
+    <entry file="file://$PROJECT_DIR$/scripts/mreads/benchmark_mreads.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="219">
+          <caret line="43" column="39" lean-forward="false" selection-start-line="43" selection-start-column="39" selection-end-line="43" selection-end-column="39" />
+          <folding>
+            <element signature="e#130#160#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/mwrites/benchmark_mwrites.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="252">
+          <caret line="32" column="34" lean-forward="false" selection-start-line="32" selection-start-column="34" selection-end-line="32" selection-end-column="34" />
+          <folding>
+            <element signature="e#130#160#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/figures/export.sh">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
@@ -604,7 +614,79 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/mreads/bar.gnuplot">
+    <entry file="file://$PROJECT_DIR$/data/mwrites/mwrites_hdd.dat">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data/mwrites/mwrites_ssd.dat">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="110">
+          <caret line="5" column="204" lean-forward="true" selection-start-line="1" selection-start-column="156" selection-end-line="5" selection-end-column="204" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data/mwrites/mwrites_hdd_avg.dat">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data/mwrites/mwrites_ssd_avg.dat">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/paper.tex">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="250">
+          <caret line="487" column="49" lean-forward="false" selection-start-line="487" selection-start-column="48" selection-end-line="487" selection-end-column="49" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/mwrites/generate_avg_data.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="44">
+          <caret line="2" column="0" lean-forward="false" selection-start-line="2" selection-start-column="0" selection-end-line="3" selection-end-column="66" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data/blocks-slices/blocks_slices_avg_hdd.dat">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="30" lean-forward="true" selection-start-line="0" selection-start-column="30" selection-end-line="0" selection-end-column="30" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data/blocks-slices/blocks_slices_avg_ssd.dat">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data/mreads/mreads_ssd_avg.dat">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data/mreads/mreads_hdd_avg.dat">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
@@ -620,138 +702,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/data/blocks-slices/blocks-slices-avg.dat">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/data/blocks-slices/totaltime.dat">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="176">
-          <caret line="8" column="164" lean-forward="false" selection-start-line="8" selection-start-column="164" selection-end-line="8" selection-end-column="164" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/mreads/generate_avg_data.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="418">
-          <caret line="102" column="43" lean-forward="false" selection-start-line="102" selection-start-column="43" selection-end-line="102" selection-end-column="43" />
-          <folding>
-            <element signature="e#651#3998#0" expanded="false" />
-            <element signature="e#4048#5931#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/mreads/comparasion_break_down.gnuplot">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="537">
-          <caret line="40" column="18" lean-forward="false" selection-start-line="40" selection-start-column="18" selection-end-line="40" selection-end-column="18" />
+        <state relative-caret-position="3583">
+          <caret line="163" column="58" lean-forward="false" selection-start-line="163" selection-start-column="58" selection-end-line="163" selection-end-column="58" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/mwrites/imageutils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/mwrites/benchmark_mwrites.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="22">
-          <caret line="1" column="0" lean-forward="false" selection-start-line="1" selection-start-column="0" selection-end-line="2" selection-end-column="81" />
-          <folding>
-            <element signature="e#130#160#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/mreads/read_time.gnuplot">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="220">
-          <caret line="10" column="0" lean-forward="false" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="26" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/mreads/total_time.gnuplot">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="308">
-          <caret line="14" column="58" lean-forward="true" selection-start-line="14" selection-start-column="11" selection-end-line="14" selection-end-column="58" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/mreads/compare_total_time.gnuplot">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="330">
-          <caret line="15" column="14" lean-forward="true" selection-start-line="15" selection-start-column="14" selection-end-line="15" selection-end-column="14" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/mwrites/compare_total_time.gnuplot">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/model.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/mwrites/comparasion_break_down.gnuplot">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="334">
-          <caret line="32" column="0" lean-forward="true" selection-start-line="32" selection-start-column="0" selection-end-line="32" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/data/mreads/mreads_ssd.dat">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="110">
-          <caret line="5" column="29" lean-forward="false" selection-start-line="5" selection-start-column="29" selection-end-line="5" selection-end-column="29" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/data/mwrites/mwrites_ssd.dat">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="110">
-          <caret line="5" column="64" lean-forward="false" selection-start-line="5" selection-start-column="64" selection-end-line="5" selection-end-column="64" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/mwrites/generate_avg_data.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="44">
-          <caret line="2" column="0" lean-forward="false" selection-start-line="2" selection-start-column="0" selection-end-line="3" selection-end-column="66" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/mreads/benchmark_mreads.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="219">
-          <caret line="43" column="39" lean-forward="true" selection-start-line="43" selection-start-column="39" selection-end-line="43" selection-end-column="39" />
-          <folding>
-            <element signature="e#130#160#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
