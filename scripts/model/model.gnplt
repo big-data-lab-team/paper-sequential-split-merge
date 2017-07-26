@@ -1,0 +1,120 @@
+#!/usr/bin/gnuplot
+
+set terminal pdf font ',16'
+set xlabel "Memory (GB)"
+set ylabel "Number of seeks"
+
+### Cluster reads 
+
+# case 1: merge only incomplete rows of blocks
+m(x)=(R*b)/n*floor(x*n/(R*b))
+f(x)=n+ceil((R*b)/(nu**2*m(x)))*D**2
+
+# case 2: merge complete rows of blocks
+n(x)=R*b/(nu**2)*floor(x*nu**2/(R*b))
+g(x)=n+ceil((R*b)/(nu*n(x)))*D
+
+# case 3: merge complete slices of blocks
+o(x)=R*b/nu*floor(x*nu/(R*b))
+h(x)=n+ceil(R*b/o(x))
+
+### Multiple reads
+
+# case 1: merge voxels
+p(x)=floor(x/(d*b))*d*b
+a(x)=floor((R*b)/p(x))*(p(x)*nu/(D*b)+1)+1+(n % floor(x/(d*b)))
+
+# case 2: merge rows
+q(x)=floor(x/(D*b))*D*b
+b(x)=ceil((R*b)/q(x))*(nu+1)
+
+# case 3: merge rows of tiles
+r(x)=floor(x/(d*D*b))*D*b*d
+#c(x)=ceil((R*b)/r(x))*(r(x)*nu**2/(D**2*b)+1)
+c(x)=floor((R*b)/r(x))*(r(x)*nu**2/(D**2*b)+1)+1+nu*(n/nu%floor(x/(d*D*b)))
+
+# case 4: merge slices of tiles
+s(x)=floor(x/(D**2*b))*D**2*b
+d(x)=ceil((R*b)/s(x))*(nu**2+1)
+
+# case 5: merge slices of blocks
+u(x)=floor(x/((D**2)*d*b))*(D**2*d*b)
+#e(x)=ceil((R*b)/u(x))*(u(x)*n/(R*b)+1)
+e(x)=floor((R*b)/u(x))*(u(x)*n/(R*b)+1)+1+nu**2*(n/(nu**2)%floor(x/((D**2)*d*b)))
+
+
+## BigBrain
+set output "../../figures/model-big-brain.pdf"
+D=3000
+R=D**3
+b=2
+nu=5
+n=nu**3
+d=D/nu
+
+# Interval bounds
+
+## Cluster reads
+m1=(R*b)/nu**2
+m2=(R*b)/nu
+ ## Multiple reads
+m3=D*b
+m4=D**2/nu*b
+m5=D**2*b
+m6=D**3/nu*b
+
+# min and max plotted memory values
+min=m1	  
+max=m2
+
+# Plot
+set xtics ("2" 2*10**9, "3" 3*10**9, "4" 4*10**9,\
+           "5" 5*10**9, "6" 6*10**9, "7" 7*10**9,\
+           "8" 8*10**9, "9" 9*10**9, "10" 10*10**9)	
+plot  [min:max][0:]            x < m1 ? f(x) : \
+                               x < m2 ? g(x) : \
+		               h(x) title "Cluster reads",\
+			       x < m3 ? a(x):\
+	 		       x < m4 ? b(x):\
+			       x < m5 ? c(x):\
+               		       x < m6 ? d(x):\
+			       e(x) title "Multiple reads"			     
+
+## BigBrain-rescan
+set output "../../figures/model-big-brain-rescan.pdf"
+D=3000
+R=D**3
+b=2
+nu=40
+n=nu**3
+d=D/nu
+
+# Interval bounds
+
+## Cluster reads
+m1=(R*b)/nu**2
+m2=(R*b)/nu
+ ## Multiple reads
+m3=D*b
+m4=D**2/nu*b
+m5=D**2*b
+m6=D**3/nu*b
+
+# min and max plotted memory values
+min=m1
+max=m2
+
+# Plot
+set xtics ("0.1" 0.1*10**9, "0.3" 0.3*10**9, "0.5" 0.5*10**9,\
+           "0.7" 0.7*10**9, "0.9" 0.9*10**9, "1.1" 1.1*10**9,\
+           "1.3" 1.3*10**9, "1.5" 1.5*10**9, "1.7" 1.7*10**9)	
+set ytics ("1" 10**6, "2" 2*10**6, "3" 3*10**6, "4" 4*10**6, "5" 5*10**6)
+set ylabel "Number of seeks (x10^6)
+plot  [min:max][0:]            x < m1 ? f(x) : \
+                               x < m2 ? g(x) : \
+		               h(x) title "Cluster reads",\
+			       x < m3 ? a(x):\
+	 		       x < m4 ? b(x):\
+			       x < m5 ? c(x):\
+               		       x < m6 ? d(x):\
+			       e(x) title "Multiple reads"			     

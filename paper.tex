@@ -9,13 +9,13 @@
 \usepackage{hyperref}
 \usepackage{mathtools}
 \usepackage{multirow}
+\usepackage{stmaryrd} % for llbracket and rrbracket
 \DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
 \DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
 
 % new commands
 \newcommand{\todo}[1]{\marginpar{\parbox{18mm}{\flushleft\tiny\color{red}\textbf{TODO}:
       #1}}}
-
 
 \newcommand{\note}[1]{
   \color{blue}\emph{[Note: #1]}
@@ -151,25 +151,19 @@ We adopt the following notations:
 \item $R=D^3$: number of voxels in the reconstructed image.
 \item $b$: number of bytes per voxel in the reconstructed image and chunks (in B).
 \item $n$: number of chunks (blocks or slices).
-\item $m$: amount of available RAM (in B).
-\item $m'$: amount of used RAM (in B). $m'\leq m$.
+\item $m$: amount of available memory (in B).
+\item $m'$: amount of used memory (in B), $m'\leq m$.
 \end{itemize}
 
-The following relations are straightforward applications of these
-definitions:
-\begin{itemize}
-\item number of bytes per chunk: $\frac{Rb}{n}$
-\item number of chunks that can fit in memory: $\frac{m.n}{Rb}$
-\end{itemize}
 For the sake of mathematical simplicity, we assume that
 the reconstructed image and blocks are cubic. Under this assumption,
-we have the following definitions and properties:
+we also have the following relations:
 \begin{itemize}
 \item Number of slices in a block: $\sqrt[3]{\frac{R}{n}}=d$. This is
   also the number of rows and columns in a slice and the number of
   voxel in a row or column.
 \item Number of blocks required to fill a row of the reconstructed
-  image: $\sqrt[3]{n}=\nu$.
+  image: $\sqrt[3]{n}$.
 \end{itemize}
 %\todo{Make a figure to illustrate the notations.}
 
@@ -351,7 +345,7 @@ memory load to a point that the overall number of seeks also
 increases. However, such cases are a bit pathological and their
 complete description requires extensive calculations involving modulo
 arithmetic, which we felt were unwieldy to report here.
-\begin{figure}[b]
+\begin{figure}
   \centering
 \def\svgwidth{0.3\columnwidth}
 \input{figures/incomplete-rows.pdf_tex}
@@ -407,6 +401,7 @@ N_\mathrm{cr} =
   n + 1                                                          & \text{otherwise}
 \end{cases} \label{eq:seeks-cluster-reads-1}
 \end{equation}
+\todo{Is $N_{cr}$ a continuous function of m?}
 
 Cluster reads are described in
 Algorithm~\ref{algo:cluster-reads}. Function \texttt{switch} (line 3)
@@ -463,7 +458,7 @@ buffer only contains contiguous bytes, at any time. That is, a given
 block will be read multiple times.     \todo{improve notations and algo in algorithm}
 
 \begin{algorithm}[h]
-  \caption{Buffered merging from blocks using multiple reads.}
+  \caption{Buffered merging of blocks with multiple reads}
   \label{algo:multiple-reads}
   \begin{algorithmic}[1]
   \STATE sorted\_split\_name\_list = sort blocks by increasing (z,y,x) values 
@@ -472,8 +467,8 @@ block will be read multiple times.     \todo{improve notations and algo in algor
     \STATE initialize data\_buffer
     \FOR{split\_name in sorted\_split\_name\_list}
       \IF{indexes of split\_name is in next\_write\_range}
-        \STATE read split;
-        \STATE extract all indexes in next write range;
+        \STATE read split
+        \STATE extract all indexes in next write range
         \STATE write the corresponding data to the data\_buffer
       \ENDIF
     \ENDFOR
@@ -486,6 +481,58 @@ block will be read multiple times.     \todo{improve notations and algo in algor
   \end{algorithmic}
 \end{algorithm}
 
+For simplicity, we assume that $m'$ represents an integer number $k$
+of block rows (case 1, $k<\sqrt[3]{n}$), of complete rows (case 2,
+$k<d$), of tile rows (case 3, $k<\sqrt[3]{n}$), of slices (case 4,
+$k<d$) or of block slices (case 5, $k<\sqrt[3]{n}$) \todo{make a
+  figure}. In each of these 5 cases, we define $v$ as follows:
+\begin{equation*}
+  v_1=db \text{ ; }  v_2=Db \text{ ; } v_3=Ddb \text{ ; } v_4=D^2b \text{ ; } v_5=D^2db
+\end{equation*}
+so that we have:
+\begin{equation*}
+k_i=\floor*{\frac{m}{v_i}} \quad \mathrm{and} \quad m_i'=k_iv_i, \quad i \in \llbracket 1,5 \rrbracket
+\end{equation*}
+Using these notations, the number of seeks performed by multiple reads is:
+\begin{equation*}
+  N_\mathrm{MR} =
+\begin{cases}
+  \floor*{\frac{Rb}{m_1'}}(k_1+1)+1
+  + n \text{ mod } k_1& \text{if } d \leq \frac{m}{b} < D\\
+  \ceil*{\frac{Rb}{m_2'}}(\sqrt[3]{n}+1)   & \text{if } D \leq \frac{m}{b} < Dd\\
+  \floor*{\frac{Rb}{m_3'}}(k_3\sqrt[3]{n}+1)+1+\\
+  \quad \quad \sqrt[3]{n}\left(\frac{n}{\sqrt[3]{n}} \text{ mod } k_3\right)&\
+  \text{if } Dd \leq \frac{m}{b} < D^2\\
+  \ceil*{\frac{Rb}{m_4'}}(\sqrt[3]{n}^2+1) & \text{if } D^2 \leq \frac{m}{b} < D^2d\\
+  \floor*{\frac{Rb}{m_5'}}(k_5\sqrt[3]{n}^2+1)+1+&\\
+  \quad \quad \sqrt[3]{n}^2\left(\frac{n}{\sqrt[3]{n}^2} \text{ mod } k_5\right)&\
+  \text{if } D^2d \leq \frac{m}{b} < R
+\end{cases} 
+\end{equation*}
+
+which gives, using $R$ and $n$ as main variables:
+\begin{equation}
+N_\mathrm{MR} =
+\begin{cases}
+  \floor*{\frac{Rb}{m_1'}}\left(\frac{m_1'\sqrt[3]{n}}{\sqrt[3]{R}b}+1\right)+1+\\
+  \quad \quad \quad n \text{ mod }\floor*{\frac{m\sqrt[3]{n}}{\sqrt[3]{R}b}}\
+  & \text{if } \sqrt[3]{\frac{R}{n}} \leq \frac{m}{b} < \sqrt[3]{R}\\
+  
+  \ceil*{\frac{Rb}{m_2'}}\left(\sqrt[3]{n}+1\right)\
+  & \text{if } \sqrt[3]{R} \leq \frac{m}{b} < \frac{\sqrt[3]{R}^2}{\sqrt[3]{n}}\\
+
+  \floor*{\frac{Rb}{m_3'}}\left(\frac{m'_3\sqrt[3]{n}^2}{\sqrt[3]{R}^2b}+1\right)+1+\\
+  \sqrt[3]{n}\left( \frac{n}{\sqrt[3]{n}} \text{ mod } \floor*{\frac{m\sqrt[3]{n}}{\sqrt[3]{R}^2b}} \right)
+  & \text{if } \frac{\sqrt[3]{R}^2}{\sqrt[3]{n}} \leq \frac{m}{b} < \sqrt[3]{R}^2\\
+  
+  \ceil*{\frac{Rb}{m_4'}}\left(\sqrt[3]{n}^2+1\right)\
+  & \text{if } \sqrt[3]{R}^2 \leq \frac{m}{b} < \frac{R}{\sqrt[3]{n}}\\
+  
+  \ceil*{\frac{Rb}{m_5'}}\left(\frac{m_5'n}{Rb}+1\right)+1+\\
+  \sqrt[3]{n}^2\left( \frac{n}{\sqrt[3]{n}^2} \text{ mod } \floor*{\frac{m\sqrt[3]{n}}{Rb}}\right)
+  & \text{if } \frac{R}{\sqrt[3]{n}} \leq \frac{m}{b} < R
+\end{cases} \label{eq:seeks-multiple-reads}
+\end{equation}
 
 
 \subsection{Lossless compression}
@@ -567,6 +614,30 @@ solution to reduce seek time.  \todo{On figure: check that breakdowns
 \subsection{Multiple reads vs blocks and slices}
 
 \subsection{Cluster reads vs Multiple reads}
+
+\subsubsection{Simulations}
+After running a few simulations, we saw that the comparison between
+Cluster reads and Multiple reads essentially depends on the three
+Cluster reads configurations.  When Cluster reads merge incomplete
+block rows (case 1), they are always outperformed by Multiple reads.
+When Cluster reads merge complete block rows (case 2), the comparison
+between Cluster reads and Multiple reads depends on the values of $D$
+and $n$. Figure~\ref{fig:model-comparison} shows two situations where
+Cluster reads and Multiple reads are alternatively better than each
+other. When Cluster reads merge complete block slices (case 3),
+Cluster reads and Multiple reads are equivalent.
+
+\begin{figure}
+  \includegraphics[width=0.45\columnwidth]{figures/model-big-brain.pdf}
+  \includegraphics[width=0.45\columnwidth]{figures/model-big-brain-rescan.pdf}
+  \caption{Number of seeks for Cluster reads vs Multiple reads when
+    Cluster reads merge complete block rows (case 2), for D=3000 and
+    b=2. Left: n=125; Right: n=64,000.}
+  % Gnuplot file: scripts/model/model.gnplt
+  \label{fig:model-comparison}
+\end{figure}
+
+\subsubsection{Experiments}
 
 \subsection{Lossless Compression}
 
