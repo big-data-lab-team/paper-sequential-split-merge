@@ -24,25 +24,25 @@ set rtics axis in scale 0,0 nomirror norotate  autojustify
 set key noinvert box
 set yrange [0:*]
 set ylabel "time(s)" font ", 10"
-set xlabel "Mreads break down - on hdd" font ", 10"
+set xlabel "Mwrites break down - on hdd" font ", 10"
 set tics scale 0.0
 set ytics
 unset xtics
 set xtics norotate nomirror font ", 10"
 
 
-set output "../../figures/benchmark-mreads/mreads-breakdown-hdd.pdf"
-plot '../../data/blocks-slices/blocks_slices_avg_hdd.dat' using 3, '../../data/mreads/mreads_hdd_avg.dat' using 2 ,'' using 3 ,'' using 4, '' using 5, '../../data/blocks-slices/blocks_slices_avg_hdd.dat' using 2:key(1)
-
+set output "../../figures/benchmark-mwrites/mwrites-breakdown-hdd.pdf"
+#plot '../../data/blocks-slices/blocks_slices_avg_hdd.dat' using 3, '../../data/mwrites/mwrites_hdd_avg.dat' using 2 ,'' using 3 ,'' using 4, '' using 5, '../../data/blocks-slices/blocks_slices_avg_hdd.dat' using 2:key(1)
+plot '../../data/mwrites/mwrites_hdd_avg.dat' using 2 ,'' using 3 ,'' using 4, '' using 5:key(1)
 set key noinvert box
 set yrange [0:*]
 set ylabel "time(s)" font ", 10"
-set xlabel "Mreads break down - on ssd" font ", 10"
+set xlabel "Mwrites break down - on ssd" font ", 10"
 set tics scale 0.0
 set ytics
 unset xtics
 set xtics norotate nomirror font ", 10"
 
 
-set output "../../figures/benchmark-mreads/mreads-breakdown-ssd.pdf"
-plot '../../data/blocks-slices/blocks_slices_avg_ssd.dat' using 3, '../../data/mreads/mreads_ssd_avg.dat' using 2 ,'' using 3 ,'' using 4, '' using 5, '../../data/blocks-slices/blocks_slices_avg_ssd.dat' using 2:key(1)
+set output "../../figures/benchmark-mwrites/mwrites-breakdown-ssd.pdf"
+plot '../../data/mwrites/mwrites_ssd_avg.dat' using 2 ,'' using 3 ,'' using 4, '' using 5:key(1)
