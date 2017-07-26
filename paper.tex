@@ -461,7 +461,7 @@ block will be read multiple times.     \todo{improve notations and algo in algor
   \caption{Buffered merging of blocks with multiple reads}
   \label{algo:multiple-reads}
   \begin{algorithmic}[1]
-  \STATE sorted\_split\_name\_list = sort blocks by increasing (z,y,x) values 
+  \STATE sorted\_split\_name\_list = sort blocks by increasing (z,y,x) values
   \STATE start\_index = 0, end\_index=(m-1)
   \WHILE{end\_index \textless sizeof(reconstructed\_image)}
     \STATE initialize data\_buffer
@@ -472,12 +472,12 @@ block will be read multiple times.     \todo{improve notations and algo in algor
         \STATE write the corresponding data to the data\_buffer
       \ENDIF
     \ENDFOR
-    \STATE write data\_buffer in reconstructed\_image 
+    \STATE write data\_buffer in reconstructed\_image
     \STATE clear data\_buffer
     \STATE start\_index = end\_index + 1
     \STATE end\_index += mem
   \ENDWHILE
- 
+
   \end{algorithmic}
 \end{algorithm}
 
@@ -507,7 +507,7 @@ Using these notations, the number of seeks performed by multiple reads is:
   \floor*{\frac{Rb}{m_5'}}(k_5\sqrt[3]{n}^2+1)+1+&\\
   \quad \quad \sqrt[3]{n}^2\left(\frac{n}{\sqrt[3]{n}^2} \text{ mod } k_5\right)&\
   \text{if } D^2d \leq \frac{m}{b} < R
-\end{cases} 
+\end{cases}
 \end{equation*}
 
 which gives, using $R$ and $n$ as main variables:
@@ -517,17 +517,17 @@ N_\mathrm{MR} =
   \floor*{\frac{Rb}{m_1'}}\left(\frac{m_1'\sqrt[3]{n}}{\sqrt[3]{R}b}+1\right)+1+\\
   \quad \quad \quad n \text{ mod }\floor*{\frac{m\sqrt[3]{n}}{\sqrt[3]{R}b}}\
   & \text{if } \sqrt[3]{\frac{R}{n}} \leq \frac{m}{b} < \sqrt[3]{R}\\
-  
+
   \ceil*{\frac{Rb}{m_2'}}\left(\sqrt[3]{n}+1\right)\
   & \text{if } \sqrt[3]{R} \leq \frac{m}{b} < \frac{\sqrt[3]{R}^2}{\sqrt[3]{n}}\\
 
   \floor*{\frac{Rb}{m_3'}}\left(\frac{m'_3\sqrt[3]{n}^2}{\sqrt[3]{R}^2b}+1\right)+1+\\
   \sqrt[3]{n}\left( \frac{n}{\sqrt[3]{n}} \text{ mod } \floor*{\frac{m\sqrt[3]{n}}{\sqrt[3]{R}^2b}} \right)
   & \text{if } \frac{\sqrt[3]{R}^2}{\sqrt[3]{n}} \leq \frac{m}{b} < \sqrt[3]{R}^2\\
-  
+
   \ceil*{\frac{Rb}{m_4'}}\left(\sqrt[3]{n}^2+1\right)\
   & \text{if } \sqrt[3]{R}^2 \leq \frac{m}{b} < \frac{R}{\sqrt[3]{n}}\\
-  
+
   \ceil*{\frac{Rb}{m_5'}}\left(\frac{m_5'n}{Rb}+1\right)+1+\\
   \sqrt[3]{n}^2\left( \frac{n}{\sqrt[3]{n}^2} \text{ mod } \floor*{\frac{m\sqrt[3]{n}}{Rb}}\right)
   & \text{if } \frac{R}{\sqrt[3]{n}} \leq \frac{m}{b} < R
@@ -536,7 +536,7 @@ N_\mathrm{MR} =
 
 
 \subsection{Lossless compression}
-     
+
 Lossless compression might reduce overall read and write times by
 reducing seek time and data sizes. However, it needs to be implemented
 on-the-fly, i.e., in chunks. See the work in~\cite{rajna2015speeding}
