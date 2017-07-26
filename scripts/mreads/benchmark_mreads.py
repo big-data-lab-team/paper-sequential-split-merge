@@ -39,12 +39,12 @@ def benchmark_mreads(mem, reconstructed, legend):
     total_time = time() - s_time
     return (total_read_time, total_write_time, total_seek_time, total_seek_number, total_time)
 
-def write_to_csv(data_dict, csv_file):
+def write_to_file(data_dict, csv_file):
     # (total_read_time, total_write_time, total_seek_time, total_seek_number, total_time)
     with open(csv_file, "a") as f:
         for k in sorted(data_dict.keys()):
             for e in data_dict[k]:
-                f.write(str(e) + ",")
+                f.write(str(e) + " ")
         f.write("\n")
 
 
@@ -69,7 +69,7 @@ def main():
             os.system("rm {}".format(files[disk][0]))
             data = benchmark_mreads(mem=mem, reconstructed=files[disk][0], legend=files[disk][1])
             data_dict[mem] = data
-        write_to_csv(data_dict, files[disk][2])
+        write_to_file(data_dict, files[disk][2])
 
 if __name__ == '__main__':
     main()

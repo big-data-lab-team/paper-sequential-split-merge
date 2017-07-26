@@ -1,0 +1,5 @@
+time naive-slices naive-blocks
+calculation-time 18.900160997 84.87303301
+read-time 1217.7973248 1679.9422391
+write-time 111.466414203 150.27027077
+seek-time 0.0 630.39525712

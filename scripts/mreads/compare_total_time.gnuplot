@@ -9,7 +9,7 @@ set pointsize 0.5
 set style data boxplot
 set xtics border in scale 0,0 nomirror norotate  autojustify
 set xtics  norangelimit
-set datafile separator ","
+
 
 
 set xtics ("naive-blocks" 1, "3g-mreads" 2, "6g-mreads" 3, "9g-mreads" 4, "12g-mreads" 5, "naive-slices" 6)
@@ -23,7 +23,7 @@ set xtics font ", 10"
 set xlabel "Merging strategy - Comparision between multiple reads and naive blocks, slices on HDD" font ",10"
 set ylabel "Total Time (s)" font ",10"
 set output "../../figures/benchmark-mreads/mreads-comparision-hdd.pdf"
-plot '../../data/blocks-slices/totaltime.csv' using (1):7 , '' using (6):6 , '../../data/mreads/mreads_hdd.csv' using (2):5 , '' using (3):10 , '' using (4):15 , '' using (5):20 
+plot '../../data/blocks-slices/totaltime.dat' using (1):7 , '' using (6):6 , '../../data/mreads/mreads_hdd.dat' using (2):5 , '' using (3):10 , '' using (4):15 , '' using (5):20 
 
 
 
@@ -38,4 +38,4 @@ set xtics font ", 10"
 set xlabel "Merging strategy - Comparision between multiple reads and naive blocks, slices on SSD" font ",10"
 set ylabel "Total Time (s)" font ",10"
 set output "../../figures/benchmark-mreads/mreads-comparision-ssd.pdf"
-plot '../../data/blocks-slices/totaltime.csv' using (1):2 , '' using (6):1 , '../../data/mreads/mreads_ssd.csv' using (2):5 , '' using (3):10 , '' using (4):15 , '' using (5):20 
+plot '../../data/blocks-slices/totaltime.dat' using (1):2 , '' using (6):1 , '../../data/mreads/mreads_ssd.dat' using (2):5 , '' using (3):10 , '' using (4):15 , '' using (5):20 
