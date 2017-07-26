@@ -6,6 +6,11 @@ paper.log
 paper.out
 paper.pdf
 x.log
-figures/*.pdf
+*~
+\#*
+.\#*
+figures/case*.pdf
+figures/incomplete-rows.pdf
+figures/overlap.pdf
+figures/buffer.pdf
 figures/*.pdf_tex
-.idea/
