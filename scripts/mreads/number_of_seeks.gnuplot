@@ -18,7 +18,7 @@ unset xrange
 unset logscale x
 unset format x
 set boxwidth 0.5
- 
+
 set xtics font ", 10"
 set xlabel "Merge strategy - number of seeks in multiple reads" font ",10"
 set ylabel "Total Time (s)" font ",10"
