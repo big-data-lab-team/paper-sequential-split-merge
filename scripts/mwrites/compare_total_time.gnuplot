@@ -24,7 +24,7 @@ set xlabel "Split strategy - Comparision between multiple writes and naive block
 set ylabel "Total Time (s)" font ",10"
 set output "./figures/benchmark-mwrites/mwrites-comparision-hdd.pdf"
 #plot '../../data/blocks-slices/totaltime.dat' using (1):7 , '' using (6):6 , '../../data/mreads/mreads_hdd.dat' using (2):5 , '' using (3):10 , '' using (4):15 , '' using (5):20
-plot './data/mwrites/mwrites_hdd.dat' using (2):5 , '' using (3):10 , '' using (4):15 , '' using (5):20
+plot [][0:1800] './data/mwrites/mwrites_hdd.dat' using (2):5 , '' using (3):10 , '' using (4):15 , '' using (5):20
 
 
 set xtics ("naive-blocks" 1, "3g-mwrites" 2, "6g-mwrites" 3, "9g-mwrites" 4, "12g-mwrites" 5, "naive-slices" 6)
@@ -39,4 +39,4 @@ set xlabel "Split strategy - Comparision between multiple writes and naive block
 set ylabel "Total Time (s)" font ",10"
 set output "./figures/benchmark-mwrites/mwrites-comparision-ssd.pdf"
 #plot '../../data/blocks-slices/totaltime.dat' using (1):2 , '' using (6):1 , '../../data/mreads/mreads_ssd.dat' using (2):5 , '' using (3):10 , '' using (4):15 , '' using (5):20
-plot './data/mwrites/mwrites_ssd.dat' using (2):5 , '' using (3):10 , '' using (4):15 , '' using (5):20
+plot [][0:1800] './data/mwrites/mwrites_ssd.dat' using (2):5 , '' using (3):10 , '' using (4):15 , '' using (5):20

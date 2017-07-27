@@ -657,6 +657,21 @@ Cluster reads and Multiple reads are equivalent.
 
 \subsection{Splitting}
 
+\subsubsection{Multiple writes}
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.45\columnwidth]{figures/benchmark-mwrites/mwrites-comparision-ssd.pdf}
+  \hfill
+  \includegraphics[width=0.45\columnwidth]{figures/benchmark-mwrites/mwrites-comparision-hdd.pdf}\\
+  \includegraphics[width=0.45\columnwidth]{figures/benchmark-mwrites/mwrites-breakdown-ssd.pdf}
+  \hfill
+    \includegraphics[width=0.45\columnwidth]{figures/benchmark-mwrites/mwrites-breakdown-hdd.pdf}
+  \caption{Comparison between Multiple writes, blocks and slices. Left column: SSD. Right column: HDD. Top row: overall merging time. Bottom row: breakdown by read, write and seek time.}
+  % Gnuplot file: scripts/blocks-slices/createboxplot.gnplt
+\label{fig:multiple-writes}
+\end{figure}
+
+
 \newpage
 
 \section{Discussion}
