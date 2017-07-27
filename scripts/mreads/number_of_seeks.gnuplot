@@ -1,3 +1,5 @@
+#!/usr/bin/env gnuplot
+
 set terminal pdfcairo color
 set border 3 front lt black linewidth 1.000 dashtype solid
 set boxwidth 0.5 absolute
@@ -16,9 +18,11 @@ unset xrange
 unset logscale x
 unset format x
 set boxwidth 0.5
+ 
 set xtics font ", 10"
-set xlabel "Merge strategy - number of seeks in multiple writes" font ",10"
+set xlabel "Merge strategy - number of seeks in multiple reads" font ",10"
 set ylabel "Total Time (s)" font ",10"
 set output "../../figures/benchmark-mreads/mreads-number-of-seeks.pdf"
+
 
 plot '../../data/mwrites/mwrites_hdd.dat' using (1):4 , '' using (2):9 , '' using (3):14 , '' using (4):19

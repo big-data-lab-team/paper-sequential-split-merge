@@ -44,7 +44,7 @@ e(x)=floor((R*b)/u(x))*(u(x)*n/(R*b)+1)+1+nu**2*(n/(nu**2)%floor(x/((D**2)*d*b))
 
 
 ## BigBrain
-set output "../../figures/model-big-brain.pdf"
+set output "./figures/model-big-brain.pdf"
 D=3000
 R=D**3
 b=2
@@ -81,7 +81,7 @@ plot  [min:max][0:]            x < m1 ? f(x) : \
 			       e(x) title "Multiple reads"			     
 
 ## BigBrain-rescan
-set output "../../figures/model-big-brain-rescan.pdf"
+set output "./figures/model-big-brain-rescan.pdf"
 D=3000
 R=D**3
 b=2

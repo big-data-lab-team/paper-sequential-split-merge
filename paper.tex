@@ -294,7 +294,7 @@ buffer are given later.
 \begin{figure}
 \centering
 \def\svgwidth{0.3\columnwidth}
-\input{figures/buffer.pdf_tex}
+\input{figures/svg/buffer.pdf_tex}
 \caption{Illustration of the buffer used in cluster reads, showing how
   the two first 4x4 blocks of a reconstructed image would be arranged
   in the buffer.  White portions in the buffer are not allocated.  The
@@ -319,11 +319,11 @@ seeks are then required.
 \begin{figure}
 \centering
 \def\svgwidth{0.3\columnwidth}
-\input{figures/case1-a.pdf_tex}
+\input{figures/svg/case1-a.pdf_tex}
 \def\svgwidth{0.3\columnwidth}
-\input{figures/case2-a.pdf_tex}
+\input{figures/svg/case2-a.pdf_tex}
 \def\svgwidth{0.3\columnwidth}
-\input{figures/case3.pdf_tex}
+\input{figures/svg/case3.pdf_tex}
 \caption{Memory-load configurations in cluster reads, leading to
   different number of seeks. Red blocks need seeking before each of
   their rows ($d^2$ seeks). Blue blocks need seeking before each of
@@ -348,10 +348,10 @@ arithmetic, which we felt were unwieldy to report here.
 \begin{figure}
   \centering
 \def\svgwidth{0.3\columnwidth}
-\input{figures/incomplete-rows.pdf_tex}
+\input{figures/svg/incomplete-rows.pdf_tex}
 \hfill
 \def\svgwidth{0.3\columnwidth}
-\input{figures/overlap.pdf_tex}
+\input{figures/svg/overlap.pdf_tex}
 \caption{Configurations that increase the number of seeks per
   memory-load and are thus deliberately avoided by cluster
   reads. Left: configuration with incomplete block rows (multiplies
@@ -549,10 +549,7 @@ could therefore potentially use in-memory compression.
 
 \todo{could we merge without de-compressing?}
 
-\section{Benchmark}
-\label{sec:benchmark}
-
-\subsubsection{Implementation}
+\subsection{Implementation}
 
 Our algorithms are implemented in Python using the Nibabel
 library. \todo{Val\'erie and Yongping: (1) extract ImageUtils from
@@ -561,11 +558,14 @@ library. \todo{Val\'erie and Yongping: (1) extract ImageUtils from
   repo. (2) Describe the code briefly, in particular the
   implementation tricks used for each implementation.}
 
-\subsubsection{Data}
+\section{Benchmark}
+\label{sec:benchmark}
+
+\subsection{Data}
 To benchmark our library we use the 76~GB BigBrain image split in 125
 non-overlapping chunks. The data is available \todo{[here]}.
 
-\subsubsection{Infrastructure}
+\subsection{Infrastructure}
 
 We run experiments using a Dell Precision Tower 3620 with CentOS Linux release
 7.3.1611, 32~GB of RAM and two disks:
@@ -612,6 +612,20 @@ solution to reduce seek time.  \todo{On figure: check that breakdowns
 \subsection{Cluster reads vs blocks and slices}
 
 \subsection{Multiple reads vs blocks and slices}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.45\columnwidth]{figures/benchmark-mreads/mreads-comparision-ssd.pdf}
+  \hfill
+  \includegraphics[width=0.45\columnwidth]{figures/benchmark-mreads/mreads-comparision-hdd.pdf}\\
+  \includegraphics[width=0.45\columnwidth]{figures/benchmark-mreads/mreads-breakdown-ssd.pdf}
+  \hfill
+    \includegraphics[width=0.45\columnwidth]{figures/benchmark-mreads/mreads-breakdown-hdd.pdf}
+  \caption{Comparison between Multiple reads, blocks and slices. Left column: SSD. Right column: HDD. Top row: overall merging time. Bottom row: breakdown by read, write and seek time.}
+  % Gnuplot file: scripts/blocks-slices/createboxplot.gnplt
+\label{fig:multiple-reads}
+\end{figure}
+
 
 \subsection{Cluster reads vs Multiple reads}
 

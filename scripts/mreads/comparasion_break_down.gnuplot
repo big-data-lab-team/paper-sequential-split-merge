@@ -1,3 +1,5 @@
+#!/usr/bin/env gnuplot
+
 set terminal pdfcairo color
 
 
@@ -31,8 +33,8 @@ unset xtics
 set xtics norotate nomirror font ", 10"
 
 
-set output "../../figures/benchmark-mreads/mreads-breakdown-hdd.pdf"
-plot '../../data/blocks-slices/blocks_slices_avg_hdd.dat' using 3, '../../data/mreads/mreads_hdd_avg.dat' using 2 ,'' using 3 ,'' using 4, '' using 5, '../../data/blocks-slices/blocks_slices_avg_hdd.dat' using 2:key(1)
+set output "./figures/benchmark-mreads/mreads-breakdown-hdd.pdf"
+plot [][0:3500] './data/blocks-slices/blocks_slices_avg_hdd.dat' using 3, './data/mreads/mreads_hdd_avg.dat' using 2 ,'' using 3 ,'' using 4, '' using 5, './data/blocks-slices/blocks_slices_avg_hdd.dat' using 2:key(1)
 
 set key noinvert box
 set yrange [0:*]
@@ -44,5 +46,5 @@ unset xtics
 set xtics norotate nomirror font ", 10"
 
 
-set output "../../figures/benchmark-mreads/mreads-breakdown-ssd.pdf"
-plot '../../data/blocks-slices/blocks_slices_avg_ssd.dat' using 3, '../../data/mreads/mreads_ssd_avg.dat' using 2 ,'' using 3 ,'' using 4, '' using 5, '../../data/blocks-slices/blocks_slices_avg_ssd.dat' using 2:key(1)
+set output "./figures/benchmark-mreads/mreads-breakdown-ssd.pdf"
+plot [][0:3500] './data/blocks-slices/blocks_slices_avg_ssd.dat' using 3, './data/mreads/mreads_ssd_avg.dat' using 2 ,'' using 3 ,'' using 4, '' using 5, './data/blocks-slices/blocks_slices_avg_ssd.dat' using 2:key(1)

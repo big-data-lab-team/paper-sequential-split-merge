@@ -1,3 +1,13 @@
+.\#*
+*~
+\#*
+figures/benchmark-mwrites/*.pdf
+figures/benchmark-mreads/*.pdf
+figures/blocks-slices/*.pdf
+figures/model/*.pdf
+figures/svg/*.pdf
+figures/svg/*.pdf_tex
+.idea/*
 nohup.out
 paper.aux
 paper.bbl
@@ -6,12 +16,3 @@ paper.log
 paper.out
 paper.pdf
 x.log
-*~
-\#*
-.\#*
-figures/case*.pdf
-figures/incomplete-rows.pdf
-figures/overlap.pdf
-figures/buffer.pdf
-figures/*.pdf_tex
-.idea/*
