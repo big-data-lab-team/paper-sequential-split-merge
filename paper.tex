@@ -27,13 +27,17 @@
 
 \title{Sequential algorithms to split and merge ultra-high resolution 3D images}
 
+\author{Final ordering
+  to be discussed when the paper: Yongping/Val\'erie,
+  Yuhong Yan, Tristan.\\
+  Department of Computer Science and Software Engineering, Concordia University, Montreal, Quebec, Canada
+}
+
 \maketitle
 
 \begin{abstract}
   \todo{The abstract goes here. DO NOT USE SPECIAL CHARACTERS,
-    SYMBOLS, OR MATH IN YOUR TITLE OR ABSTRACT.}  Authors (final order
-  to be discussed when the paper shapes up): Yongping/Val\'erie,
-  Yuhong Yan, Tristan. Perhaps Pierre Bellec. \note{This is a note.}
+    SYMBOLS, OR MATH IN YOUR TITLE OR ABSTRACT.} 
 \end{abstract}
 
 
@@ -493,6 +497,7 @@ so that we have:
 \begin{equation*}
 k_i=\floor*{\frac{m}{v_i}} \quad \mathrm{and} \quad m_i'=k_iv_i, \quad i \in \llbracket 1,5 \rrbracket
 \end{equation*}
+\todo{add one more preliminary step to explain how these equations were derived. Then jump to the final ones.}
 Using these notations, the number of seeks performed by multiple reads is:
 \begin{equation*}
   N_\mathrm{MR} =
@@ -607,11 +612,11 @@ solution to reduce seek time.  \todo{On figure: check that breakdowns
 \label{fig:slices-vs-blocks}
 \end{figure}
 
-\subsection{Buffered slices vs slices}
+\subsection{Buffered slices}
 
-\subsection{Cluster reads vs blocks and slices}
+\subsection{Cluster reads}
 
-\subsection{Multiple reads vs blocks and slices}
+\subsection{Multiple reads}
 
 \begin{figure}[h]
   \centering
