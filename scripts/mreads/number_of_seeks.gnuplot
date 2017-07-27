@@ -22,7 +22,7 @@ set boxwidth 0.5
 set xtics font ", 10"
 set xlabel "Merge strategy - number of seeks in multiple reads" font ",10"
 set ylabel "Total Time (s)" font ",10"
-set output "../../figures/benchmark-mreads/mreads-number-of-seeks.pdf"
+set output "./figures/benchmark-mreads/mreads-number-of-seeks.pdf"
 
 
-plot '../../data/mwrites/mwrites_hdd.dat' using (1):4 , '' using (2):9 , '' using (3):14 , '' using (4):19
+plot './data/mwrites/mwrites_hdd.dat' using (1):4 , '' using (2):9 , '' using (3):14 , '' using (4):19
