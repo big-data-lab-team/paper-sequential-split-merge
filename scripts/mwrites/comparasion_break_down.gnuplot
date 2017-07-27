@@ -35,7 +35,7 @@ set xtics norotate nomirror font ", 10"
 
 set output "./figures/benchmark-mwrites/mwrites-breakdown-hdd.pdf"
 #plot '../../data/blocks-slices/blocks_slices_avg_hdd.dat' using 3, '../../data/mwrites/mwrites_hdd_avg.dat' using 2 ,'' using 3 ,'' using 4, '' using 5, '../../data/blocks-slices/blocks_slices_avg_hdd.dat' using 2:key(1)
-plot [][0:1800] './data/mwrites/mwrites_hdd_avg.dat' using 2 ,'' using 3 ,'' using 4, '' using 5:key(1)
+plot [][0:3500] './data/mwrites/mwrites_hdd_avg.dat' using 2 ,'' using 3 ,'' using 4, '' using 5:key(1)
 set key noinvert box
 set yrange [0:*]
 set ylabel "time(s)" font ", 10"
@@ -47,4 +47,4 @@ set xtics norotate nomirror font ", 10"
 
 
 set output "./figures/benchmark-mwrites/mwrites-breakdown-ssd.pdf"
-plot [][0:1800] './data/mwrites/mwrites_ssd_avg.dat' using 2 ,'' using 3 ,'' using 4, '' using 5:key(1)
+plot [][0:3500] './data/mwrites/mwrites_ssd_avg.dat' using 2 ,'' using 3 ,'' using 4, '' using 5:key(1)
