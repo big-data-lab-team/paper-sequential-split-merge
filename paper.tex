@@ -59,7 +59,10 @@ in a sequential environment made of a single storage disk. We are
 aware of the need for parallel algorithms that would split and merge
 images to and from an array of disks but we plan to describe such
 algorithms in a subsequent paper based on the results of the present
-one.
+one. \todo{
+There is BigBrain-1 rescanned at 1 micron in the plane. So resolution
+is 1x1x20, 7404 slices. If raw data are about 1Tb, then multiply by
+100 for an estimation of the size of the new image. }
 
 
 %also in
@@ -563,6 +566,14 @@ library. \todo{Val\'erie and Yongping: (1) extract ImageUtils from
   repo. (2) Describe the code briefly, in particular the
   implementation tricks used for each implementation.}
 
+\subsubsection{Cluster reads}
+
+\subsubsection{Multiple reads}
+
+\todo{Yongping: among other implementation techniques (e.g. dictionary
+  vs list, etc), explain clearly and concisely what the calculation
+  time covers.}
+
 \section{Benchmark}
 \label{sec:benchmark}
 
@@ -630,6 +641,13 @@ solution to reduce seek time.  \todo{On figure: check that breakdowns
   % Gnuplot file: scripts/blocks-slices/createboxplot.gnplt
 \label{fig:multiple-reads}
 \end{figure}
+
+Results discussion:
+\begin{itemize}
+\item Comment on calculation time.
+\item Write time is higher than read time because use nibabel for writing but not reading.
+\item It seems that the merge time is quite stable w.r.t the amount of available memory. This is good news for multiple reads. 
+\end{itemize}
 
 
 \subsection{Cluster reads vs Multiple reads}
@@ -710,6 +728,8 @@ Future work:
 - parallel algorithms
 - re-splitting
 - model
+
+% Ideas for the future: measure the actual amount of consumed memory.
 
 \section*{Acknowledgment}
 
