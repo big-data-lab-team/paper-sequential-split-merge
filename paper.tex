@@ -28,7 +28,7 @@
 \title{Sequential algorithms to split and merge ultra-high resolution 3D images}
 
 \author{Final ordering
-  to be discussed when the paper: Yongping/Val\'erie,
+  to be discussed: Yongping/Val\'erie,
   Yuhong Yan, Tristan.\\
   Department of Computer Science and Software Engineering, Concordia University, Montreal, Quebec, Canada
 }
@@ -36,8 +36,17 @@
 \maketitle
 
 \begin{abstract}
-  \todo{The abstract goes here. DO NOT USE SPECIAL CHARACTERS,
-    SYMBOLS, OR MATH IN YOUR TITLE OR ABSTRACT.} 
+  Splitting and merging data is a requirement for most parallel
+    or distributed processing operations, however, naive algorithms
+    perform very poorly on ultra-high resolution 3D images due to
+    important seek times. To address this issue, we created two
+    algorithms based on in-memory reconstruction of image segments and
+    analyzed their complexity in terms of number of seeks. Evaluation
+    on a 3000x3000x3000 image of the brain shows that both our
+    algorithms can split or merge blocks with a performance similar to
+    slices, which solves our initial problem. We conclude that
+    splitting and merging large 3D images can be done efficiently
+    based on simple data formats.
 \end{abstract}
 
 
@@ -50,19 +59,20 @@ represents 1~TB of data organized in 3600 planes at full resolution
 (1$\mu$m in-plane), and 76~GB at a 40$\mu$m isotropic resolution
 commonly used in neurosciences~\cite{amunts2013bigbrain}. Other
 examples found in medical imaging, our primary domain of interest,
-include \todo{electromicroscopy,spectroscopy-francoise-peyrin}. As
-such images would typically be processed on a computing cluster,
-possibly using locality-aware file systems such as HDFS, software
-libraries are needed to split and merge such images efficiently. We
-introduce and compare a family of algorithms to address this problem
-in a sequential environment made of a single storage disk. We are
-aware of the need for parallel algorithms that would split and merge
-images to and from an array of disks but we plan to describe such
-algorithms in a subsequent paper based on the results of the present
-one. \todo{
-There is BigBrain-1 rescanned at 1 micron in the plane. So resolution
-is 1x1x20, 7404 slices. If raw data are about 1Tb, then multiply by
-100 for an estimation of the size of the new image. }
+include high-resolution 3D electron microscopy (see, e.g.,
+~\cite{bock2011network}) or micro and
+nano-tomography~\cite{10.1371/journal.pone.0035691}. As such images
+would typically be processed on a computing cluster, possibly using
+locality-aware file systems such as HDFS, software libraries are
+needed to split and merge such images efficiently. We introduce and
+compare a family of algorithms to address this problem in a sequential
+environment made of a single storage disk. We are aware of the need
+for parallel algorithms that would split and merge images to and from
+an array of disks but we plan to describe such algorithms in a
+subsequent paper based on the results of the present one. \todo{ There
+  is BigBrain-1 rescanned at 1 micron in the plane. So resolution is
+  1x1x20, 7404 slices. If raw data are about 1Tb, then multiply by 100
+  for an estimation of the size of the new image. }
 
 
 %also in
@@ -93,7 +103,7 @@ arbitrary byte orders in data files. The main idea of the variations
 presented in the remainder of the paper is to convert data orderings
 in memory before writing them on disk. 
 
-The literature looks remarkably scarce on the problem described
+The literature is remarkably scarce on the problem described
 above. Parallel processing of 3D images has obviously been extensively
 studied, but methods have focused more on geometrical approaches to
 partition images and on load-balancing and task scheduling techniques
@@ -115,12 +125,11 @@ This paper makes the following contributions:
 \begin{itemize}
   \item We propose a set of algorithms to split and merge 3D images
     that do not fit in memory.
-  \item We model the performance (execution time) of these algorithms,
+  \item We model the performance (number of seeks) of these algorithms,
     based on a simple but realistic disk I/O model.
   \item We evaluate our model and algorithms on a representative
     use-case involving a 1~TB image a hard drive and a solid-state
     drive.
-  \item We compare the algorithms in a variety of conditions based on the validated model.
 \end{itemize}
 Section~\ref{sec:algos} presents our algorithms and their complexity,
 Section~\ref{sec:results} details the results and
@@ -558,6 +567,7 @@ could therefore potentially use in-memory compression.
 \todo{could we merge without de-compressing?}
 
 \subsection{Implementation}
+\label{sec:implementation}
 
 Our algorithms are implemented in Python using the Nibabel
 library. \todo{Val\'erie and Yongping: (1) extract ImageUtils from
@@ -591,8 +601,17 @@ We run experiments using a Dell Precision Tower 3620 with CentOS Linux release
       firmware version X4130012.
 \end{itemize}
 Both drives used 512-byte logical sectors, 4096-byte physical sectors,
-SATA >3.1 (6.0 Gb/s) and were accessed through the XFS file system.
+SATA >3.1 (6.0 Gb/s) and were accessed through the XFS file system
+v4.5.0.
 %smartctl --xall /dev/sda
+
+\subsection{Execution conditions}
+
+We used release xxx of our library. 
+
+\todo{Yongping: mention the cache cleaning thing that you run before every experiment.}
+
+Experiment scripts are available at xxx.
 
 \section{Results}
 \label{sec:results}
@@ -700,34 +719,60 @@ Cluster reads and Multiple reads are equivalent.
 \section{Discussion}
 \label{sec:discussion}
 
-What is the best algorithm (between 3 and 4), in which context. Did we
-solve the seek problem or is there any issue remaining?
+% Problem solved!
+Cluster reads and multiple reads are able to reduce to a negligible
+amount the overall seek time required to split or merge 3D blocks in a
+high-resolution image where data is stored linearly. Both algorithms
+performed equivalently on our benchmark and compared to the reference
+configuration where slices are merged or split without seeking. Our
+initial problem is solved.
 
-File formats:
-\begin{itemize}
-\item would MINC~\cite{vincent2016minc} support such algorithms? See on-going email discussion
-with P. Bellec.
-\item some formats optimize the storage for particular split shapes. See
-  ndstore~\cite{burns2013open}. Such formats would behave equally
-  poorly with chunks that do not comply to this geometry. Our
-  algorithms would work equally well with such formats.
-\end{itemize}
+% Parallel algorithms
+In a real system, high-resolution images are likely to be processed on
+computing clusters, for instance using software from the Hadoop
+project, in particular the Hadoop Distributed File
+System~\cite{shvachko2010hadoop}. In this context parallel split-and-merge algorithms
+will be required, since the various splits of a large image would be
+uploaded to different disks concurrently. In the same vein,
+``re-spliting'' algorithms would have to be devised in case a split
+image need to be split in a different geometry. Cluster reads and
+multiple reads could be used as starting points for such algorithms.
 
-The performance model might be dependent on the particular
-infrastructure (disks, OS and filesystem) used in the experiments. In
-particular, caching might behave differently in a different setup.
+% Several other factors might influence performance
+I/O optimization is a holistic problem that is in practice highly
+dependent on the hardware used, firmware, operating system, file
+system and programming language. Caching occurs at various levels and
+might always influence performance, potentially differently depending
+on the split or merge algorithm used. In some disks, seek time greatly
+varies with the seek distance, which would open the door to additional
+opportunities for I/O optimization. Interactions between those
+components might also result in performance differences particular to
+a particular algorithm. To ensure the portability of our library
+across systems and configurations, we focused on reducing the overall
+number of seeks and ignored specific system configurations. We
+demonstrated the performance of our methods on both an HDD and an SSD
+disk, using state-of-the-art and widely used versions of Linux
+(CentOS7) and file systems (XFS v4.5.0).
 
-Reconstructing (therefore splitting) a complete 3D image may not
-always be necessary. Re-splitting, for instance, could be done from
-existing chunks.
-
-\section{Conclusion}
-
-Future work:
-- obliques
-- parallel algorithms
-- re-splitting
-- model
+% File formats
+In terms of file formats, our results demonstrate that simple imaging
+formats might be used for the split-and-merge problem without
+performance loss compared to more complex formats that try to preserve
+spatial locality on disk, for instance MINC 2.0~\cite{vincent2016minc}
+or the format based on space-filling curves mentioned
+in~\cite{burns2013open}. This is of major interest in the current
+open-science context since simpler formats favor data-sharing and
+interoperability.  Moreover, our algorithms could potentially be
+adapted to any split geometry, even though we demonstrated them on
+slices and blocks only, while file formats inevitably assume a
+particular geometry. For instance, the format in~\cite{burns2013open}
+wouldn't perform nicely with a naive splitting algorithm if slices had
+to be extracted instead of blocks.  Two points need to be made to be
+fair though. First, we aimed at extracting all the blocks while the
+problem targeted by the format in~\cite{burns2013open} was to extract
+a single block from a large image. Second, we have not considered
+on-the-fly data compression yet, which is a unique feature of MINC
+2.0.
 
 % Ideas for the future: measure the actual amount of consumed memory.
 
