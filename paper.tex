@@ -650,13 +650,10 @@ solution to reduce seek time.  \todo{On figure: check that breakdowns
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.45\columnwidth]{figures/benchmark-mreads/mreads-comparision-ssd.pdf}
-  \hfill
-  \includegraphics[width=0.45\columnwidth]{figures/benchmark-mreads/mreads-comparision-hdd.pdf}\\
   \includegraphics[width=0.45\columnwidth]{figures/benchmark-mreads/mreads-breakdown-ssd.pdf}
   \hfill
     \includegraphics[width=0.45\columnwidth]{figures/benchmark-mreads/mreads-breakdown-hdd.pdf}
-  \caption{Comparison between Multiple reads, blocks and slices. Left column: SSD. Right column: HDD. Top row: overall merging time. Bottom row: breakdown by read, write and seek time.}
+  \caption{Comparison between Multiple reads, blocks and slices. Left: SSD. Right: HDD.}
   % Gnuplot file: scripts/blocks-slices/createboxplot.gnplt
 \label{fig:multiple-reads}
 \end{figure}
@@ -702,13 +699,10 @@ Cluster reads and Multiple reads are equivalent.
 \subsubsection{Multiple writes}
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.45\columnwidth]{figures/benchmark-mwrites/mwrites-comparision-ssd.pdf}
-  \hfill
-  \includegraphics[width=0.45\columnwidth]{figures/benchmark-mwrites/mwrites-comparision-hdd.pdf}\\
   \includegraphics[width=0.45\columnwidth]{figures/benchmark-mwrites/mwrites-breakdown-ssd.pdf}
   \hfill
     \includegraphics[width=0.45\columnwidth]{figures/benchmark-mwrites/mwrites-breakdown-hdd.pdf}
-  \caption{Comparison between Multiple writes, blocks and slices. Left column: SSD. Right column: HDD. Top row: overall merging time. Bottom row: breakdown by read, write and seek time.}
+  \caption{Comparison between Multiple writes, blocks and slices. Left: SSD. Right: HDD.}
   % Gnuplot file: scripts/blocks-slices/createboxplot.gnplt
 \label{fig:multiple-writes}
 \end{figure}
