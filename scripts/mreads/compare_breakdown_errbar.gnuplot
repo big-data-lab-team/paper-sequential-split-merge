@@ -10,7 +10,7 @@ set style data histograms
 
 ## HDD
 set output "./figures/benchmark-mreads/mreads-breakdown-hdd.pdf"
-plot [][0:3000] \
+plot [][0:3500] \
      './data/mreads/mreads_hdd_avg_var.dat' using ($2):xtic(1) t "calculation time" , \
      '' using ($3) t "read time" , \
       '' using ($4) t "write time",\
