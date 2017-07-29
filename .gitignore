@@ -7,6 +7,7 @@ figures/blocks-slices/*.pdf
 figures/model/*.pdf
 figures/svg/*.pdf
 figures/svg/*.pdf_tex
+figures/*.pdf
 .idea/*
 nohup.out
 paper.aux
