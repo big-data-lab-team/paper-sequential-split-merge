@@ -1,6 +1,6 @@
 #!/usr/bin/env gnuplot
 
-set terminal pdfcairo color
+set terminal pdf color
 set border 3 front lt black linewidth 1.000 dashtype solid
 set boxwidth 0.75 absolute
 set style fill solid 1.00 border lt -1

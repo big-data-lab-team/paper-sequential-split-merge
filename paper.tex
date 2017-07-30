@@ -477,18 +477,19 @@ block will be read multiple times.     \todo{improve notations and algo in algor
   \caption{Buffered merging of blocks with multiple reads}
   \label{algo:multiple-reads}
   \begin{algorithmic}[1]
-  \STATE sorted\_split\_name\_list = sort blocks by increasing (z,y,x) values
+  \STATE sorted\_split\_list = sort splits based on its postion in increasing (z,y,x) values
   \STATE start\_index = 0, end\_index=(m-1)
+  \STATE write\_range = (start\_index, end\_index)
   \WHILE{end\_index \textless sizeof(reconstructed\_image)}
     \STATE initialize data\_buffer
-    \FOR{split\_name in sorted\_split\_name\_list}
-      \IF{indexes of split\_name is in next\_write\_range}
+    \FOR{split in sorted\_split\_list}
+      \IF{split is in write\_range}
         \STATE read split
-        \STATE extract all indexes in next write range
-        \STATE write the corresponding data to the data\_buffer
+        \STATE extract the rows in the write\_range
+        \STATE write rows to the data\_buffer
       \ENDIF
     \ENDFOR
-    \STATE write data\_buffer in reconstructed\_image
+    \STATE write data\_buffer continuously to reconstructed\_image
     \STATE clear data\_buffer
     \STATE start\_index = end\_index + 1
     \STATE end\_index += mem
@@ -584,6 +585,27 @@ library. \todo{Val\'erie and Yongping: (1) extract ImageUtils from
 
 \subsubsection{Multiple reads}
 
+For faster reading all the splits, before the merging process start,
+we read all the split’s headers to get their position information and
+calculate each row’s index in the reconstructed image. We only read the
+split when there is a row in that writing range (available memory),
+otherwise, we skip it.
+
+Initially, we use a numpy array as our data buffer, after the split is read,
+we assign the rows (a numpy array of unsigned integers) into this
+buffer to the right position. However, after some tests, we found that
+there is some overhead. Each time we assign the data to the corresponding
+position of the buffer, the system will copy these integers first.
+This is neither time-efficient nor space-efficient.
+
+We then think of a better solution which we use the dictionary in python
+as our data buffer. We use the row’s index as a key, the data (in bytes)
+as the value. As for the multiple reads, the data buffer only contains
+contiguous bytes, we can just seek once (the first key of the sorted keys
+in dictionary), then write all the bytes continuously to the file.
+There is no copy in the memory, which proves a bit faster than using
+a numpy array as the buffer.
+
 \todo{Yongping: among other implementation techniques (e.g. dictionary
   vs list, etc), explain clearly and concisely what the calculation
   time covers.}
@@ -640,6 +662,9 @@ We used release xxx of our library.
 \todo{Yongping: mention the cache cleaning thing that you run before every experiment.}
 
 Experiment scripts are available at xxx.
+As our experiments results are heavily rely on IO performance of the disk,
+we drop the system cache to get more precise result before each experiment.
+
 
 \section{Results}
 \label{sec:results}
