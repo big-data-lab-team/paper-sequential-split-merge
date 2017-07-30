@@ -28,9 +28,10 @@
 \title{Sequential algorithms to split and merge ultra-high resolution 3D images}
 
 \author{Final ordering
-  to be discussed: Yongping/Val\'erie,
-  Yuhong Yan, Tristan.\\
-  Department of Computer Science and Software Engineering, Concordia University, Montreal, Quebec, Canada
+  to be discussed: Yongping Gao/Val\'erie Hayot-Sasson,
+  Yuhong Yan, Tristan Glatard\\
+  Department of Computer Science and Software Engineering\\ Concordia University, Montreal, Quebec, Canada\\
+  {first.last}@concordia.ca
 }
 
 \maketitle
@@ -136,8 +137,6 @@ Section~\ref{sec:results} details the results and
 Sections~\ref{sec:discussion} discusses them.
 
 %\href{http://dl.acm.org/citation.cfm?id=218395}
-
-\newpage
 
 \section{Algorithms}
 \label{sec:algos}
@@ -577,7 +576,8 @@ library. \todo{Val\'erie and Yongping: (1) extract ImageUtils from
   implementation tricks used for each implementation.}
 
 \begin{itemize}
-  \item In MR, no seeking withing the splits.
+\item In MR, no seeking withing the splits.
+\item Avoid in-memory copies.
 \end{itemize}
 
 \subsubsection{Cluster reads}
