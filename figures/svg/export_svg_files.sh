@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 for name in buffer case1-a case2-a case3 incomplete-rows overlap
 do
