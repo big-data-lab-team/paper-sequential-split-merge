@@ -1,4 +1,4 @@
-#!/usr/bin/gnuplot
+#!/usr/bin/env gnuplot
 
 set terminal pdf font ',16'
 set xlabel "Memory (GB)"
