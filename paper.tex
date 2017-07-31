@@ -475,6 +475,31 @@ any time. Therefore, the buffer can be written continuously to the
 reconstructed image, without seeking (line 13).  It should be noted
 that a given block might be read multiple times, in different memory
 loads. 
+
+\begin{figure}
+\centering
+\def\svgwidth{0.3\columnwidth}
+\input{figures/svg/mreads-case1.pdf_tex}
+\def\svgwidth{0.3\columnwidth}
+\input{figures/svg/mreads-case2.pdf_tex}
+\def\svgwidth{0.3\columnwidth}
+\input{figures/svg/mreads-case3.pdf_tex}
+
+\medskip
+
+\def\svgwidth{0.3\columnwidth}
+\input{figures/svg/mreads-case4.pdf_tex}
+\def\svgwidth{0.3\columnwidth}
+\input{figures/svg/mreads-case5.pdf_tex}
+\caption{Memory-load configurations in multiple reads, leading to
+  different number of seeks. Red regions shows different memory
+  load in each case. Small dots are used to represent block frontiers,
+  long dashes used to represent rows/slices in blocks.}
+\label{fig:multiple-reads-cases}
+\end{figure}
+
+
+
 \begin{algorithm}[h]
   \caption{Buffered merging of blocks with multiple reads}
   \label{algo:multiple-reads}
@@ -503,7 +528,7 @@ For simplicity, we assume that $m'$ represents an integer number $k$
 of block rows (case 1, $k<\sqrt[3]{n}$), of complete rows (case 2,
 $k<d$), of tile rows (case 3, $k<\sqrt[3]{n}$), of slices (case 4,
 $k<d$) or of block slices (case 5, $k<\sqrt[3]{n}$) \todo{make a
-  figure}. In each of these 5 cases, we define $v$ as follows:
+  figure}. In each of these 5 cases in Figure~\ref{fig:multiple-reads-cases}, we define $v$ as follows:
 \begin{equation*}
   v_1=db \text{ ; }  v_2=Db \text{ ; } v_3=Ddb \text{ ; } v_4=D^2b \text{ ; } v_5=D^2db
 \end{equation*}
