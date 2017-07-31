@@ -435,7 +435,7 @@ in the buffer to merge its continuous segments. \todo{Precise this
   \caption{Buffered merging of blocks with cluster reads}
   \label{algo:cluster-reads}
   \begin{algorithmic}[1]
-    \STATE list = sort blocks by increasing (z,y,x) values
+    \STATE sorted\_splits = sort splits by increasing (z,y,x) values
     \STATE initialize buffer
     \STATE (m',case)=\texttt{switch}(m,n,R,b)
     \STATE old\_block = list[0]
@@ -468,30 +468,32 @@ in the buffer to merge its continuous segments. \todo{Precise this
    
 \subsection{Buffered blocks: Multiple reads}
 
-In multiple reads, blocks are read partially to ensure that the memory
-buffer only contains contiguous bytes, at any time. That is, a given
-block will be read multiple times.     \todo{improve notations and algo in algorithm}
-
+Multiple reads are shown in Algorithm~\ref{algo:multiple-reads}.  The
+main idea of this algorithm is that blocks are read partially (line 9)
+to ensure that the memory buffer only contains contiguous bytes, at
+any time. Therefore, the buffer can be written continuously to the
+reconstructed image, without seeking (line 13).  It should be noted
+that a given block might be read multiple times, in different memory
+loads. 
 \begin{algorithm}[h]
   \caption{Buffered merging of blocks with multiple reads}
   \label{algo:multiple-reads}
   \begin{algorithmic}[1]
-  \STATE sorted\_split\_list = sort splits based on its postion in increasing (z,y,x) values
-  \STATE start\_index = 0, end\_index=(m-1)
+  \STATE sorted\_splits = sort splits by increasing (z,y,x) values
+  \STATE start\_index = 0 ; end\_index=(m-1)
   \STATE write\_range = (start\_index, end\_index)
-  \WHILE{end\_index \textless sizeof(reconstructed\_image)}
-    \STATE initialize data\_buffer
-    \FOR{split in sorted\_split\_list}
-      \IF{split is in write\_range}
-        \STATE read split
-        \STATE extract the rows in the write\_range
-        \STATE write rows to the data\_buffer
+  \WHILE{end\_index \textless Rb}
+    \STATE initialize buffer
+    \FOR{split in sorted\_splits}
+      \IF{split has voxels in write\_range}
+        \STATE split\_data = read split
+        \STATE in split\_data, extract the rows in write\_range
+        \STATE write rows to buffer
       \ENDIF
     \ENDFOR
-    \STATE write data\_buffer continuously to reconstructed\_image
-    \STATE clear data\_buffer
+    \STATE write buffer to reconstructed\_image
     \STATE start\_index = end\_index + 1
-    \STATE end\_index += mem
+    \STATE end\_index += m
   \ENDWHILE
 
   \end{algorithmic}
@@ -509,44 +511,62 @@ so that we have:
 \begin{equation*}
 k_i=\floor*{\frac{m}{v_i}} \quad \mathrm{and} \quad m_i'=k_iv_i, \quad i \in \llbracket 1,5 \rrbracket
 \end{equation*}
-\todo{add one more preliminary step to explain how these equations were derived. Then jump to the final ones.}
-Using these notations, the number of seeks performed by multiple reads is:
+
+The total number of seeks performed by multiple reads in case $i$ is:
+\begin{equation*}
+  N^i_{\mathrm{MR}} = x_i + (x_i-1)b_i +b_i', \quad i \in \llbracket 1,5 \rrbracket
+\end{equation*}
+where $x_i$ is the total number of required memory loads, $b_i$ is the
+number of blocks accessed by the first ($x_i$-1) memory loads and
+$b_i'$ is the number of blocks access by the last memory load. We have:
+\begin{equation*}
+  x_i = \ceil*{\frac{Rb}{m_i'}} \quad ; \quad x_i -1 = \floor*{\frac{Rb}{m_i'}}, \quad i \in \llbracket 1,5 \rrbracket
+\end{equation*}
+and:
+\begin{equation*}
+b_1=k_1 ; \quad b_2=\sqrt[3]{n} ; \quad b_3 = k_3\sqrt[3]{n} ; \quad b_4=\sqrt[3]{n}^2 ; \quad b_5=k_5\sqrt[3]{n}^2
+\end{equation*}
+and:
+\begin{eqnarray*}
+b_1'=\sqrt[3]{n}D^2\text{ mod }k_1; &b_2'=b_2;   & b_3' = \sqrt[3]{n}\left( \sqrt[3]{n}D\text{ mod }k_3\right)\\
+                                   &b_4'=b_4;  & b_5'=\sqrt[3]{n}^2\left( \sqrt[3]{n}\text{ mod }k_5\right) 
+\end{eqnarray*}
+It gives the following expression for $N_\mathrm{MR}$:
 \begin{equation*}
   N_\mathrm{MR} =
 \begin{cases}
   \floor*{\frac{Rb}{m_1'}}(k_1+1)+1
-  + n \text{ mod } k_1& \text{if } d \leq \frac{m}{b} < D\\
+  + \sqrt[3]{n}D^2 \text{ mod } k_1& \text{if } d \leq \frac{m}{b} < D\\
   \ceil*{\frac{Rb}{m_2'}}(\sqrt[3]{n}+1)   & \text{if } D \leq \frac{m}{b} < Dd\\
   \floor*{\frac{Rb}{m_3'}}(k_3\sqrt[3]{n}+1)+1+\\
-  \quad \quad \sqrt[3]{n}\left(\frac{n}{\sqrt[3]{n}} \text{ mod } k_3\right)&\
+  \quad \quad \sqrt[3]{n}\left(\sqrt[3]{n}D\text{ mod } k_3\right)&\
   \text{if } Dd \leq \frac{m}{b} < D^2\\
   \ceil*{\frac{Rb}{m_4'}}(\sqrt[3]{n}^2+1) & \text{if } D^2 \leq \frac{m}{b} < D^2d\\
   \floor*{\frac{Rb}{m_5'}}(k_5\sqrt[3]{n}^2+1)+1+&\\
-  \quad \quad \sqrt[3]{n}^2\left(\frac{n}{\sqrt[3]{n}^2} \text{ mod } k_5\right)&\
+  \quad \quad \sqrt[3]{n}^2\left(\sqrt[3]{n} \text{ mod } k_5\right)&\
   \text{if } D^2d \leq \frac{m}{b} < R
 \end{cases}
 \end{equation*}
-
-which gives, using $R$ and $n$ as main variables:
+And finally, using $R$ and $n$ as main variables:
 \begin{equation}
 N_\mathrm{MR} =
 \begin{cases}
   \floor*{\frac{Rb}{m_1'}}\left(\frac{m_1'\sqrt[3]{n}}{\sqrt[3]{R}b}+1\right)+1+\\
-  \quad \quad \quad n \text{ mod }\floor*{\frac{m\sqrt[3]{n}}{\sqrt[3]{R}b}}\
+  \quad \quad \quad \sqrt[3]{n}\sqrt[3]{R}^2 \text{ mod }\floor*{\frac{m\sqrt[3]{n}}{\sqrt[3]{R}b}}\
   & \text{if } \sqrt[3]{\frac{R}{n}} \leq \frac{m}{b} < \sqrt[3]{R}\\
 
   \ceil*{\frac{Rb}{m_2'}}\left(\sqrt[3]{n}+1\right)\
   & \text{if } \sqrt[3]{R} \leq \frac{m}{b} < \frac{\sqrt[3]{R}^2}{\sqrt[3]{n}}\\
 
   \floor*{\frac{Rb}{m_3'}}\left(\frac{m'_3\sqrt[3]{n}^2}{\sqrt[3]{R}^2b}+1\right)+1+\\
-  \sqrt[3]{n}\left( \frac{n}{\sqrt[3]{n}} \text{ mod } \floor*{\frac{m\sqrt[3]{n}}{\sqrt[3]{R}^2b}} \right)
+  \sqrt[3]{n}\left( \sqrt[3]{nR} \text{ mod } \floor*{\frac{m\sqrt[3]{n}}{\sqrt[3]{R}^2b}} \right)
   & \text{if } \frac{\sqrt[3]{R}^2}{\sqrt[3]{n}} \leq \frac{m}{b} < \sqrt[3]{R}^2\\
 
   \ceil*{\frac{Rb}{m_4'}}\left(\sqrt[3]{n}^2+1\right)\
   & \text{if } \sqrt[3]{R}^2 \leq \frac{m}{b} < \frac{R}{\sqrt[3]{n}}\\
 
   \ceil*{\frac{Rb}{m_5'}}\left(\frac{m_5'n}{Rb}+1\right)+1+\\
-  \sqrt[3]{n}^2\left( \frac{n}{\sqrt[3]{n}^2} \text{ mod } \floor*{\frac{m\sqrt[3]{n}}{Rb}}\right)
+  \sqrt[3]{n}^2\left( \sqrt[3]{n} \text{ mod } \floor*{\frac{m\sqrt[3]{n}}{Rb}}\right)
   & \text{if } \frac{R}{\sqrt[3]{n}} \leq \frac{m}{b} < R
 \end{cases} \label{eq:seeks-multiple-reads}
 \end{equation}

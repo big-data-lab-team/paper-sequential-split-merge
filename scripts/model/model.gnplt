@@ -22,7 +22,7 @@ h(x)=n+ceil(R*b/o(x))
 
 # case 1: merge voxels
 p(x)=floor(x/(d*b))*d*b
-a(x)=floor((R*b)/p(x))*(p(x)*nu/(D*b)+1)+1+(n % floor(x/(d*b)))
+a(x)=floor((R*b)/p(x))*(p(x)*nu/(D*b)+1)+1+(nu*D**2 % floor(x/(d*b)))
 
 # case 2: merge rows
 q(x)=floor(x/(D*b))*D*b
@@ -31,7 +31,7 @@ b(x)=ceil((R*b)/q(x))*(nu+1)
 # case 3: merge rows of tiles
 r(x)=floor(x/(d*D*b))*D*b*d
 #c(x)=ceil((R*b)/r(x))*(r(x)*nu**2/(D**2*b)+1)
-c(x)=floor((R*b)/r(x))*(r(x)*nu**2/(D**2*b)+1)+1+nu*(n/nu%floor(x/(d*D*b)))
+c(x)=floor((R*b)/r(x))*(r(x)*nu**2/(D**2*b)+1)+1+nu*(nu*D %floor(x/(d*D*b)))
 
 # case 4: merge slices of tiles
 s(x)=floor(x/(D**2*b))*D**2*b
