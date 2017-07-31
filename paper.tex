@@ -630,30 +630,6 @@ a numpy array as the buffer.
   vs list, etc), explain clearly and concisely what the calculation
   time covers.}
 
-\section{Simulations}
-
-\todo{Make more simulations to support that claim.}
-After running a few simulations, we saw that the comparison between
-Cluster reads and Multiple reads essentially depends on the three
-Cluster reads configurations.  When Cluster reads merge incomplete
-block rows (case 1), they are always outperformed by Multiple reads.
-When Cluster reads merge complete block rows (case 2), the comparison
-between Cluster reads and Multiple reads depends on the values of $D$
-and $n$. Figure~\ref{fig:model-comparison} shows two situations where
-Cluster reads and Multiple reads are alternatively better than each
-other. When Cluster reads merge complete block slices (case 3),
-Cluster reads and Multiple reads are equivalent.
-
-\begin{figure}
-  \includegraphics[width=0.45\columnwidth]{figures/model-big-brain.pdf}
-  \includegraphics[width=0.45\columnwidth]{figures/model-big-brain-rescan.pdf}
-  \caption{Number of seeks for Cluster reads vs Multiple reads when
-    Cluster reads merge complete block rows (case 2), for D=3000 and
-    b=2. Left: n=125; Right: n=64,000.}
-  % Gnuplot file: scripts/model/model.gnplt
-  \label{fig:model-comparison}
-\end{figure}
-
 \section{Benchmark}
 \label{sec:benchmark}
 
@@ -675,6 +651,44 @@ SATA >3.1 (6.0 Gb/s) and were accessed through the XFS file system
 v4.5.0.
 %smartctl --xall /dev/sda
 
+\section{Simulations}
+
+\todo{Make more simulations to support that claim.}
+
+After running a few simulations, we saw that the comparison between
+Cluster reads and Multiple reads essentially depends on the three
+Cluster reads configurations.  When Cluster reads merge incomplete
+block rows (case 1), they are always outperformed by Multiple reads.
+When Cluster reads merge complete block rows (case 2), the comparison
+between Cluster reads and Multiple reads depends on the values of $D$
+and $n$. Figure~\ref{fig:model-comparison} shows two situations where
+Cluster reads and Multiple reads are alternatively better than each
+other. When Cluster reads merge complete block slices (case 3),
+Cluster reads and Multiple reads are equivalent.
+
+\begin{figure}
+  \includegraphics[width=0.45\columnwidth]{figures/model-big-brain-creads.pdf}
+  \includegraphics[width=0.45\columnwidth]{figures/model-big-brain-mreads.pdf}
+  \caption{Number of seeks for Cluster reads (Left) and Multiple reads (Right), for
+    D=3000, b=2 and n=125.}
+  % Gnuplot file: scripts/model/model.gnplt
+  \label{fig:model-individual}
+\end{figure}
+
+
+\begin{figure}
+  \includegraphics[width=0.45\columnwidth]{figures/model-big-brain-comparison.pdf}
+  \includegraphics[width=0.45\columnwidth]{figures/model-big-brain-comparison-moreblocks.pdf}
+  \caption{Number of seeks for Cluster reads vs Multiple reads when
+    Cluster reads merge complete block rows (case 2), for D=3000 and
+    b=2. Left: n=125; Right: n=64,000.}
+  % Gnuplot file: scripts/model/model.gnplt
+  \label{fig:model-comparison}
+\end{figure}
+
+\section{Experiments}
+\label{sec:results}
+
 \subsection{Execution conditions}
 
 We used release xxx of our library. 
@@ -684,10 +698,6 @@ We used release xxx of our library.
 Experiment scripts are available at xxx.
 As our experiments results are heavily rely on IO performance of the disk,
 we drop the system cache to get more precise result before each experiment.
-
-
-\section{Results}
-\label{sec:results}
 
 \subsection{Slices vs Blocks}
 
