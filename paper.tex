@@ -143,11 +143,11 @@ Sections~\ref{sec:discussion} discusses them.
 
 \todo{Overlapping blocks. non-cubic blocks.}
 
-In our context, split and merge relate to the same dual
-problem \todo{not so sure about this actually}. Without loss of
-generality, we focus here on merging for the sake of concision. Our
-goal then is to merge a set of $n$ chunks into a single reconstructed
-3D image with $R$ voxels of size $b$. We assume that all chunks are of
+In our context, split and merge relate to the same dual problem . We
+focus here on merging for the sake of concision. Splitting algorithms
+can be derived from merging by swapping reads and writes. Our goal
+then is to merge a set of $n$ chunks into a single reconstructed 3D
+image with $R$ voxels of size $b$. We assume that all chunks are of
 identical size and that slices are squares and blocks are cubes.
 
 Without loss of generality, we consider a file format where voxels are
@@ -161,7 +161,7 @@ the remainder, we use the term ``slice" for ``x slice".
 
 \subsection{Notations}
 
-We adopt the following notations:
+We adopt the following notations (see Figure\ref{fig:notations}):
 \begin{itemize}
 \item $R=D^3$: number of voxels in the reconstructed image.
 \item $b$: number of bytes per voxel in the reconstructed image and chunks (in B).
@@ -263,6 +263,23 @@ later.
 %%     \end{multlined}
 %% \end{equation}
 
+\begin{figure}
+  \centering
+  \begin{minipage}[b]{0.3\columnwidth}
+    \def\svgwidth{\columnwidth}
+    \input{figures/svg/Notations.pdf_tex}
+    \caption{Notations.}
+    \label{fig:notations}
+  \end{minipage}
+  \quad \quad \quad
+  \begin{minipage}[b]{0.3\columnwidth}
+    \def\svgwidth{\columnwidth}
+    \input{figures/svg/buffer.pdf_tex}
+    \caption{Buffer used in cluster reads.}
+    \label{fig:cluster-reads-buffer}
+  \end{minipage}
+\end{figure}
+
 \subsection{Buffered slices}
 
 The algorithms presented up to now are in fact particular cases of
@@ -290,7 +307,6 @@ maximum size of a chunk.
 N_\mathrm{buff\_slices} =  n + \ceil*{\frac{bR}{m}}
 \end{equation}
 
-
 \subsection{Buffered blocks: Cluster reads}
 
 The main idea of cluster reads is to load multiple blocks in memory,
@@ -305,21 +321,11 @@ disjoint sequences of contiguous bytes without having to allocate
 memory for the bytes between such
 sequences. Figure~\ref{fig:cluster-reads-buffer} illustrates how the
 buffer would fill up for the two first blocks in a reconstructed
-image. Implementation details about the buffer are given later.
-\begin{figure}
-\centering
-\def\svgwidth{0.3\columnwidth}
-\input{figures/svg/buffer.pdf_tex}
-\caption{Illustration of the buffer used in cluster reads, showing how
-  the two first 4x4 blocks of a reconstructed image would be arranged
-  in the buffer.  White portions in the buffer are not allocated.  The
-  column-major order is used, similar to the NIfTI format: i is the
-  fastest changing dimension, followed by j, followed by k.}
-\label{fig:cluster-reads-buffer}
-% Data file: path
-% Gnuplot file: path
-% Script file: path
-\end{figure}
+image. It shows how the two first 4x4 blocks of a reconstructed image
+would be arranged in the buffer.  White portions in the buffer are not
+allocated.  The column-major order is used, similar to the NIfTI
+format: i is the fastest changing dimension, followed by j, followed
+by k. 
 
 The number of seeks performed by cluster reads depends on how blocks
 loaded in memory arrange in the reconstructed image. In the best case,
@@ -442,9 +448,9 @@ Finally, the total number of seeks performed by cluster reads to reconstruct the
 \begin{equation}
 N_\mathrm{CR} =
 \begin{cases}
-  n + \ceil*{\frac{Rb}{\sqrt[3]{n}^2m_1'}}\sqrt[3]{R}^2     & \text{if } \frac{mn}{Rb} < \sqrt[3]{n}\\[0.4em]
-  n + \ceil*{\frac{Rb}{\sqrt[3]{n}m_2'}}\sqrt[3]{R}        & \text{if } \sqrt[3]{n} \leq \frac{mn}{Rb} < \sqrt[3]{n}^2\\[0.4em]
-  n + \ceil*{\frac{Rb}{m_3'}}                              & \text{if } \sqrt[3]{n}^2 \leq \frac{mn}{Rb} < n\\[0.4em]
+  n + \ceil*{\frac{Rb}{\sqrt[3]{n}^2m_1'}}\sqrt[3]{R}^2     & \text{if } m < \frac{Rb}{\sqrt[3]{n}^2}\\[0.4em]
+  n + \ceil*{\frac{Rb}{\sqrt[3]{n}m_2'}}\sqrt[3]{R}        & \text{if } \frac{Rb}{\sqrt[3]{n}^2} \leq m < \frac{Rb}{\sqrt[3]{n}}\\[0.4em]
+  n + \ceil*{\frac{Rb}{m_3'}}                              & \text{if } \frac{Rb}{\sqrt[3]{n}} \leq Rb < n\\[0.4em]
   n + 1                                                          & \text{otherwise}
 \end{cases} \label{eq:seeks-cluster-reads-1}
 \end{equation}
@@ -719,8 +725,6 @@ v4.5.0.
 
 We used release xxx of our library. 
 
-\todo{Yongping: mention the cache cleaning thing that you run before every experiment.}
-
 Experiment scripts are available at xxx.
 As our experiments results are heavily rely on IO performance of the disk,
 we drop the system cache to get more precise result before each experiment.
@@ -856,7 +860,7 @@ on-the-fly data compression yet, which is a unique feature of MINC
 
 \section*{Acknowledgment}
 
-(If not added as co-authors): Greg Kiar, Pierre Bellec.
+(If not added as co-authors): Greg Kiar, Pierre Bellec, Claude Lepage, Lindsay B. Lewis.
 
 \bibliographystyle{IEEEtran}
 \bibliography{IEEEabrv,biblio.bib}
