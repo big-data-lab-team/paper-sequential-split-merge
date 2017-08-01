@@ -299,13 +299,13 @@ image. Seeking is reduced compared to naive block merging since
 contiguous parts of the buffer will be written without seeking. In
 cluster reads, a given block is accessed only once. 
 
-The buffer might be a
-slightly complex data structure, for instance an associative array or
-a Python dictionary, capable of storing multiple disjoint sequences of
-contiguous bytes without having to allocate memory for the bytes
-between such sequences. Figure~\ref{fig:cluster-reads-buffer}
-illustrates how the buffer would fill up for the two first blocks in a reconstructed image.Implementation details about the
-buffer are given later.
+The buffer might be a slightly complex data structure, for instance an
+associative array or a Python dictionary, capable of storing multiple
+disjoint sequences of contiguous bytes without having to allocate
+memory for the bytes between such
+sequences. Figure~\ref{fig:cluster-reads-buffer} illustrates how the
+buffer would fill up for the two first blocks in a reconstructed
+image. Implementation details about the buffer are given later.
 \begin{figure}
 \centering
 \def\svgwidth{0.3\columnwidth}
@@ -324,7 +324,7 @@ buffer are given later.
 The number of seeks performed by cluster reads depends on how blocks
 loaded in memory arrange in the reconstructed image. In the best case,
 complete contiguous slices of the reconstructed image can be assembled
-in memory and written without any seeking. In the worst case, the
+in memory and written in a single seek. In the worst case, the
 memory load only partially covers rows in the reconstructed image:
 O($d^2$) seeks are then required during writing, one for every partial
 row in every partial slice. In the intermediary case, rows are
@@ -350,14 +350,14 @@ seeks are then required.
 Our cluster reads algorithm focuses on the three memory load
 configurations represented in Figure~\ref{fig:cluster-reads}, that is,
 the amount of memory $m'$ used by the algorithm is rounded down to the
-closest number of complete blocks (case 1), complete block rows (case
-2) or complete block slices (case 3). This is in general reasonable
+closest number of complete blocks (case 1), of complete block rows (case
+2) or of complete block slices (case 3). This is in general reasonable
 since adding an incomplete row to a set of complete ones multiplies
 the number of required seeks by $d$, as illustrated in
 Figure~\ref{fig:avoided-configurations}-Left. In some cases though,
 rounding $m$ down to $m'$ might increase the number of required
 memory load to a point that the overall number of seeks also
-increases. However, such cases are a bit pathological and their
+increases. Such cases are, however, slightly unusual and their
 complete description requires extensive calculations involving modulo
 arithmetic, which we felt were unwieldy to report here.
 \begin{figure}
@@ -374,49 +374,6 @@ arithmetic, which we felt were unwieldy to report here.
   overlap multiple block slices (multiplies number of seeks by $2$).}
 \label{fig:avoided-configurations}
 \end{figure}
-To summarize, the amount of memory used $m'$ is set as follows in each of the 3 cases:
-%% \begin{equation*}
-%%   m_{case 1}' = bd^3\floor*{\frac{m}{d^3b}}; m_{case 2}' = bd^3\sqrt[3]{n}\floor*{\frac{m}{d^3b\sqrt[3]{n}}}; m_{case 3}' = bd^3\sqrt[3]{n}^2\floor*{\frac{m}{d^3b\sqrt[3]{n}^2}}
-%% \end{equation*}
-%% which gives:
-\begin{equation*}
-  m_1' = \frac{Rb}{n}\floor*{\frac{mn}{Rb}};
-  m_2' = \frac{Rb}{\sqrt[3]{n}^2}\floor*{\frac{m\sqrt[3]{n}^2}{Rb}};
-  m_3' = \frac{Rb}{\sqrt[3]{n}}\floor*{\frac{m\sqrt[3]{n}}{Rb}}
-\end{equation*}
-
-In addition, our algorithm avoids configurations where the memory load
-overlaps multiple block slices in case 2 or multiple block rows in
-case 1, as such overlaps multiply the number of required seeks
-(see Figure~\ref{fig:avoided-configurations}-Right). Thus, the total
-number of memory loads $x$ required to reconstruct the image is:
-\begin{equation*}
-  x_1 = \ceil*{\frac{Rb}{\sqrt[3]{n}^2m_1'}}\sqrt[3]{n}^2;
-  x_2 = \ceil*{\frac{Rb}{\sqrt[3]{n}m_2'}}\sqrt[3]{n};
-  x_3 = \ceil*{\frac{Rb}{m_3'}}
-\end{equation*}
-
-Finally, the total number of seeks performed by cluster reads to reconstruct the image is:
-%% \begin{equation*}
-%% N_\mathrm{cr} =
-%% \begin{cases}
-%%   n + \sqrt[3]{n}^2 \ceil*{\frac{Rb}{\sqrt[3]{n}^2m_1'}}d^2 & \text{if } \frac{m}{d^3b} < \sqrt[3]{n}\\
-%%   n + \sqrt[3]{n} \ceil*{\frac{Rb}{\sqrt[3]{n}m_2'}}d      & \text{if } \sqrt[3]{n} \leq \frac{m}{d^3b} < \sqrt[3]{n}^2\\
-%%   n + \ceil*{\frac{Rb}{m_3'}}                              & \text{if } \sqrt[3]{n}^2 \leq \frac{m}{d^3b} < n\\
-%%   n + 1                                                          & \text{otherwise}
-%% \end{cases} \label{eq:seeks-cluster-reads}
-%% \end{equation*}
-%% And since $d=\frac{D}{\sqrt[3]{n}}$ and $R=D^3$, we finally have:
-\begin{equation}
-N_\mathrm{cr} =
-\begin{cases}
-  n + \ceil*{\frac{Rb}{\sqrt[3]{n}^2m_1'}}\sqrt[3]{R}^2     & \text{if } \frac{mn}{Rb} < \sqrt[3]{n}\\
-  n + \ceil*{\frac{Rb}{\sqrt[3]{n}m_2'}}\sqrt[3]{R}        & \text{if } \sqrt[3]{n} \leq \frac{mn}{Rb} < \sqrt[3]{n}^2\\
-  n + \ceil*{\frac{Rb}{m_3'}}                              & \text{if } \sqrt[3]{n}^2 \leq \frac{mn}{Rb} < n\\
-  n + 1                                                          & \text{otherwise}
-\end{cases} \label{eq:seeks-cluster-reads-1}
-\end{equation}
-\todo{Is $N_{cr}$ a continuous function of m?}
 
 Cluster reads are described in
 Algorithm~\ref{algo:cluster-reads}. Function \texttt{switch} (line 3)
@@ -438,9 +395,9 @@ in the buffer to merge its continuous segments. \todo{Precise this
     \STATE sorted\_splits = sort splits by increasing (z,y,x) values
     \STATE initialize buffer
     \STATE (m',case)=\texttt{switch}(m,n,R,b)
-    \STATE old\_block = list[0]
+    \STATE old\_block = sorted\_splits[0]
     \FOR{i = 0 ; i\textless n ; i+=1}
-      \STATE block = list[i]
+      \STATE block = sorted\_splits[i]
       \STATE overlap = \texttt{check\_overlap}(block,old\_block,case)
       \IF{\texttt{sizeof}(buffer)+\texttt{sizeof}(block) $\geq$ m' \textbf{or} overlap=true}
       \STATE write buffer in reconstructed image
@@ -452,6 +409,47 @@ in the buffer to merge its continuous segments. \todo{Precise this
   \end{algorithmic}
 \end{algorithm}
 
+The amount of memory used $m'$ is set as follows in each of the 3 cases:
+\begin{equation*}
+  m_1' = \frac{Rb}{n}\floor*{\frac{mn}{Rb}};
+  m_2' = \frac{Rb}{\sqrt[3]{n}^2}\floor*{\frac{m\sqrt[3]{n}^2}{Rb}};
+  m_3' = \frac{Rb}{\sqrt[3]{n}}\floor*{\frac{m\sqrt[3]{n}}{Rb}}
+\end{equation*}
+The number of seeks performed by cluster reads in each of the three cases is:
+\begin{equation*}
+  N^i_{\mathrm{CR}} = n + x_ib_i, \quad i \in \llbracket 1, 3\rrbracket,
+\end{equation*}
+where $x_i$ is the number of memory loads required to reconstruct the
+image and $b_i$ is the number of seeks required to write a the memory
+load. The first $n$ seeks in the equation are required to read all the blocks
+once. According to Figure~\ref{fig:cluster-reads}, we have:
+\begin{equation*}
+  b_1=d^2=\sqrt[3]{\frac{R}{n}}^2 \quad ; \quad b_2=d=\sqrt[3]{\frac{R}{n}} \quad ; \quad b_3=1
+\end{equation*}
+
+Our algorithm avoids configurations where the memory load
+overlaps multiple block slices in case 2 or multiple block rows in
+case 1, as such overlaps multiply the number of required seeks
+(see Figure~\ref{fig:avoided-configurations}-Right). Thus, the
+numbers of memory loads required to reconstruct the image are:
+\begin{equation*}
+  x_1 = \ceil*{\frac{Rb}{\sqrt[3]{n}^2m_1'}}\sqrt[3]{n}^2;
+  x_2 = \ceil*{\frac{Rb}{\sqrt[3]{n}m_2'}}\sqrt[3]{n};
+  x_3 = \ceil*{\frac{Rb}{m_3'}}
+\end{equation*}
+
+Finally, the total number of seeks performed by cluster reads to reconstruct the image is:
+\begin{equation}
+N_\mathrm{CR} =
+\begin{cases}
+  n + \ceil*{\frac{Rb}{\sqrt[3]{n}^2m_1'}}\sqrt[3]{R}^2     & \text{if } \frac{mn}{Rb} < \sqrt[3]{n}\\[0.4em]
+  n + \ceil*{\frac{Rb}{\sqrt[3]{n}m_2'}}\sqrt[3]{R}        & \text{if } \sqrt[3]{n} \leq \frac{mn}{Rb} < \sqrt[3]{n}^2\\[0.4em]
+  n + \ceil*{\frac{Rb}{m_3'}}                              & \text{if } \sqrt[3]{n}^2 \leq \frac{mn}{Rb} < n\\[0.4em]
+  n + 1                                                          & \text{otherwise}
+\end{cases} \label{eq:seeks-cluster-reads-1}
+\end{equation}
+It should be noted that $N_{CR}$ is not a continuous function of m,
+due to the differences among $b_i$ values.
 
 %% In case (1) on
 %% this Figure, the memory load completely fills rows and slices in the
@@ -513,12 +511,11 @@ loads.
       \IF{split has voxels in write\_range}
         \STATE split\_data = read split
         \STATE in split\_data, extract the rows in write\_range
-        \STATE write rows to buffer
+        \STATE insert rows in buffer
       \ENDIF
     \ENDFOR
     \STATE write buffer to reconstructed\_image
-    \STATE start\_index = end\_index + 1
-    \STATE end\_index += m
+    \STATE start\_index = end\_index + 1 ; end\_index += m
   \ENDWHILE
 
   \end{algorithmic}
@@ -543,7 +540,9 @@ The total number of seeks performed by multiple reads in case $i$ is:
 \end{eqnarray*}
 where $x_i$ is the total number of required memory loads, $b_i$ is the
 number of blocks accessed by the first ($x_i$-1) memory loads and
-$b_i'$ is the number of blocks access by the last memory load. We have:
+$b_i'$ is the number of blocks access by the last memory load. The
+first $x_i$ seeks in the equation are required to write each memory
+load (1 seek per memory load). We have:
 \begin{equation*}
   x_i = \ceil*{\frac{Rb}{m_i'}}, \quad i \in \llbracket 1,5 \rrbracket
 \end{equation*}
@@ -560,7 +559,7 @@ It gives the following expression for $N_\mathrm{MR}$:
 \begin{equation*}
   N_\mathrm{MR} =
 \begin{cases}
-  \ceil*{\frac{Rb}{m_1'}}(k_1+1)-k_1
+  \ceil*{\frac{Rb}{m_1'}}(k_1+1)-k_1 \\
   + \left( \sqrt[3]{n}D^2 \text{ mod } k_1 \right)& \text{\hspace*{-0.9em}if } d \leq \frac{m}{b} < D\\[0.4em]
   
   \ceil*{\frac{Rb}{m_2'}}(\sqrt[3]{n}+1)   & \text{\hspace*{-0.9em}if } D \leq \frac{m}{b} < Dd\\[0.4em]
@@ -656,27 +655,6 @@ a numpy array as the buffer.
   vs list, etc), explain clearly and concisely what the calculation
   time covers.}
 
-\section{Benchmark}
-\label{sec:benchmark}
-
-\subsection{Data}
-To benchmark our library we use the 76~GB BigBrain image split in 125
-non-overlapping chunks. The data is available \todo{[here]}.
-
-\subsection{Infrastructure}
-
-We run experiments using a Dell Precision Tower 3620 with CentOS Linux release
-7.3.1611, 32~GB of RAM and two disks:
-\begin{itemize}
-  \item Hard disk drive (HDD): HGST Travelstar 7K1000, 7200~rpm, 931GiB (1TB), firmware version JB0OA3W0.
-    \item Solid-state drive (SSD): SanDisk X400 2.5, 238GiB (256GB),
-      firmware version X4130012.
-\end{itemize}
-Both drives used 512-byte logical sectors, 4096-byte physical sectors,
-SATA >3.1 (6.0 Gb/s) and were accessed through the XFS file system
-v4.5.0.
-%smartctl --xall /dev/sda
-
 \section{Simulations}
 
 \todo{Make more simulations to support that claim.}
@@ -711,6 +689,28 @@ Cluster reads and Multiple reads are equivalent.
   % Gnuplot file: scripts/model/model.gnplt
   \label{fig:model-comparison}
 \end{figure}
+
+\section{Benchmark}
+\label{sec:benchmark}
+
+\subsection{Data}
+To benchmark our library we use the 76~GB BigBrain image split in 125
+non-overlapping chunks. The data is available \todo{[here]}.
+
+\subsection{Infrastructure}
+
+We run experiments using a Dell Precision Tower 3620 with CentOS Linux release
+7.3.1611, 32~GB of RAM and two disks:
+\begin{itemize}
+  \item Hard disk drive (HDD): HGST Travelstar 7K1000, 7200~rpm, 931GiB (1TB), firmware version JB0OA3W0.
+    \item Solid-state drive (SSD): SanDisk X400 2.5, 238GiB (256GB),
+      firmware version X4130012.
+\end{itemize}
+Both drives used 512-byte logical sectors, 4096-byte physical sectors,
+SATA >3.1 (6.0 Gb/s) and were accessed through the XFS file system
+v4.5.0.
+%smartctl --xall /dev/sda
+
 
 \section{Experiments}
 \label{sec:results}
