@@ -26,7 +26,7 @@ creads(x) = x < m1 ? f(x) : \
 
 # case 1: merge voxels
 p(x)=floor(x/(d*b))*d*b
-a(x)=floor((R*b)/p(x))*(p(x)*nu/(D*b)+1)+1+(nu*D**2 % floor(x/(d*b)))
+a(x)=ceil((R*b)/p(x))*(p(x)*nu/(D*b)+1)-p(x)*nu/(D*b)+(nu*D**2 % floor(x/(d*b)))
 
 # case 2: merge rows
 q(x)=floor(x/(D*b))*D*b
@@ -35,7 +35,7 @@ b(x)=ceil((R*b)/q(x))*(nu+1)
 # case 3: merge rows of tiles
 r(x)=floor(x/(d*D*b))*D*b*d
 #c(x)=ceil((R*b)/r(x))*(r(x)*nu**2/(D**2*b)+1)
-c(x)=floor((R*b)/r(x))*(r(x)*nu**2/(D**2*b)+1)+1+nu*(nu*D %floor(x/(d*D*b)))
+c(x)=ceil((R*b)/r(x))*(r(x)*nu**2/(D**2*b)+1)-r(x)*nu**2/(D**2*b)+nu*(nu*D %floor(x/(d*D*b)))
 
 # case 4: merge slices of tiles
 s(x)=floor(x/(D**2*b))*D**2*b
@@ -44,7 +44,7 @@ d(x)=ceil((R*b)/s(x))*(nu**2+1)
 # case 5: merge slices of blocks
 u(x)=floor(x/((D**2)*d*b))*(D**2*d*b)
 #e(x)=ceil((R*b)/u(x))*(u(x)*n/(R*b)+1)
-e(x)=floor((R*b)/u(x))*(u(x)*n/(R*b)+1)+1+nu**2*(n/(nu**2)%floor(x/((D**2)*d*b)))
+e(x)=floor((R*b)/u(x))*(u(x)*n/(R*b)+1)-u(x)*n/(R*b)+nu**2*(n/(nu**2)%floor(x/((D**2)*d*b)))
 
 mreads(x) =    x < m3 ? a(x):\
 	       x < m4 ? b(x):\

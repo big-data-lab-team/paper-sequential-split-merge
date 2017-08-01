@@ -491,10 +491,10 @@ loads.
 \input{figures/svg/mreads-case4.pdf_tex}
 \def\svgwidth{0.3\columnwidth}
 \input{figures/svg/mreads-case5.pdf_tex}
-\caption{Memory-load configurations in multiple reads, leading to
-  different number of seeks. Red regions shows different memory
-  load in each case. Small dots are used to represent block frontiers,
-  long dashes used to represent rows/slices in blocks.}
+\caption{Memory-load configurations in multiple reads (d=4, D=16,
+  n=64, $k_1=k_2=k_3=k_4=k_5=1$). Red colour shows the content of the
+  memory load. Small dots depict block frontiers and long dashes
+  depict rows and slices within blocks.}
 \label{fig:multiple-reads-cases}
 \end{figure}
 
@@ -524,11 +524,10 @@ loads.
   \end{algorithmic}
 \end{algorithm}
 
-For simplicity, we assume that $m'$ represents an integer number $k$
+As illustrated in Figure~\ref{fig:multiple-reads-cases}, we assume that $m'$ represents an integer number $k$
 of block rows (case 1, $k<\sqrt[3]{n}$), of complete rows (case 2,
 $k<d$), of tile rows (case 3, $k<\sqrt[3]{n}$), of slices (case 4,
-$k<d$) or of block slices (case 5, $k<\sqrt[3]{n}$) \todo{make a
-  figure}. In each of these 5 cases in Figure~\ref{fig:multiple-reads-cases}, we define $v$ as follows:
+$k<d$) or of block slices (case 5, $k<\sqrt[3]{n}$). In each of these 5 cases, we define $v$ as follows:
 \begin{equation*}
   v_1=db \text{ ; }  v_2=Db \text{ ; } v_3=Ddb \text{ ; } v_4=D^2b \text{ ; } v_5=D^2db
 \end{equation*}
@@ -538,14 +537,15 @@ k_i=\floor*{\frac{m}{v_i}} \quad \mathrm{and} \quad m_i'=k_iv_i, \quad i \in \ll
 \end{equation*}
 
 The total number of seeks performed by multiple reads in case $i$ is:
-\begin{equation*}
-  N^i_{\mathrm{MR}} = x_i + (x_i-1)b_i +b_i', \quad i \in \llbracket 1,5 \rrbracket
-\end{equation*}
+\begin{eqnarray*}
+  N^i_{\mathrm{MR}} &=& x_i + (x_i-1)b_i +b_i', \quad i \in \llbracket 1,5 \rrbracket\\
+  &=& x_i \left(1+b_i\right)-b_i+b_i'
+\end{eqnarray*}
 where $x_i$ is the total number of required memory loads, $b_i$ is the
 number of blocks accessed by the first ($x_i$-1) memory loads and
 $b_i'$ is the number of blocks access by the last memory load. We have:
 \begin{equation*}
-  x_i = \ceil*{\frac{Rb}{m_i'}} \quad ; \quad x_i -1 = \floor*{\frac{Rb}{m_i'}}, \quad i \in \llbracket 1,5 \rrbracket
+  x_i = \ceil*{\frac{Rb}{m_i'}}, \quad i \in \llbracket 1,5 \rrbracket
 \end{equation*}
 and:
 \begin{equation*}
@@ -560,39 +560,40 @@ It gives the following expression for $N_\mathrm{MR}$:
 \begin{equation*}
   N_\mathrm{MR} =
 \begin{cases}
-  \floor*{\frac{Rb}{m_1'}}(k_1+1)+1
-  + \sqrt[3]{n}D^2 \text{ mod } k_1& \text{if } d \leq \frac{m}{b} < D\\
-  \ceil*{\frac{Rb}{m_2'}}(\sqrt[3]{n}+1)   & \text{if } D \leq \frac{m}{b} < Dd\\
-  \floor*{\frac{Rb}{m_3'}}(k_3\sqrt[3]{n}+1)+1+\\
-  \quad \quad \sqrt[3]{n}\left(\sqrt[3]{n}D\text{ mod } k_3\right)&\
-  \text{if } Dd \leq \frac{m}{b} < D^2\\
-  \ceil*{\frac{Rb}{m_4'}}(\sqrt[3]{n}^2+1) & \text{if } D^2 \leq \frac{m}{b} < D^2d\\
-  \floor*{\frac{Rb}{m_5'}}(k_5\sqrt[3]{n}^2+1)+1+&\\
+  \ceil*{\frac{Rb}{m_1'}}(k_1+1)-k_1
+  + \left( \sqrt[3]{n}D^2 \text{ mod } k_1 \right)& \text{\hspace*{-0.9em}if } d \leq \frac{m}{b} < D\\[0.4em]
+  
+  \ceil*{\frac{Rb}{m_2'}}(\sqrt[3]{n}+1)   & \text{\hspace*{-0.9em}if } D \leq \frac{m}{b} < Dd\\[0.4em]
+  
+  \ceil*{\frac{Rb}{m_3'}}(k_3\sqrt[3]{n}+1)-k_3\sqrt[3]{n}+\\[0.4em]
+  \quad \quad \quad \quad \sqrt[3]{n}\left(\sqrt[3]{n}D\text{ mod } k_3\right)& \text{\hspace*{-0.9em}if } Dd \leq \frac{m}{b} < D^2\\[0.4em]
+  \ceil*{\frac{Rb}{m_4'}}(\sqrt[3]{n}^2+1) & \text{\hspace*{-0.9em}if } D^2 \leq \frac{m}{b} < D^2d\\[0.4em]
+  \ceil*{\frac{Rb}{m_5'}}(k_5\sqrt[3]{n}^2+1)-k_5\sqrt[3]{n}^2+&\\[0.4em]
   \quad \quad \sqrt[3]{n}^2\left(\sqrt[3]{n} \text{ mod } k_5\right)&\
-  \text{if } D^2d \leq \frac{m}{b} < R
+  \text{\hspace*{-0.9em}if } D^2d \leq \frac{m}{b} < R
 \end{cases}
 \end{equation*}
 And finally, using $R$ and $n$ as main variables:
 \begin{equation}
 N_\mathrm{MR} =
 \begin{cases}
-  \floor*{\frac{Rb}{m_1'}}\left(\frac{m_1'\sqrt[3]{n}}{\sqrt[3]{R}b}+1\right)+1+\\
-  \quad \quad \quad \sqrt[3]{n}\sqrt[3]{R}^2 \text{ mod }\floor*{\frac{m\sqrt[3]{n}}{\sqrt[3]{R}b}}\
-  & \text{if } \sqrt[3]{\frac{R}{n}} \leq \frac{m}{b} < \sqrt[3]{R}\\
+  \ceil*{\frac{Rb}{m_1'}}\left(\frac{m_1'\sqrt[3]{n}}{\sqrt[3]{R}b}+1\right)-\frac{m_1'\sqrt[3]{n}}{\sqrt[3]{R}b}\\[0.4em]
+   +\left( \sqrt[3]{n}\sqrt[3]{R}^2 \text{ mod }\floor*{\frac{m\sqrt[3]{n}}{\sqrt[3]{R}b}}\right)\
+  & \text{\hspace*{-0.9em}if } \sqrt[3]{\frac{R}{n}} \leq \frac{m}{b} < \sqrt[3]{R}\\[0.4em]
 
   \ceil*{\frac{Rb}{m_2'}}\left(\sqrt[3]{n}+1\right)\
-  & \text{if } \sqrt[3]{R} \leq \frac{m}{b} < \frac{\sqrt[3]{R}^2}{\sqrt[3]{n}}\\
+  & \text{\hspace*{-0.9em}if } \sqrt[3]{R} \leq \frac{m}{b} < \frac{\sqrt[3]{R}^2}{\sqrt[3]{n}}\\[0.4em]
 
-  \floor*{\frac{Rb}{m_3'}}\left(\frac{m'_3\sqrt[3]{n}^2}{\sqrt[3]{R}^2b}+1\right)+1+\\
-  \sqrt[3]{n}\left( \sqrt[3]{nR} \text{ mod } \floor*{\frac{m\sqrt[3]{n}}{\sqrt[3]{R}^2b}} \right)
-  & \text{if } \frac{\sqrt[3]{R}^2}{\sqrt[3]{n}} \leq \frac{m}{b} < \sqrt[3]{R}^2\\
+  \ceil*{\frac{Rb}{m_3'}}\left(\frac{m'_3\sqrt[3]{n}^2}{\sqrt[3]{R}^2b}+1\right)-\frac{m'_3\sqrt[3]{n}^2}{\sqrt[3]{R}^2b}\\[0.4em]
+  +\sqrt[3]{n}\left( \sqrt[3]{nR} \text{ mod } \floor*{\frac{m\sqrt[3]{n}}{\sqrt[3]{R}^2b}} \right)
+  & \text{\hspace*{-0.9em}if } \frac{\sqrt[3]{R}^2}{\sqrt[3]{n}} \leq \frac{m}{b} < \sqrt[3]{R}^2\\[0.4em]
 
   \ceil*{\frac{Rb}{m_4'}}\left(\sqrt[3]{n}^2+1\right)\
-  & \text{if } \sqrt[3]{R}^2 \leq \frac{m}{b} < \frac{R}{\sqrt[3]{n}}\\
+  & \text{\hspace*{-0.9em}if } \sqrt[3]{R}^2 \leq \frac{m}{b} < \frac{R}{\sqrt[3]{n}}\\[0.4em]
 
-  \ceil*{\frac{Rb}{m_5'}}\left(\frac{m_5'n}{Rb}+1\right)+1+\\
-  \sqrt[3]{n}^2\left( \sqrt[3]{n} \text{ mod } \floor*{\frac{m\sqrt[3]{n}}{Rb}}\right)
-  & \text{if } \frac{R}{\sqrt[3]{n}} \leq \frac{m}{b} < R
+  \ceil*{\frac{Rb}{m_5'}}\left(\frac{m_5'n}{Rb}+1\right)-\frac{m_5'n}{Rb}\\[0.4em]
+  +\sqrt[3]{n}^2\left( \sqrt[3]{n} \text{ mod } \floor*{\frac{m\sqrt[3]{n}}{Rb}}\right)
+  & \text{\hspace*{-0.9em}if } \frac{R}{\sqrt[3]{n}} \leq \frac{m}{b} < R
 \end{cases} \label{eq:seeks-multiple-reads}
 \end{equation}
 
