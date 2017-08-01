@@ -42,7 +42,7 @@
   perform very poorly to split or merge 3D blocks from ultra-high
   resolution images, due to important seek times. We propose and
   analyze two algorithms based on in-memory reconstruction of image
-  parts. Cluster reads access image splits only once while Multiple
+  parts. Cluster reads access image chunks only once while Multiple
   reads minimize the accesses to the image. Evaluation on a
   3000x3000x3000 brain image shows that our algorithms perform
   similarly to the optimal configuration (slice merging) provided that
@@ -132,78 +132,99 @@ Sections~\ref{sec:discussion} discusses them.\todo{Revise when outline is final.
 \section{Algorithms}
 \label{sec:algos}
 
-In our context, split and merge relate to the same dual problem . We
+Split and merge relate to the same dual problem in our context. We
 focus here on merging for the sake of concision. Splitting algorithms
-can be derived from merging by swapping reads and writes. Our goal
-then is to merge a set of $n$ chunks into a single reconstructed 3D
-image with $R$ voxels of size $b$. We assume that all chunks are of
-identical size and that slices are squares and blocks are cubes.
+can be derived from merging ones by swapping reads and writes. Our
+goal then is to merge a set of $n$ chunks into a single reconstructed
+3D image with $R$ voxels of size $b$. For simplicity, we assume that
+all chunks are of identical size, that they do not overlap, and that
+slices are squares and blocks are cubes.
 
-Without loss of generality, we consider a file format where voxels are
-written after alphanumerical sorting of their (z,y,x)
-representation. That is, z slices are written one after the other, and
-in every z slice, y rows are written one after the other. x is the
-fastest-changing dimention.  NIfTI, the file format defined by the
+We consider a file format where voxels are written in column-major
+order, that is, for an image of dimensions (i, j, k), i is the fastest
+changing dimension, followed by dimension j, followed by dimension
+k. All voxels in a \emph{slice} have a the same $k$ and all voxels in
+a \emph{row} have the same $j$.  NIfTI, the file format defined by the
 Neuroimaging Informatics Technology Initiative
 NIfTI\footnote{\url{https://nifti.nimh.nih.gov}} is such a format,
-used by the vast majority of the neuroimaging community. In the
-remainder, we use the term ``slice" for ``z slice".
+used by the vast majority of the neuroimaging community.
 
 \subsection{Notations}
 
 We adopt the following notations (see Figure\ref{fig:notations}):
 \begin{itemize}
 \item $R=D^3$: number of voxels in the reconstructed image.
-\item $b$: number of bytes per voxel in the reconstructed image and chunks (in B).
+\item $b$: number of bytes per voxel (in B).
 \item $n$: number of chunks (blocks or slices).
 \item $m$: amount of available memory (in B).
 \item $m'$: amount of used memory (in B), $m'\leq m$.
 \end{itemize}
-
-For the sake of mathematical simplicity, we assume that the
-reconstructed image and blocks are cubic and that they do not
-overlap. Under this assumption, we also have the following relations:
+We also have the following relations:
 \begin{itemize}
-\item Number of slices in a block: $\sqrt[3]{\frac{R}{n}}=d$. This is
-  also the number of rows and columns in a slice and the number of
-  voxel in a row or column.
-\item Number of blocks required to fill a row of the reconstructed
-  image: $\sqrt[3]{n}$.
+\item Number of slices, rows, columns in a block: $\sqrt[3]{\frac{R}{n}}=d$.
+\item Number of blocks in a block row: $\sqrt[3]{n}$.
 \end{itemize}
-
-%\todo{Make a figure to illustrate the notations.}
 
 \subsection{Disk model}
 
-We use a simplistic disk model where a disk is characterized by its
-read and write rates and its seek time. We do not distinguish between
-access time and seek time. We also assume that seeks require a
-constant amount of time, regardless of the position seeked to. In
-practice, large variations would be expected, but modeling such
-variations would inevitably lead to models specific to the hardware,
-file system or operating system, which we intentionally avoid
-here. Thus, our goal is to find algorithms that minimize the
-\emph{number} of seek operations. Likewise, in modern systems, read
-and write times are greatly impacted by caching occurring at several
-levels, which we do not model here.
+A disk is characterized by its read and write rates and its seek
+time. We do not distinguish between access time and seek time. We also
+assume that seeks require a constant amount of time, regardless of the
+position seeked to. In practice, large variations would be expected,
+but modeling such variations would inevitably lead to models specific
+to the hardware, file system or operating system, which we
+intentionally avoid here. Likewise, in modern systems, read and write
+times are greatly impacted by caching occurring at several levels,
+which we do not model here. Thus, our goal is to find algorithms that
+minimize the \emph{number} of seek operations.
 
-%% and its seek time,
-%% a function $\sigma$ of the seek distance (in B). More precisely,
-%% $\sigma$ would typically be in the order of $\beta$ when an opened
-%% file is seeked to a random position, but it would be much smaller when
-%% a file is seeked to a nearby position.
-%% The disk model encompasses file systems, kernel modules and disk
-%% controllers required to access the disk from a program run in user
-%% space. In modern systems, this often includes caching at various
-%% levels \todo{\cite{x}}, which we will model by zeroing $\alpha_r$ or
-%% $\alpha_w$ values depending on the application.
+\todo{Add ballpark values of seek time (5ms) and read/write rates.}
 
 \subsection{Slices vs blocks}
 
-Algorithms~\ref{algo:naive-slices} and~\ref{algo:naive-blocks} are the
-naive merging methods for slices and blocks.
-\begin{algorithm}[h]
-\caption{Naive merging from slices.}
+\begin{figure}
+  \centering
+  \begin{minipage}[b]{0.42\columnwidth}
+    \def\svgwidth{0.8\columnwidth}
+    \input{figures/svg/Notations.pdf_tex}
+    \caption{Notations. A \emph{block row} is shown in red. A
+      \emph{block slice} is shown in blue.}
+    \label{fig:notations}
+  \end{minipage}
+  \quad \quad \quad
+  \begin{minipage}[b]{0.42\columnwidth}
+    \def\svgwidth{0.8\columnwidth}
+    \input{figures/svg/buffer.pdf_tex}
+    \caption{Buffer used in cluster reads (d=4).  White portions in
+      the buffer are not allocated. }
+    \label{fig:cluster-reads-buffer}
+  \end{minipage}
+\end{figure}
+Algorithms~\ref{algo:naive-slices} and~\ref{algo:naive-blocks} show
+the naive merging methods for slices and blocks. These algorithms
+actually have very different complexities even though blocks and
+slices have identical sizes. Since slices are stored contiguously in
+the reconstructed image, the number of seeks in
+Algorithm~\ref{algo:naive-slices} is only $2n$ as $n$ seeks are
+required to read the slices and $n$ seeks are required to write them:
+\begin{equation}
+  N_\mathrm{slices} = 2n 
+\end{equation}
+However,
+Algorithm~\ref{algo:naive-blocks} has to do extra seeks for each row
+in each slice of each block:
+\begin{equation*}
+N_\mathrm{blocks} = n+nd^2 
+\end{equation*}
+or, using $R$ and $n$ as main variables:
+\begin{equation}
+N_\mathrm{blocks} = n+n\left(\sqrt[3]{\frac{R}{n}}\right)^2
+\end{equation}
+In practice, this difference could lead to a tremendous slowdown, as
+we will show later.
+
+\begin{algorithm}
+\caption{Naive merging from slices}
 \label{algo:naive-slices} 
 \begin{algorithmic}
   \FOR{each slice}
@@ -213,7 +234,7 @@ naive merging methods for slices and blocks.
 \end{algorithmic}
 \end{algorithm}
 \begin{algorithm}[h]
-\caption{Naive merging from blocks.}
+\caption{Naive merging from blocks}
 \label{algo:naive-blocks}
 \begin{algorithmic}
   \FOR{each block}
@@ -222,30 +243,6 @@ naive merging methods for slices and blocks.
   \ENDFOR 
 \end{algorithmic}
 \end{algorithm}
-Algorithms~\ref{algo:naive-slices} and~\ref{algo:naive-blocks}
-actually have very different performance even though blocks and slices
-have identical sizes. Since slices are stored contiguously in the
-reconstructed image, the number of seeks in
-Algorithm~\ref{algo:naive-slices} is only $2n$ as $n$ seeks are
-required to read the slices and $n$ seeks are required to write them:
-\begin{equation}
-  N_\mathrm{slices} = 2n 
-\end{equation}
-However,
-Algorithm~\ref{algo:naive-blocks} has to do extra seeks for each row
-in each slice of each block. That is, the total number of seeks
-performed by Algorithm~\ref{algo:naive-blocks} is:
-\begin{equation*}
-N_\mathrm{blocks} = n+nd^2 
-\end{equation*}
-or, using $R$ and $n$ as our main variables:
-\begin{equation}
-N_\mathrm{blocks} = n+n\left(\sqrt[3]{\frac{R}{n}}\right)^2
-\end{equation}
-In
-practice, this difference could lead to a tremendous slowdown as we will show
-later.
-
 %%  For slices, the total merge time is modeled as follows:
 %% \begin{equation}
 %% T_\mathrm{slices} = \frac{bR}{\alpha_r}+\frac{bR}{\alpha_w}+2\beta n
@@ -258,22 +255,6 @@ later.
 %%     \end{multlined}
 %% \end{equation}
 
-\begin{figure}
-  \centering
-  \begin{minipage}[b]{0.3\columnwidth}
-    \def\svgwidth{\columnwidth}
-    \input{figures/svg/Notations.pdf_tex}
-    \caption{Notations.}
-    \label{fig:notations}
-  \end{minipage}
-  \quad \quad \quad
-  \begin{minipage}[b]{0.3\columnwidth}
-    \def\svgwidth{\columnwidth}
-    \input{figures/svg/buffer.pdf_tex}
-    \caption{Buffer used in cluster reads.}
-    \label{fig:cluster-reads-buffer}
-  \end{minipage}
-\end{figure}
 
 \subsection{Buffered slices}
 
@@ -286,7 +267,7 @@ Algorithm~\ref{algo:buffered-slices}.
   \caption{Buffered merging from slices}
   \label{algo:buffered-slices}
   \begin{algorithmic}[1]
-    \STATE sorted\_slices = sort slices by increasing z values
+    \STATE sorted\_slices = sort slices by increasing k values
     \STATE initialize buffer
     \FOR{i = 0 ; i \textless n ; i+=1 }
       \STATE slice = sorted\_slices[i]
@@ -298,19 +279,23 @@ Algorithm~\ref{algo:buffered-slices}.
     \ENDFOR
   \end{algorithmic}
 \end{algorithm}
-The number of seeks obtained with buffered slices is:
+This algorithm writes in the reconstructed image using a single seek
+per memory load. Therefore:
 \begin{equation}
 N_\mathrm{buff\_slices} =  n + \ceil*{\frac{bR}{m}}
 \end{equation}
-The next two algorithms attempt to generalize buffered slices to blocks.
+Buffered slices are straightforward to implement, however, their
+extension to block merging is not easy. The remainder of this Section
+presents our attempts for such a generalization.
 
 \subsection{Buffered blocks: Cluster reads}
 
-The main idea of cluster reads is to load multiple blocks in memory,
-concatenate them in a buffer and write the buffer in the reconstructed
-image. Seeking is reduced compared to naive block merging since
-contiguous parts of the buffer will be written without seeking. In
-cluster reads, a given block is accessed only once. 
+Cluster reads are the more direct extension of buffered slices to
+blocks: they load multiple blocks in memory, concatenate them in a
+buffer and write the buffer in the reconstructed image. Seeking is
+reduced compared to naive block merging since contiguous parts of the
+buffer will be written without seeking. A given
+block is accessed only once.
 
 The buffer might be a slightly complex data structure, for instance an
 associative array or a Python dictionary, capable of storing multiple
@@ -318,11 +303,7 @@ disjoint sequences of contiguous bytes without having to allocate
 memory for the bytes between such
 sequences. Figure~\ref{fig:cluster-reads-buffer} illustrates how the
 buffer would fill up for the two first blocks in a reconstructed
-image. It shows how the two first 4x4 blocks of a reconstructed image
-would be arranged in the buffer.  White portions in the buffer are not
-allocated.  The column-major order is used, similar to the NIfTI
-format: i is the fastest changing dimension, followed by j, followed
-by k. 
+image, assuming that blocks are of size 4x4x4.
 
 The number of seeks performed by cluster reads depends on how blocks
 loaded in memory arrange in the reconstructed image. In the best case,
@@ -359,7 +340,7 @@ since adding an incomplete row to a set of complete ones multiplies
 the number of required seeks by $d$, as illustrated in
 Figure~\ref{fig:avoided-configurations}-Left. In some cases though,
 rounding $m$ down to $m'$ might increase the number of required
-memory load to a point that the overall number of seeks also
+memory loads to a point that the overall number of seeks also
 increases. Such cases are, however, slightly unusual and their
 complete description requires extensive calculations involving modulo
 arithmetic, which we felt were unwieldy to report here.
@@ -378,6 +359,11 @@ arithmetic, which we felt were unwieldy to report here.
 \label{fig:avoided-configurations}
 \end{figure}
 
+Our algorithm also avoids configurations where the memory load
+overlaps multiple block slices in case 2 or multiple block rows in
+case 1, as such overlaps multiply the number of required seeks (see
+Figure~\ref{fig:avoided-configurations}-Right).
+
 Cluster reads are described in
 Algorithm~\ref{algo:cluster-reads}. Function \texttt{switch} (line 3)
 selects one of the three cases based on the amount of available memory
@@ -385,21 +371,21 @@ and the number of blocks. It returns \texttt{m'} and \texttt{case},
 the identifier of the selected case. Function \texttt{check\_overlap}
 (line 7) determines whether two blocks overlap multiple block slices
 (case 2) or multiple block rows (case 1). For case 3 it always returns
-true.  Function \texttt{sizeof} (line 8) returns the actual memory
+false.  Function \texttt{sizeof} (line 8) returns the actual memory
 used by its argument, including only its allocated segments in case
-the argument is a buffer. 
+the argument is a buffer.
 \begin{algorithm}[h]
   \caption{Buffered merging of blocks with cluster reads}
   \label{algo:cluster-reads}
   \begin{algorithmic}[1]
-    \STATE sorted\_splits = sort splits by increasing (z,y,x) values
+    \STATE sorted\_blocks = sort blocks by increasing (k,j,i)
     \STATE initialize buffer
-    \STATE (m',case)=\texttt{switch}(m,n,R,b)
-    \STATE old\_block = sorted\_splits[0]
+    \STATE (m',case)=switch(m,n,R,b)
+    \STATE old\_block = sorted\_blocks[0]
     \FOR{i = 0 ; i\textless n ; i+=1}
-      \STATE block = sorted\_splits[i]
-      \STATE overlap = \texttt{check\_overlap}(block,old\_block,case)
-      \IF{\texttt{sizeof}(buffer)+\texttt{sizeof}(block) $\geq$ m' \textbf{or} overlap=true}
+      \STATE block = sorted\_blocks[i]
+      \STATE overlap = check\_overlap(block,old\_block,case)
+      \IF{sizeof(buffer)+sizeof(block) $\geq$ m' \textbf{or} overlap=true}
       \STATE write buffer in reconstructed image
       \STATE clear buffer
       \STATE overlap = false
@@ -420,25 +406,26 @@ The number of seeks performed by cluster reads in each of the three cases is:
   N^i_{\mathrm{CR}} = n + x_ib_i, \quad i \in \llbracket 1, 3\rrbracket,
 \end{equation*}
 where $x_i$ is the number of memory loads required to reconstruct the
-image and $b_i$ is the number of seeks required to write a the memory
-load. The first $n$ seeks in the equation are required to read all the blocks
-once. According to Figure~\ref{fig:cluster-reads}, we have:
+image and $b_i$ is the number of seeks required to write the memory
+load. The first $n$ seeks in the equation are required to read all the
+blocks once. According to Figure~\ref{fig:cluster-reads}, we have:
 \begin{equation*}
   b_1=d^2=\sqrt[3]{\frac{R}{n}}^2 \quad ; \quad b_2=d=\sqrt[3]{\frac{R}{n}} \quad ; \quad b_3=1
 \end{equation*}
-
-Our algorithm avoids configurations where the memory load
-overlaps multiple block slices in case 2 or multiple block rows in
-case 1, as such overlaps multiply the number of required seeks
-(see Figure~\ref{fig:avoided-configurations}-Right). Thus, the
+The
 numbers of memory loads required to reconstruct the image are:
 \begin{equation*}
   x_1 = \ceil*{\frac{Rb}{\sqrt[3]{n}^2m_1'}}\sqrt[3]{n}^2;
   x_2 = \ceil*{\frac{Rb}{\sqrt[3]{n}m_2'}}\sqrt[3]{n};
   x_3 = \ceil*{\frac{Rb}{m_3'}}
 \end{equation*}
+Because our algorithm avoids overlapping configurations, $x_1$ is
+proportional to the total number of block rows in the image
+($\sqrt[3]{n}^2$) and $x_2$ is proportional to the total number of
+block slices ($\sqrt[3]{n}$).
 
-Finally, the total number of seeks performed by cluster reads to reconstruct the image is:
+Finally, the total number of seeks
+performed by cluster reads to reconstruct the image is:
 \begin{equation}
 N_\mathrm{CR} =
 \begin{cases}
@@ -468,11 +455,10 @@ due to the differences among $b_i$ values.
 
 Multiple reads are shown in Algorithm~\ref{algo:multiple-reads}.  The
 main idea of this algorithm is that blocks are read partially (line 9)
-to ensure that the memory buffer only contains contiguous bytes, at
-any time. Therefore, the buffer can be written continuously to the
-reconstructed image, without seeking (line 13).  It should be noted
-that a given block might be read multiple times, in different memory
-loads. 
+to ensure that the memory buffer only contains contiguous
+bytes. Therefore, the buffer can be written continuously to the
+reconstructed image, without seeking (line 13).  However, a given
+block might be read multiple times, in different memory loads.
 
 \begin{figure}
 \centering
@@ -502,12 +488,12 @@ loads.
   \caption{Buffered merging of blocks with multiple reads}
   \label{algo:multiple-reads}
   \begin{algorithmic}[1]
-  \STATE sorted\_splits = sort splits by increasing (z,y,x) values
+  \STATE sorted\_blocks = sort blocks by increasing (k,j,i)
   \STATE start\_index = 0 ; end\_index=(m-1)
   \STATE write\_range = (start\_index, end\_index)
   \WHILE{end\_index \textless Rb}
     \STATE initialize buffer
-    \FOR{split in sorted\_splits}
+    \FOR{split in sorted\_blocks}
       \IF{split has voxels in write\_range}
         \STATE split\_data = read split
         \STATE in split\_data, extract the rows in write\_range
@@ -521,10 +507,12 @@ loads.
   \end{algorithmic}
 \end{algorithm}
 
-As illustrated in Figure~\ref{fig:multiple-reads-cases}, we assume that $m'$ represents an integer number $k$
-of block rows (case 1, $k<\sqrt[3]{n}$), of complete rows (case 2,
-$k<d$), of tile rows (case 3, $k<\sqrt[3]{n}$), of slices (case 4,
-$k<d$) or of block slices (case 5, $k<\sqrt[3]{n}$). In each of these 5 cases, we define $v$ as follows:
+As illustrated in Figure~\ref{fig:multiple-reads-cases}, we assume
+that $m'$ represents an integer number $k$ of sub-rows (case 1,
+$k_1<\sqrt[3]{n}$), of complete rows (case 2, $k_2<d$), of tile rows
+(case 3, $k_3<\sqrt[3]{n}$), of slices (case 4, $k_4<d$) or of block
+slices (case 5, $k_5<\sqrt[3]{n}$). In each of these 5 cases, we
+define $v_i$ as follows:
 \begin{equation*}
   v_1=db \text{ ; }  v_2=Db \text{ ; } v_3=Ddb \text{ ; } v_4=D^2b \text{ ; } v_5=D^2db
 \end{equation*}
@@ -538,7 +526,7 @@ The total number of seeks performed by multiple reads in case $i$ is:
   N^i_{\mathrm{MR}} &=& x_i + (x_i-1)b_i +b_i', \quad i \in \llbracket 1,5 \rrbracket\\
   &=& x_i \left(1+b_i\right)-b_i+b_i'
 \end{eqnarray*}
-where $x_i$ is the total number of required memory loads, $b_i$ is the
+where $x_i$ is the total number of memory loads, $b_i$ is the
 number of blocks accessed by the first ($x_i$-1) memory loads and
 $b_i'$ is the number of blocks access by the last memory load. The
 first $x_i$ seeks in the equation are required to write each memory
@@ -622,7 +610,7 @@ library. \todo{Val\'erie and Yongping: (1) extract ImageUtils from
   implementation tricks used for each implementation.}
 
 \begin{itemize}
-\item In MR, no seeking withing the splits.
+\item In MR, no seeking withing the blocks.
 \item Avoid in-memory copies.
 \end{itemize}
 
@@ -630,7 +618,7 @@ library. \todo{Val\'erie and Yongping: (1) extract ImageUtils from
 
 \subsubsection{Multiple reads}
 
-For faster reading all the splits, before the merging process start,
+For faster reading all the blocks, before the merging process start,
 we read all the split’s headers to get their position information and
 calculate each row’s index in the reconstructed image. We only read the
 split when there is a row in that writing range (available memory),
@@ -819,7 +807,7 @@ In a real system, high-resolution images are likely to be processed on
 computing clusters, for instance using software from the Hadoop
 project, in particular the Hadoop Distributed File
 System~\cite{shvachko2010hadoop}. In this context parallel split-and-merge algorithms
-will be required, since the various splits of a large image would be
+will be required, since the various blocks of a large image would be
 uploaded to different disks concurrently. In the same vein,
 ``re-spliting'' algorithms would have to be devised in case a split
 image need to be split in a different geometry. Cluster reads and
@@ -860,6 +848,9 @@ problem targeted by the format in~\cite{burns2013open} was to extract
 a single block from a large image. Second, we have not considered
 on-the-fly data compression yet, which is a unique feature of MINC
 2.0.
+
+% Library is available. We recommend using xxx for most cases. Same
+% algo works for blocks or slices.
 
 % Ideas for the future: measure the actual amount of consumed memory.
 
