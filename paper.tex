@@ -7,6 +7,7 @@
 \usepackage{color}
 \usepackage[pdftex]{graphicx}
 \usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=black,citecolor=black,filecolor=black,urlcolor=blue}
 \usepackage{mathtools}
 \usepackage{multirow}
 \usepackage{stmaryrd} % for llbracket and rrbracket
@@ -584,6 +585,86 @@ N_\mathrm{MR} =
 \end{cases} \label{eq:seeks-multiple-reads}
 \end{equation}
 
+\subsection{Analysis}
+
+\todo{Make more simulations to support that claim.}
+
+Based on a few simulations of Equations~\ref{eq:seeks-cluster-reads-1}
+and~\ref{eq:seeks-multiple-reads}, we conjectured that the comparison
+between Cluster reads and Multiple reads essentially depends on the
+three Cluster reads cases. When Cluster reads merge incomplete block
+rows (case 1), they are always outperformed by Multiple reads
+(\textbf{prop 1}).  When Cluster reads merge complete block rows (case
+2), the comparison between Cluster reads and Multiple reads depends on
+the values of $D$ and $n$ (\textbf{prop 2}). When Cluster reads merge complete
+block slices (case 3), Cluster reads and Multiple reads are equivalent
+(\textbf{prop 3}).
+
+\textbf{prop 1} \todo{do it!}
+
+ \textbf{prop 2} is proven by Figure~\ref{fig:model-comparison} that
+ shows two situations where Cluster reads and Multiple reads are
+ alternatively better than each other.
+
+ \textbf{prop 3} is easy to infer from
+ equations~\ref{eq:seeks-cluster-reads-1}
+ and~\ref{eq:seeks-multiple-reads} when assuming that $Rb$ is an exact
+ multiple of $m$. In this case, both equations boils down to
+ $n+\frac{Rb}{m}$.
+
+\begin{figure}
+  \includegraphics[width=0.45\columnwidth]{figures/model-big-brain-comparison.pdf}
+  \includegraphics[width=0.45\columnwidth]{figures/model-big-brain-comparison-moreblocks.pdf}
+  \caption{Number of seeks for Cluster reads vs Multiple reads when
+    Cluster reads merge complete block rows (case 2), for D=3000 and
+    b=2. Left: n=125; Right: n=64,000.}
+  % Gnuplot file: scripts/model/model.gnplt
+  \label{fig:model-comparison}
+\end{figure}
+
+\section{Implementation}
+\label{sec:implementation}
+
+The 5 algorithms presented earlier are implemented in a Python library
+called \texttt{sam} (for ``split and merge''), available at
+\url{https://github.com/big-data-lab-team/-bin-sam} under MIT
+license. It uses Nibabel~\cite{matthew_brett_2016_60808} for image I/O
+and NumPy for array manipulations.
+
+% buffer implementation
+The data buffer used in Cluster reads and Multiple reads is
+implemented as a Python dictionary where the keys are offsets in the
+reconstructed image and the values are NumPy arrays containing the
+data starting at this offset. When the memory load is complete,
+dictionary entries are written sequentially to the reconstructed
+image. In Cluster reads, some seeking might be required between
+writes. We implemented a defragmentation procedure for the dictionary
+that merges contiguous dictionary entries in a single one, but we
+abandoned it as it proved more time-consuming than going through all
+the initial entries, due to the overhead of resizing NumPy arrays to
+merge entries. In Multiple reads, dictionary entries are always
+contiguous in the reconstructed image.  We tried to use a single NumPy
+array as a buffer, but we finally abandoned it as inserting data at a
+specific position in a NumPy array copies the data in memory, which
+increases the runtime and the peak memory consumption.
+
+% Split methods
+The implementation of splitting algorithms was greatly facilitated by
+the availability of so-called array proxies in Nibabel, which help to
+read specific sub-parts of large images. Nibabel's array proxies
+essentially provided the buffer implementation for splitting
+algorithms. Unfortunately, they are not available to write
+data. \todo{Yongping, Valerie: any other comment on split
+  implementations?}
+
+% Additional optimizations.
+In Multiple reads, for faster reading all the blocks, before the
+merging process start, we read all the block headers to get their
+position information and calculate each corresponding row index in the
+reconstructed image. We only read the block when there is a row in
+that writing range (available memory), otherwise, we skip it.
+\todo{Valerie, Yongping, any other implementation trick to report?}
+
 
 \subsection{Lossless compression}
 
@@ -599,87 +680,8 @@ could therefore potentially use in-memory compression.
 
 \todo{could we merge without de-compressing?}
 
-\subsection{Implementation}
-\label{sec:implementation}
-
-Our algorithms are implemented in Python using the Nibabel
-library. \todo{Val\'erie and Yongping: (1) extract ImageUtils from
-  mapreduce repository (preserve git history; just copy the repo and
-  remove the mapreduce stuff in the copy). Link to the github
-  repo. (2) Describe the code briefly, in particular the
-  implementation tricks used for each implementation.}
-
-\begin{itemize}
-\item In MR, no seeking withing the blocks.
-\item Avoid in-memory copies.
-\end{itemize}
-
-\subsubsection{Cluster reads}
-
-\subsubsection{Multiple reads}
-
-For faster reading all the blocks, before the merging process start,
-we read all the split’s headers to get their position information and
-calculate each row’s index in the reconstructed image. We only read the
-split when there is a row in that writing range (available memory),
-otherwise, we skip it.
-
-Initially, we use a numpy array as our data buffer, after the split is read,
-we assign the rows (a numpy array of unsigned integers) into this
-buffer to the right position. However, after some tests, we found that
-there is some overhead. Each time we assign the data to the corresponding
-position of the buffer, the system will copy these integers first.
-This is neither time-efficient nor space-efficient.
-
-We then think of a better solution which we use the dictionary in python
-as our data buffer. We use the row’s index as a key, the data (in bytes)
-as the value. As for the multiple reads, the data buffer only contains
-contiguous bytes, we can just seek once (the first key of the sorted keys
-in dictionary), then write all the bytes continuously to the file.
-There is no copy in the memory, which proves a bit faster than using
-a numpy array as the buffer.
-
-\todo{Yongping: among other implementation techniques (e.g. dictionary
-  vs list, etc), explain clearly and concisely what the calculation
-  time covers.}
-
-\section{Simulations}
-
-\todo{Make more simulations to support that claim.}
-
-After running a few simulations, we saw that the comparison between
-Cluster reads and Multiple reads essentially depends on the three
-Cluster reads configurations.  When Cluster reads merge incomplete
-block rows (case 1), they are always outperformed by Multiple reads.
-When Cluster reads merge complete block rows (case 2), the comparison
-between Cluster reads and Multiple reads depends on the values of $D$
-and $n$. Figure~\ref{fig:model-comparison} shows two situations where
-Cluster reads and Multiple reads are alternatively better than each
-other. When Cluster reads merge complete block slices (case 3),
-Cluster reads and Multiple reads are equivalent.
-
-\begin{figure}
-  \includegraphics[width=0.45\columnwidth]{figures/model-big-brain-creads.pdf}
-  \includegraphics[width=0.45\columnwidth]{figures/model-big-brain-mreads.pdf}
-  \caption{Number of seeks for Cluster reads (Left) and Multiple reads (Right), for
-    D=3000, b=2 and n=125.}
-  % Gnuplot file: scripts/model/model.gnplt
-  \label{fig:model-individual}
-\end{figure}
-
-
-\begin{figure}
-  \includegraphics[width=0.45\columnwidth]{figures/model-big-brain-comparison.pdf}
-  \includegraphics[width=0.45\columnwidth]{figures/model-big-brain-comparison-moreblocks.pdf}
-  \caption{Number of seeks for Cluster reads vs Multiple reads when
-    Cluster reads merge complete block rows (case 2), for D=3000 and
-    b=2. Left: n=125; Right: n=64,000.}
-  % Gnuplot file: scripts/model/model.gnplt
-  \label{fig:model-comparison}
-\end{figure}
-
-\section{Benchmark}
-\label{sec:benchmark}
+\section{Experiments}
+\label{sec:results}
 
 \subsection{Data}
 To benchmark our library we use the 76~GB Big~Brain image split in 125
@@ -698,10 +700,6 @@ Both drives used 512-byte logical sectors, 4096-byte physical sectors,
 SATA >3.1 (6.0 Gb/s) and were accessed through the XFS file system
 v4.5.0.
 %smartctl --xall /dev/sda
-
-
-\section{Experiments}
-\label{sec:results}
 
 \subsection{Execution conditions}
 
