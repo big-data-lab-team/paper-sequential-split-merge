@@ -370,7 +370,7 @@ arithmetic, which we felt were unwieldy to report here.
   \centering
 \def\svgwidth{0.3\columnwidth}
 \input{figures/svg/incomplete-rows.pdf_tex}
-\hfill
+\quad \quad \quad
 \def\svgwidth{0.3\columnwidth}
 \input{figures/svg/overlap.pdf_tex}
 \caption{Configurations that increase the number of seeks per
@@ -390,10 +390,7 @@ the identifier of the selected case. Function \texttt{check\_overlap}
 (case 2) or multiple block rows (case 1). For case 3 it always returns
 true.  Function \texttt{sizeof} (line 8) returns the actual memory
 used by its argument, including only its allocated segments in case
-the argument is a buffer. It should be noted that writing the buffer
-to the reconstructed image (line 11) might involve some manipulation
-in the buffer to merge its continuous segments. \todo{Precise this
-  based on Valerie's final code.}
+the argument is a buffer. 
 \begin{algorithm}[h]
   \caption{Buffered merging of blocks with cluster reads}
   \label{algo:cluster-reads}
