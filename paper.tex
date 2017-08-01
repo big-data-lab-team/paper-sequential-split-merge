@@ -37,111 +37,100 @@
 \maketitle
 
 \begin{abstract}
-  Splitting and merging data is a requirement for most parallel
-    or distributed processing operations, however, naive algorithms
-    perform very poorly on ultra-high resolution 3D images due to
-    important seek times. To address this issue, we created two
-    algorithms based on in-memory reconstruction of image segments and
-    analyzed their complexity in terms of number of seeks. Evaluation
-    on a 3000x3000x3000 image of the brain shows that both our
-    algorithms can split or merge blocks with a performance similar to
-    slices, which solves our initial problem. We conclude that
-    splitting and merging large 3D images can be done efficiently
-    based on simple data formats.
+  Splitting and merging data is a requirement for most parallel or
+  distributed processing operations. Naive algorithms, however,
+  perform very poorly to split or merge 3D blocks from ultra-high
+  resolution images, due to important seek times. We propose and
+  analyze two algorithms based on in-memory reconstruction of image
+  parts. Cluster reads access image splits only once while Multiple
+  reads minimize the accesses to the image. Evaluation on a
+  3000x3000x3000 brain image shows that our algorithms perform
+  similarly to the optimal configuration (slice merging) provided that
+  enough memory is available, which solves our initial problem.  We
+  conclude that splitting and merging large 3D images can be done
+  efficiently based on simple data formats.
 \end{abstract}
 
 
 \section{Introduction}
 
+% Problem definition
 Three-dimensional images that exceed typical memory size are
-increasingly found in a variety of disciplines. BigBrain, for
+increasingly found in a variety of disciplines. Big~Brain, for
 instance, is a 3D histological image of the human brain that
 represents 1~TB of data organized in 3600 planes at full resolution
 (1$\mu$m in-plane), and 76~GB at a 40$\mu$m isotropic resolution
-commonly used in neurosciences~\cite{amunts2013bigbrain}. Other
-examples found in medical imaging, our primary domain of interest,
-include high-resolution 3D electron microscopy (see, e.g.,
-~\cite{bock2011network}) or micro and
+commonly used in neurosciences~\cite{amunts2013bigbrain}. This dataset
+is being re-scanned at an even higher resolution, leading to 100~TB of
+raw data. Other examples found in medical imaging, our primary domain
+of interest, include high-resolution 3D electron microscopy (see,
+e.g., ~\cite{bock2011network}) or micro- and
 nano-tomography~\cite{10.1371/journal.pone.0035691}. As such images
 would typically be processed on a computing cluster, possibly using
-locality-aware file systems such as HDFS, software libraries are
-needed to split and merge such images efficiently. We introduce and
-compare a family of algorithms to address this problem in a sequential
-environment made of a single storage disk. We are aware of the need
-for parallel algorithms that would split and merge images to and from
-an array of disks but we plan to describe such algorithms in a
-subsequent paper based on the results of the present one. \todo{ There
-  is BigBrain-1 rescanned at 1 micron in the plane. So resolution is
-  1x1x20, 7404 slices. If raw data are about 1Tb, then multiply by 100
-  for an estimation of the size of the new image. }
+locality-aware file systems such as HDFS~\cite{shvachko2010hadoop},
+efficient software libraries are needed to split and merge them
+efficiently. In particular, data reads and writes might result in
+extensive seek times that drastically limit I/O performance.  In this
+paper we introduce and compare a family of sequential algorithms to
+split and merge images with minimal seek time.
 
-
-%also in
-%MB/s).
-
-Images are split into chunks representing 3D blocks or 2D slices. We
-assume that a block or slice fits in memory. The BigBrain would
+Images are split into chunks representing 3D blocks or 2D slices,
+which we assume fit in memory. A dataset such as Big~Brain would
 perhaps be split into 125 chunks of 600~MB. The decision to split an
-image into slices or blocks, and the size of the resulting chunks, may
-be constrained by the application. Some applications, for instance
-spatial filtering, would commonly require blocks while other ones such
+image into slices or blocks, and the size of the resulting chunks, is
+usually done by the application. Some applications would commonly
+require blocks, for instance spatial filtering, while other ones such
 as acquisition artifact removal would rather work on
-slices. Flexibility is thus required in the splitting
-scheme. Applications processing voxels individually, for instance
+slices. Applications processing voxels individually, for instance
 histogram computation or k-means clustering, could work on either
-slices or blocks.
+slices or blocks. Flexibility is thus required in the splitting
+scheme.
 
-The main problem encountered in the context of this paper is the fact
-that, if not ordered properly, data reads and writes might result in
-extensive seek times that, as we illustrate below, drastically limit
-the I/O performance. This problem is obviously related to the ordering
-of data bytes in image files, which we assume is arbitrary but known
-to the algorithm. The problem is also related to the geometry of the
-chunks to extract or merge, which we again assume arbitrary but known
-to the algorithm. In a nutshell, we are looking for algorithms to
-reduce seek times while allowing for arbitrary chunk geometries and
-arbitrary byte orders in data files. The main idea of the variations
-presented in the remainder of the paper is to convert data orderings
-in memory before writing them on disk. 
+Seek time is highly dependent on the byte ordering in image files,
+which we assume is arbitrary but known to the algorithm. The geometry
+of the chunks to split or merge (slices or blocks) and their sizes are
+also critical, which we again assume arbitrary but known to the
+algorithm.  The main idea of our algorithms will be to convert data
+orderings in memory before writing them to disk.
 
-The literature is remarkably scarce on the problem described
-above. Parallel processing of 3D images has obviously been extensively
-studied, but methods have focused more on geometrical approaches to
-partition images and on load-balancing and task scheduling techniques
-while we aim at algorithms to efficiently split or merge images
-regardless of the geometry of the chunks \todo{do a serious literature
-review on this topic}. Perhaps this lack of related works could be
-attributed to the fact that disk I/O weren't a bottleneck until image
-resolution reached a certain threshold. A relevant reference is the
-description of the Open Connectome Data Cluster~\cite{burns2013open},
-a data warehouse system that allows users to retrieve specific chunks
-of large datasets. In this work, the problem of long seek times is
-addressed by designing a specific file format based on space-filling
-curves, that elegantly preserves spatial proximity on disk. However,
-addressing the problem using a specific data organization optimizes
-the system for specific chunk geometries, volumetric in this case,
-while we aim at algorithms that support multiple types of geometries.
+The literature on this problem is remarkably scarce. Parallel and
+distributed image processing has obviously been extensively studied
+and used in various
+platforms~\cite{miguet1991elastic,tang2007eman2,yang2008parallel,braunl2013parallel,moise2013terabyte,bajcsy2013terabyte},
+but methods have focused more on geometrical approaches to partition
+images and on load-balancing and task scheduling techniques while we
+aim at algorithms to efficiently split or merge images regardless of
+the geometry of the chunks. Seek times are, however, often identified
+as an issue but the preferred solution is usually to optimize data
+storage formats for a certain application while we are searching for
+algorithms that would reduce the seek time regardless of the data
+format. For instance, the Open Connectome Data
+Cluster~\cite{burns2013open} is a data warehouse system that allows
+users to retrieve specific chunks of large image datasets. It
+addresses seek times by designing a specific file format based on
+space-filling curves, which elegantly preserves spatial proximity on
+disk. Such specific data formats optimize the system for particular
+chunk geometries, blocks in this case, while we aim at algorithms to
+support multiple types of geometries.
+%http://dl.acm.org/citation.cfm?id=218395 also minimizes seek time using a specific format.
 
 This paper makes the following contributions:
 \begin{itemize}
-  \item We propose a set of algorithms to split and merge 3D images
-    that do not fit in memory.
-  \item We model the performance (number of seeks) of these algorithms,
-    based on a simple but realistic disk I/O model.
+  \item We propose a set of algorithms to split and merge
+    terabyte-scale 3D images from blocks or slices.
+  \item We model the performance (number of seeks) of these algorithms.
   \item We evaluate our model and algorithms on a representative
     use-case involving a 1~TB image a hard drive and a solid-state
     drive.
 \end{itemize}
 Section~\ref{sec:algos} presents our algorithms and their complexity,
 Section~\ref{sec:results} details the results and
-Sections~\ref{sec:discussion} discusses them.
+Sections~\ref{sec:discussion} discusses them.\todo{Revise when outline is final.}
 
 %\href{http://dl.acm.org/citation.cfm?id=218395}
 
 \section{Algorithms}
 \label{sec:algos}
-
-\todo{Overlapping blocks. non-cubic blocks.}
 
 In our context, split and merge relate to the same dual problem . We
 focus here on merging for the sake of concision. Splitting algorithms
@@ -151,13 +140,14 @@ image with $R$ voxels of size $b$. We assume that all chunks are of
 identical size and that slices are squares and blocks are cubes.
 
 Without loss of generality, we consider a file format where voxels are
-written after alphanumerical sorting of their (x,y,z)
-representation. That is, x slices are written one after the other, and
-in every x slice, y rows are written one after the other. NIfTI, the
-file format defined by the Neuroimaging Informatics Technology
-Initiative NIfTI\footnote{\url{https://nifti.nimh.nih.gov}} is such a
-format, used by the vast majority of the neuroimaging community. In
-the remainder, we use the term ``slice" for ``x slice".
+written after alphanumerical sorting of their (z,y,x)
+representation. That is, z slices are written one after the other, and
+in every z slice, y rows are written one after the other. x is the
+fastest-changing dimention.  NIfTI, the file format defined by the
+Neuroimaging Informatics Technology Initiative
+NIfTI\footnote{\url{https://nifti.nimh.nih.gov}} is such a format,
+used by the vast majority of the neuroimaging community. In the
+remainder, we use the term ``slice" for ``z slice".
 
 \subsection{Notations}
 
@@ -170,9 +160,9 @@ We adopt the following notations (see Figure\ref{fig:notations}):
 \item $m'$: amount of used memory (in B), $m'\leq m$.
 \end{itemize}
 
-For the sake of mathematical simplicity, we assume that
-the reconstructed image and blocks are cubic. Under this assumption,
-we also have the following relations:
+For the sake of mathematical simplicity, we assume that the
+reconstructed image and blocks are cubic and that they do not
+overlap. Under this assumption, we also have the following relations:
 \begin{itemize}
 \item Number of slices in a block: $\sqrt[3]{\frac{R}{n}}=d$. This is
   also the number of rows and columns in a slice and the number of
@@ -180,20 +170,22 @@ we also have the following relations:
 \item Number of blocks required to fill a row of the reconstructed
   image: $\sqrt[3]{n}$.
 \end{itemize}
+
 %\todo{Make a figure to illustrate the notations.}
 
 \subsection{Disk model}
 
 We use a simplistic disk model where a disk is characterized by its
-read and write rates and its access time. In particular, we assume
-that seeks require a constant amount of time, regardless of the
-position seeked to. In practice, large variations would be expected,
-but modeling such variations would inevitably lead to models specific
-to the hardware, file system or operating system, which we
-intentionally avoid here. Thus, our goal is to find algorithms that
-minimize the \emph{number} of seek operations. Likewise, in modern
-systems, read and write times are greatly impacted by caching
-occurring at several levels, which we do not model here.
+read and write rates and its seek time. We do not distinguish between
+access time and seek time. We also assume that seeks require a
+constant amount of time, regardless of the position seeked to. In
+practice, large variations would be expected, but modeling such
+variations would inevitably lead to models specific to the hardware,
+file system or operating system, which we intentionally avoid
+here. Thus, our goal is to find algorithms that minimize the
+\emph{number} of seek operations. Likewise, in modern systems, read
+and write times are greatly impacted by caching occurring at several
+levels, which we do not model here.
 
 %% and its seek time,
 %% a function $\sigma$ of the seek distance (in B). More precisely,
@@ -220,7 +212,6 @@ naive merging methods for slices and blocks.
   \ENDFOR      
 \end{algorithmic}
 \end{algorithm}
-
 \begin{algorithm}[h]
 \caption{Naive merging from blocks.}
 \label{algo:naive-blocks}
@@ -231,12 +222,12 @@ naive merging methods for slices and blocks.
   \ENDFOR 
 \end{algorithmic}
 \end{algorithm}
-
 Algorithms~\ref{algo:naive-slices} and~\ref{algo:naive-blocks}
 actually have very different performance even though blocks and slices
 have identical sizes. Since slices are stored contiguously in the
 reconstructed image, the number of seeks in
-Algorithm~\ref{algo:naive-slices} is only $2n$:
+Algorithm~\ref{algo:naive-slices} is only $2n$ as $n$ seeks are
+required to read the slices and $n$ seeks are required to write them:
 \begin{equation}
   N_\mathrm{slices} = 2n 
 \end{equation}
@@ -244,8 +235,12 @@ However,
 Algorithm~\ref{algo:naive-blocks} has to do extra seeks for each row
 in each slice of each block. That is, the total number of seeks
 performed by Algorithm~\ref{algo:naive-blocks} is:
-\begin{equation}
+\begin{equation*}
 N_\mathrm{blocks} = n+nd^2 
+\end{equation*}
+or, using $R$ and $n$ as our main variables:
+\begin{equation}
+N_\mathrm{blocks} = n+n\left(\sqrt[3]{\frac{R}{n}}\right)^2
 \end{equation}
 In
 practice, this difference could lead to a tremendous slowdown as we will show
@@ -282,18 +277,19 @@ later.
 
 \subsection{Buffered slices}
 
-The algorithms presented up to now are in fact particular cases of
-memory buffering where the amount of available memory equals the
-maximum size of a chunk. 
-
+Algorithm~\ref{algo:naive-slices} is a particular case of memory
+buffering where the amount of available memory equals the maximum size
+of a chunk. More buffering can be achieved when the amount of
+available memory increases, as shown in
+Algorithm~\ref{algo:buffered-slices}.
 \begin{algorithm}[h]
   \caption{Buffered merging from slices}
   \label{algo:buffered-slices}
   \begin{algorithmic}[1]
-    \STATE list = sort slices by increasing x values
+    \STATE sorted\_slices = sort slices by increasing z values
     \STATE initialize buffer
     \FOR{i = 0 ; i \textless n ; i+=1 }
-      \STATE slice = list[index]
+      \STATE slice = sorted\_slices[i]
       \IF{\texttt{sizeof}(buffer)+\texttt{sizeof}(slice) $\geq$ m}
         \STATE write buffer in reconstructed image
         \STATE clear buffer
@@ -302,10 +298,11 @@ maximum size of a chunk.
     \ENDFOR
   \end{algorithmic}
 \end{algorithm}
-
+The number of seeks obtained with buffered slices is:
 \begin{equation}
 N_\mathrm{buff\_slices} =  n + \ceil*{\frac{bR}{m}}
 \end{equation}
+The next two algorithms attempt to generalize buffered slices to blocks.
 
 \subsection{Buffered blocks: Cluster reads}
 
@@ -697,7 +694,7 @@ Cluster reads and Multiple reads are equivalent.
 \label{sec:benchmark}
 
 \subsection{Data}
-To benchmark our library we use the 76~GB BigBrain image split in 125
+To benchmark our library we use the 76~GB Big~Brain image split in 125
 non-overlapping chunks. The data is available \todo{[here]}.
 
 \subsection{Infrastructure}
