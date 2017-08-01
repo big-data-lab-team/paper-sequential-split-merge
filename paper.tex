@@ -761,9 +761,20 @@ solution to reduce seek time.  \todo{On figure: check that breakdowns
   \hfill
     \includegraphics[width=0.45\columnwidth]{figures/benchmark-mreads/mreads-breakdown-hdd.pdf}
   \caption{Comparison between Multiple reads, blocks and slices. Left: SSD. Right: HDD.}
-  % Gnuplot file: scripts/blocks-slices/createboxplot.gnplt
+  % Python file: scripts/mreads/generate_avg_var_data.py
+  % Gnuplot file: scripts/mreads/compare_breakdown_errbar.gnuplot
 \label{fig:multiple-reads}
 \end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.70\columnwidth]{figures/benchmark-mreads/mreads-number-of-seeks.pdf}
+  \hfill
+  \caption{Number of seeks in Multiple reads}
+  % Gnuplot file: scripts/mreads/number_of_seeks.gnuplot
+\label{fig:multiple-reads-number-of-seek}
+\end{figure}
+
 
 Results discussion:
 \begin{itemize}
