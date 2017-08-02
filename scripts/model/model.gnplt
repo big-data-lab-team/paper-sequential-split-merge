@@ -53,7 +53,7 @@ mreads(x) =    x < m3 ? a(x):\
 	       e(x) 
 
 ## BigBrain
-D=3000
+D=3458
 R=D**3
 b=2
 nu=5
@@ -123,10 +123,34 @@ set xtics ("2" 2*10**9, "3" 3*10**9, "4" 4*10**9,\
 plot  [min:max][0:]            creads(x) lw 3 title "Cluster reads",\
 			       mreads(x) lw 3 title "Multiple reads"			     
 
+# Computes and prints values to be ploted later, by scripts/mreads/number_of_seeks.gnuplot
+buffslices(x)=n+ceil((b*x)/x)
+
+v0=n+n*d**2
+v1=creads(3*10**9)
+v2=creads(6*10**9)
+v3=creads(9*10**9)
+v4=creads(12*10**9)
+v5=creads(16.65*10**9)
+v6=mreads(3*10**9)
+v7=mreads(6*10**9)
+v8=mreads(9*10**9)
+v9=mreads(12*10**9)
+v10=mreads(16*10**9)
+v11=2*n
+v12=buffslices(3*10**9)
+v13=buffslices(6*10**9)
+v14=buffslices(9*10**9)
+v15=buffslices(12*10**9)
+v16=buffslices(16*10**9)
+#  1.naiveblocks 2.cr3g 3.cr6g 4.cr9g 5.cr12g 6.cr16g\
+   7.mr3g 8.mr6g 9.mr9g 10.mr12g 11.mr16g 12.naiveslices\
+   13. buffsl3g 14. buffsl6g 15. buffsl9g 16. buffsl12g 17. buffsl16g
+print v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16
+
 
 ### Comparison with more blocks
 set output "./figures/model-big-brain-comparison-moreblocks.pdf" 
-D=3000
 R=D**3
 b=2
 nu=40

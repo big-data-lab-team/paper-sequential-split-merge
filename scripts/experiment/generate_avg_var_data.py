@@ -1,12 +1,20 @@
 #!/usr/bin/env python
 
 input_file_mreads_ssd = "./data/mreads/mreads_ssd.dat"
-input_file_naive_ssd = "./data/blocks-slices/totaltime.dat"
 output_file_mreads_ssd = "./data/mreads/mreads_ssd_avg_var.dat"
-
 input_file_mreads_hdd = "./data/mreads/mreads_hdd.dat"
-input_file_naive_hdd = "./data/blocks-slices/totaltime.dat"
 output_file_mreads_hdd = "./data/mreads/mreads_hdd_avg_var.dat"
+
+input_file_creads_ssd = "./data/creads/creads_ssd.dat"
+output_file_creads_ssd = "./data/creads/creads_ssd_avg_var.dat"
+input_file_creads_hdd = "./data/creads/creads_hdd.dat"
+output_file_creads_hdd = "./data/creads/creads_hdd_avg_var.dat"
+
+input_file_buff_slices_ssd = "./data/buff-slices/buff-slices_ssd.dat"
+output_file_buff_slices_ssd = "./data/buff-slices/buff-slices_ssd_avg_var.dat"
+input_file_buff_slices_hdd = "./data/buff-slices/buff-slices_hdd.dat"
+output_file_buff_slices_hdd = "./data/buff-slices/buff-slices_hdd_avg_var.dat"
+
 
 def avg(l):
     return sum(l) / float(len(l))
@@ -19,7 +27,7 @@ def var(l):
         s2 += i
     return (float(s1) / len(l) - (float(s2) / len(l)) ** 2) ** 0.5
 
-def get_avg_var_mreads_naive(input_file_mreads, input_file_naive, output_file, disk):
+def get_avg_var_naive(input_file, output_file, input_file_naive_blocks, input_file_naive_slices, hasnaive, disk):
     read_times_3g = []
     write_times_3g = []
     seek_times_3g = []
@@ -56,15 +64,19 @@ def get_avg_var_mreads_naive(input_file_mreads, input_file_naive, output_file, d
     calculation_times_blocks = []
     total_time_blocks = []
 
-    with open(input_file_mreads, 'r') as f:
+    offset=0
+    if hasnaive:
+        offset=5
+        
+    with open(input_file, 'r') as f:
         for line in f:
             if '#' not in line:
                 items = line.split(' ')
                 # 3g
-                read_time = float(items[0])
-                write_time = float(items[1])
-                seek_time = float(items[2])
-                total_time = float(items[4])
+                read_time = float(items[offset+0])
+                write_time = float(items[offset+1])
+                seek_time = float(items[offset+2])
+                total_time = float(items[offset+4])
                 calculation_time = total_time - seek_time - write_time - read_time
                 read_times_3g.append(read_time)
                 write_times_3g.append(write_time)
@@ -72,10 +84,10 @@ def get_avg_var_mreads_naive(input_file_mreads, input_file_naive, output_file, d
                 calculation_times_3g.append(calculation_time)
                 total_time_3g.append(total_time)
                 # 6g
-                read_time = float(items[5])
-                write_time = float(items[6])
-                seek_time = float(items[7])
-                total_time = float(items[9])
+                read_time = float(items[offset+5])
+                write_time = float(items[offset+6])
+                seek_time = float(items[offset+7])
+                total_time = float(items[offset+9])
                 calculation_time = total_time - seek_time - write_time - read_time
                 read_times_6g.append(read_time)
                 write_times_6g.append(write_time)
@@ -83,10 +95,10 @@ def get_avg_var_mreads_naive(input_file_mreads, input_file_naive, output_file, d
                 calculation_times_6g.append(calculation_time)
                 total_time_6g.append(total_time)
                 # 9g
-                read_time = float(items[10])
-                write_time = float(items[11])
-                seek_time = float(items[12])
-                total_time = float(items[14])
+                read_time = float(items[offset+10])
+                write_time = float(items[offset+11])
+                seek_time = float(items[offset+12])
+                total_time = float(items[offset+14])
                 calculation_time = total_time - seek_time - write_time - read_time
                 read_times_9g.append(read_time)
                 write_times_9g.append(write_time)
@@ -94,72 +106,51 @@ def get_avg_var_mreads_naive(input_file_mreads, input_file_naive, output_file, d
                 calculation_times_9g.append(calculation_time)
                 total_time_9g.append(total_time)
                 # 12g
-                read_time = float(items[15])
-                write_time = float(items[16])
-                seek_time = float(items[17])
-                total_time = float(items[19])
+                read_time = float(items[offset+15])
+                write_time = float(items[offset+16])
+                seek_time = float(items[offset+17])
+                total_time = float(items[offset+19])
                 calculation_time = total_time - seek_time - write_time - read_time
                 read_times_12g.append(read_time)
                 write_times_12g.append(write_time)
                 seek_times_12g.append(seek_time)
                 calculation_times_12g.append(calculation_time)
                 total_time_12g.append(total_time)
-    # open naive slice block file:
-    with open(input_file_naive, 'r') as f:
-        if disk == "hdd":
+
+    # open naive block file:
+    with open(input_file_naive_blocks, 'r') as f:
+            for line in f:
+                if '#' not in line:
+                    items = line.split(' ')
+                    # naive blocks hdd
+                    read_time = float(items[0])
+                    write_time = float(items[1])
+                    seek_time = float(items[2])
+                    total_time = float(items[4])
+                    calculation_time = total_time - seek_time - write_time - read_time
+                    read_times_blocks.append(read_time)
+                    write_times_blocks.append(write_time)
+                    seek_times_blocks.append(seek_time)
+                    calculation_times_blocks.append(calculation_time)
+                    total_time_blocks.append(total_time)
+
+        # open naive slice  file:
+    with open(input_file_naive_slices, 'r') as f:
             for line in f:
                 if '#' not in line:
                     items = line.split(' ')
                     # naive slices hdd
-                    read_time = float(items[9])
-                    write_time = float(items[10])
-                    seek_time = 0
-                    total_time = float(items[5])
+                    read_time = float(items[0])
+                    write_time = float(items[1])
+                    seek_time = float(items[2])
+                    total_time = float(items[4])
                     calculation_time = total_time - seek_time - write_time - read_time
                     read_times_slices.append(read_time)
                     write_times_slices.append(write_time)
                     seek_times_slices.append(seek_time)
                     calculation_times_slices.append(calculation_time)
                     total_time_slices.append(total_time)
-                    # naive blocks hdd
-                    read_time = float(items[14])
-                    write_time = float(items[16])
-                    seek_time = float(items[15])
-                    total_time = float(items[6])
-                    calculation_time = total_time - seek_time - write_time - read_time
-                    read_times_blocks.append(read_time)
-                    write_times_blocks.append(write_time)
-                    seek_times_blocks.append(seek_time)
-                    calculation_times_blocks.append(calculation_time)
-                    total_time_blocks.append(total_time)
-
-        else:
-            for line in f:
-                if '#' not in line:
-                    items = line.split(' ')
-                    # naive slices ssd
-                    read_time = float(items[7])
-                    write_time = float(items[8])
-                    seek_time = 0
-                    total_time = float(items[0])
-                    calculation_time = total_time - seek_time - write_time - read_time
-                    read_times_slices.append(read_time)
-                    write_times_slices.append(write_time)
-                    seek_times_slices.append(seek_time)
-                    calculation_times_slices.append(calculation_time)
-                    total_time_slices.append(total_time)
-                    # naive blocks ssd
-                    read_time = float(items[11])
-                    write_time = float(items[13])
-                    seek_time = float(items[12])
-                    total_time = float(items[1])
-                    calculation_time = total_time - seek_time - write_time - read_time
-                    read_times_blocks.append(read_time)
-                    write_times_blocks.append(write_time)
-                    seek_times_blocks.append(seek_time)
-                    calculation_times_blocks.append(calculation_time)
-                    total_time_blocks.append(total_time)
-
+                    
     with open(output_file, 'w') as f:
         f.write("#time calculation_time read_time write_time seek_time total_time_error")
         f.write('\n')
@@ -167,16 +158,16 @@ def get_avg_var_mreads_naive(input_file_mreads, input_file_naive, output_file, d
                                                     avg(write_times_blocks),
                                                     avg(seek_times_blocks), var(total_time_blocks)))
         f.write('\n')
-        f.write("3g {} {} {} {} {} ".format(avg(calculation_times_3g), avg(read_times_3g), avg(write_times_3g),
+        f.write("3 {} {} {} {} {} ".format(avg(calculation_times_3g), avg(read_times_3g), avg(write_times_3g),
                                             avg(seek_times_3g), var(total_time_3g)))
         f.write('\n')
-        f.write("6g {} {} {} {} {} ".format(avg(calculation_times_6g), avg(read_times_6g), avg(write_times_6g),
+        f.write("6 {} {} {} {} {} ".format(avg(calculation_times_6g), avg(read_times_6g), avg(write_times_6g),
                                             avg(seek_times_6g), var(total_time_6g)))
         f.write('\n')
-        f.write("9g {} {} {} {} {} ".format(avg(calculation_times_9g), avg(read_times_9g), avg(write_times_9g),
+        f.write("9 {} {} {} {} {} ".format(avg(calculation_times_9g), avg(read_times_9g), avg(write_times_9g),
                                             avg(seek_times_9g), var(total_time_9g)))
         f.write('\n')
-        f.write("12g {} {} {} {} {} ".format(avg(calculation_times_12g), avg(read_times_12g), avg(write_times_12g),
+        f.write("12 {} {} {} {} {} ".format(avg(calculation_times_12g), avg(read_times_12g), avg(write_times_12g),
                                              avg(seek_times_12g), var(total_time_12g)))
         f.write('\n')
         f.write("naive-slice {} {} {} {} {}".format(avg(calculation_times_slices), avg(read_times_slices),
@@ -184,8 +175,13 @@ def get_avg_var_mreads_naive(input_file_mreads, input_file_naive, output_file, d
                                                     avg(seek_times_slices), var(total_time_slices)))
 
 def main():
-    get_avg_var_mreads_naive(input_file_mreads_ssd, input_file_naive_ssd, output_file_mreads_ssd, disk="ssd")
-    get_avg_var_mreads_naive(input_file_mreads_hdd, input_file_naive_hdd, output_file_mreads_hdd, disk="hdd")
+    # mreads
+    get_avg_var_naive(input_file_mreads_ssd, output_file_mreads_ssd, input_file_creads_ssd, input_file_buff_slices_ssd, hasnaive=False, disk="ssd")
+    #get_avg_var_naive(input_file_mreads_hdd, output_file_mreads_hdd, input_file_creads_hdd, input_file_buff_slices_hdd, hasnaive=False, disk="hdd")
+    # creads
+    get_avg_var_naive(input_file_creads_ssd, output_file_creads_ssd, input_file_creads_ssd, input_file_buff_slices_ssd, hasnaive=True, disk="ssd")
+    # buffered slicse
+    get_avg_var_naive(input_file_buff_slices_ssd, output_file_buff_slices_ssd, input_file_creads_ssd, input_file_buff_slices_ssd, hasnaive=True, disk="ssd")
 
 if __name__ == '__main__':
     main()

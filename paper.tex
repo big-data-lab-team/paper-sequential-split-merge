@@ -45,7 +45,7 @@
   analyze two algorithms based on in-memory reconstruction of image
   parts. Cluster reads access image chunks only once while Multiple
   reads minimize the accesses to the image. Evaluation on a
-  3000x3000x3000 brain image shows that our algorithms perform
+  3850x3025x3500 brain image shows that our algorithms perform
   similarly to the optimal configuration (slice merging) provided that
   enough memory is available, which solves our initial problem.  We
   conclude that splitting and merging large 3D images can be done
@@ -587,8 +587,6 @@ N_\mathrm{MR} =
 
 \subsection{Analysis}
 
-\todo{Make more simulations to support that claim.}
-
 Based on a few simulations of Equations~\ref{eq:seeks-cluster-reads-1}
 and~\ref{eq:seeks-multiple-reads}, we conjectured that the comparison
 between Cluster reads and Multiple reads essentially depends on the
@@ -616,7 +614,7 @@ block slices (case 3), Cluster reads and Multiple reads are equivalent
   \includegraphics[width=0.45\columnwidth]{figures/model-big-brain-comparison.pdf}
   \includegraphics[width=0.45\columnwidth]{figures/model-big-brain-comparison-moreblocks.pdf}
   \caption{Number of seeks for Cluster reads vs Multiple reads when
-    Cluster reads merge complete block rows (case 2), for D=3000 and
+    Cluster reads merge complete block rows (case 2), for D=3458 and
     b=2. Left: n=125; Right: n=64,000.}
   % Gnuplot file: scripts/model/model.gnplt
   \label{fig:model-comparison}
@@ -687,7 +685,7 @@ could therefore potentially use in-memory compression.
 To benchmark our library we use the 76~GB Big~Brain image split in 125
 non-overlapping chunks. The data is available \todo{[here]}.
 
-\subsection{Infrastructure}
+\subsection{Hardware}
 
 We run experiments using a Dell Precision Tower 3620 with CentOS Linux release
 7.3.1611, 32~GB of RAM and two disks:
@@ -722,22 +720,33 @@ solution to reduce seek time.  \todo{On figure: check that breakdowns
   add up to total time. Harmonize time formats. Harmonize colors (all
   slices in purple, all blocks in green). If time permits, try
   histogram for breakdown, on same figure than total time.}
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.45\columnwidth]{figures/blocks-slices/totalmergetimeSSD1.pdf}
-  \hfill
-  \includegraphics[width=0.45\columnwidth]{figures/blocks-slices/totalmergetimeHDD1.pdf}\\
-  \includegraphics[width=0.45\columnwidth]{figures/blocks-slices/hddBreakDown1.pdf}
-  \hfill
-  \includegraphics[width=0.45\columnwidth]{figures/blocks-slices/ssdBreakDown1.pdf}
-  \caption{Merging time for Slices and Blocks. Left column: SSD. Right column: HDD. Top row: overall merging time. Bottom row: breakdown by read, write and seek time.}
-  % Gnuplot file: scripts/blocks-slices/createboxplot.gnplt
-\label{fig:slices-vs-blocks}
-\end{figure}
 
 \subsection{Buffered slices}
 
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.45\columnwidth]{figures/benchmark-buff-slices/buff-slices-breakdown-ssd.pdf}
+  \hfill
+    \includegraphics[width=0.45\columnwidth]{figures/benchmark--buff-slices/buff-slices-breakdown-hdd.pdf}
+  \caption{Comparison between Bufered slices, naive blocks and naive slices. Left: SSD. Right: HDD.}
+  % Python file: scripts/experiment/generate_avg_var_data.py
+  % Gnuplot file: scripts/experiment/compare_breakdown_errbar.gnuplot
+\label{fig:buffered-slices}
+\end{figure}
+
+
 \subsection{Cluster reads}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.45\columnwidth]{figures/benchmark-creads/creads-breakdown-ssd.pdf}
+  \hfill
+    \includegraphics[width=0.45\columnwidth]{figures/benchmark-creads/creads-breakdown-hdd.pdf}
+  \caption{Comparison between Cluster reads, naive blocks and naive slices. Left: SSD. Right: HDD.}
+  % Python file: scripts/experiment/generate_avg_var_data.py
+  % Gnuplot file: scripts/experiment/compare_breakdown_errbar.gnuplot
+\label{fig:cluster-reads}
+\end{figure}
 
 \subsection{Multiple reads}
 
@@ -746,20 +755,22 @@ solution to reduce seek time.  \todo{On figure: check that breakdowns
   \includegraphics[width=0.45\columnwidth]{figures/benchmark-mreads/mreads-breakdown-ssd.pdf}
   \hfill
     \includegraphics[width=0.45\columnwidth]{figures/benchmark-mreads/mreads-breakdown-hdd.pdf}
-  \caption{Comparison between Multiple reads, blocks and slices. Left: SSD. Right: HDD.}
-  % Python file: scripts/mreads/generate_avg_var_data.py
-  % Gnuplot file: scripts/mreads/compare_breakdown_errbar.gnuplot
+  \caption{Comparison between Multiple reads, naive blocks and naive slices. Left: SSD. Right: HDD.}
+  % Python file: scripts/experiment/generate_avg_var_data.py
+  % Gnuplot file: scripts/experiment/compare_breakdown_errbar.gnuplot
 \label{fig:multiple-reads}
 \end{figure}
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.70\columnwidth]{figures/benchmark-mreads/mreads-number-of-seeks.pdf}
+  \includegraphics[width=0.70\columnwidth]{figures/number-of-seeks.pdf}
   \hfill
-  \caption{Number of seeks in Multiple reads}
-  % Gnuplot file: scripts/mreads/number_of_seeks.gnuplot
-\label{fig:multiple-reads-number-of-seek}
+  \caption{Number of seeks for all algorithms, comparing modeled and
+    experimental values.}
+  % Gnuplot file: scripts/number_of_seeks.gnuplot
+\label{fig:number-of-seeks}
 \end{figure}
+
 
 
 Results discussion:
