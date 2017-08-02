@@ -58,9 +58,9 @@
 % Problem definition
 Three-dimensional images that exceed typical memory size are
 increasingly found in a variety of disciplines. Big~Brain, for
-instance, is a 3D histological image of the human brain that
-represents 1~TB of data organized in 3600 planes at full resolution
-(1$\mu$m in-plane), and 76~GB at a 40$\mu$m isotropic resolution
+\todo{summarize sizes} instance, is a 3D histological image of the human brain that
+represents 1~TB of raw data organized in 3600 planes at full resolution
+and 76~GB at a 40-micrometer isotropic resolution
 commonly used in neurosciences~\cite{amunts2013bigbrain}. This dataset
 is being re-scanned at an even higher resolution, leading to 100~TB of
 raw data. Other examples found in medical imaging, our primary domain
@@ -147,7 +147,7 @@ changing dimension, followed by dimension j, followed by dimension
 k. All voxels in a \emph{slice} have a the same $k$ and all voxels in
 a \emph{row} have the same $j$.  NIfTI, the file format defined by the
 Neuroimaging Informatics Technology Initiative
-NIfTI\footnote{\url{https://nifti.nimh.nih.gov}} is such a format,
+NIfTI (\url{https://nifti.nimh.nih.gov}) is such a format,
 used by the vast majority of the neuroimaging community.
 
 \subsection{Notations}
@@ -209,17 +209,17 @@ the reconstructed image, the number of seeks in
 Algorithm~\ref{algo:naive-slices} is only $2n$ as $n$ seeks are
 required to read the slices and $n$ seeks are required to write them:
 \begin{equation}
-  N_\mathrm{slices} = 2n 
+  N_\mathrm{slices} = 2n \label{eq:naive-blocks}
 \end{equation}
 However,
 Algorithm~\ref{algo:naive-blocks} has to do extra seeks for each row
 in each slice of each block:
 \begin{equation*}
-N_\mathrm{blocks} = n+nd^2 
+N_\mathrm{blocks} = n+nd^2  
 \end{equation*}
 or, using $R$ and $n$ as main variables:
 \begin{equation}
-N_\mathrm{blocks} = n+n\left(\sqrt[3]{\frac{R}{n}}\right)^2
+N_\mathrm{blocks} = n+n\left(\sqrt[3]{\frac{R}{n}}\right)^2 \label{eq:naive-slices}
 \end{equation}
 In practice, this difference could lead to a tremendous slowdown, as
 we will show later.
@@ -283,7 +283,7 @@ Algorithm~\ref{algo:buffered-slices}.
 This algorithm writes in the reconstructed image using a single seek
 per memory load. Therefore:
 \begin{equation}
-N_\mathrm{buff\_slices} =  n + \ceil*{\frac{bR}{m}}
+N_\mathrm{buff\_slices} =  n + \ceil*{\frac{bR}{m}} \label{eq:buff-slices}
 \end{equation}
 Buffered slices are straightforward to implement, however, their
 extension to block merging is not easy. The remainder of this Section
@@ -586,7 +586,7 @@ N_\mathrm{MR} =
 \end{equation}
 
 \subsection{Analysis}
-
+\label{sec:analysis}
 Based on a few simulations of Equations~\ref{eq:seeks-cluster-reads-1}
 and~\ref{eq:seeks-multiple-reads}, we conjectured that the comparison
 between Cluster reads and Multiple reads essentially depends on the
@@ -624,9 +624,7 @@ block slices (case 3), Cluster reads and Multiple reads are equivalent
 \label{sec:implementation}
 
 The 5 algorithms presented earlier are implemented in a Python library
-called \texttt{sam} (for ``split and merge''), available at
-\url{https://github.com/big-data-lab-team/-bin-sam} under MIT
-license. It uses Nibabel~\cite{matthew_brett_2016_60808} for image I/O
+called \texttt{sam} (for ``split and merge''). It uses Nibabel~\cite{matthew_brett_2016_60808} for image I/O
 and NumPy for array manipulations.
 
 % buffer implementation
@@ -679,36 +677,60 @@ could therefore potentially use in-memory compression.
 \todo{could we merge without de-compressing?}
 
 \section{Experiments}
-\label{sec:results}
+\label{sec:experiments}
 
 \subsection{Data}
-To benchmark our library we use the 76~GB Big~Brain image split in 125
-non-overlapping chunks. The data is available \todo{[here]}.
+We used the 3850x3025x3500 Big~Brain image split in 125
+non-overlapping chunks of size 770x605x700 with 2 bytes per voxel
+(total size, uncompressed is 75.92~GB). Big~Brain is a reference brain
+based on the reconstruction of 7404 histological sections at nearly
+cellular resolution of 20 micrometers~\cite{amunts2013bigbrain}. It is
+a freely, publicly available tool with numerous applications in
+neurosciences and neurosurgery.
+
+We used the blocks of the 2015 Big~Brain release with 40-micrometer
+isotropic resolution available at
+\url{ftp://bigbrain.loris.ca/BigBrainRelease.2015/3D\_Blocks/40um}. We
+converted them to NiFTI 1.0 using Nibabel and left them uncompressed.
+
+\todo{add slices}
 
 \subsection{Hardware}
 
-We run experiments using a Dell Precision Tower 3620 with CentOS Linux release
-7.3.1611, 32~GB of RAM and two disks:
-\begin{itemize}
-  \item Hard disk drive (HDD): HGST Travelstar 7K1000, 7200~rpm, 931GiB (1TB), firmware version JB0OA3W0.
-    \item Solid-state drive (SSD): SanDisk X400 2.5, 238GiB (256GB),
-      firmware version X4130012.
-\end{itemize}
-Both drives used 512-byte logical sectors, 4096-byte physical sectors,
-SATA >3.1 (6.0 Gb/s) and were accessed through the XFS file system
-v4.5.0.
+We used a Dell Precision Tower 3620 workstation with CentOS Linux
+release 7.3.1611, 32~GB of RAM and two disks. (1) a Hard disk drive
+(HDD): HGST Travelstar 7K1000, 7200~rpm, 931GiB (1TB), firmware
+version JB0OA3W0; (2) a Solid-state drive (SSD): SanDisk X400 2.5,
+238GiB (256GB), firmware version X4130012.  Both drives used 512-byte
+logical sectors, 4096-byte physical sectors, SATA \textgreater 3.1 (6.0 Gb/s) and
+were accessed through the XFS file system v4.5.0. We used
+\texttt{iotop} (\url{http://guichaz.free.fr/iotop}) to monitor I/Os on
+the workstation and make sure that no other process was compromising
+our measures.
 %smartctl --xall /dev/sda
 
 \subsection{Execution conditions}
 
-We used release xxx of our library. 
+We used Git tag 0.1 of our \texttt{sam} library. Our experiment
+scripts are available at
+\url{https://github.com/big-data-lab-team/paper-sequential-split-merge/blob/master/scripts/experiment}. We
+used them to split and merge using Buffered slices, Cluster reads and
+Multiple reads, with 3GB, 6GB, 9GB, 12GB and 16GB of memory. We also
+did 0GB of memory for Buffered slices and Cluster reads, which
+triggered naive slice and block merging. We did 5 repetitions for each
+memory value. Memory values were shuffled in each repetition, to
+correct for potential biases coming from ordering, such as caching
+effects. To improve reproducibility, we dropped the kernel page,
+dentry and inode caches before each run (\texttt{echo 3 | sudo tee
+  /proc/sys/vm/drop\_caches}). 
 
-Experiment scripts are available at xxx.
-As our experiments results are heavily rely on IO performance of the disk,
-we drop the system cache to get more precise result before each experiment.
+\subsection{Results}
 
-\subsection{Slices vs Blocks}
+\subsubsection{Merging time}
 
+% For each paragraph below, comment on overal trend and breakdown.
+
+% Slices vs blocks
 Figure~\ref{fig:slices-vs-blocks} shows the merging time for Slices vs
 Blocks, on SSD and HDD. Merging with Blocks takes about twice the time
 of Slices, which motivates the need for improved algorithms to merge
@@ -721,7 +743,24 @@ solution to reduce seek time.  \todo{On figure: check that breakdowns
   slices in purple, all blocks in green). If time permits, try
   histogram for breakdown, on same figure than total time.}
 
-\subsection{Buffered slices}
+% Buffered slices
+
+% Cluster reads
+%% ultimately fine but not stable due to discontinuities
+At 3GB, Cluster reads were in case 1, which explains that more than 10
+million seeks were done, almost equivalent to naive blocks. At 6, 9
+and 12~GB, Cluster reads were in case 2 and at 16~GB they were in case
+3. This confirms that Cluster reads are beneficial in case 2 and 3
+only, consistently with the analysis in Section~\ref{sec:analysis} .
+
+% Multiple reads
+%% more stable
+
+\begin{itemize}
+\item Comment on calculation time.
+\item Write time is higher than read time because use nibabel for writing but not reading.
+\item It seems that the merge time is quite stable w.r.t the amount of available memory. This is good news for multiple reads. 
+\end{itemize}
 
 \begin{figure}[h]
   \centering
@@ -734,9 +773,6 @@ solution to reduce seek time.  \todo{On figure: check that breakdowns
 \label{fig:buffered-slices}
 \end{figure}
 
-
-\subsection{Cluster reads}
-
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.45\columnwidth]{figures/benchmark-creads/creads-breakdown-ssd.pdf}
@@ -747,8 +783,6 @@ solution to reduce seek time.  \todo{On figure: check that breakdowns
   % Gnuplot file: scripts/experiment/compare_breakdown_errbar.gnuplot
 \label{fig:cluster-reads}
 \end{figure}
-
-\subsection{Multiple reads}
 
 \begin{figure}[h]
   \centering
@@ -761,6 +795,19 @@ solution to reduce seek time.  \todo{On figure: check that breakdowns
 \label{fig:multiple-reads}
 \end{figure}
 
+\subsubsection{Seeks}
+
+The number of seeks is reported in Figure~\ref{fig:number-of-seeks},
+for all algorithms and the corresponding models
+(Equations~\ref{eq:naive-blocks}
+to~\ref{eq:seeks-multiple-reads}). Note the logarithmic y scale. Error
+bars are not reported as numbers of seeks were constant across all
+repetitions. The mean model error is \todo{x\%}, explained by the fact
+that the model assumes cubic blocks while we used non-cubic ones in
+the experiment. Overall, the model is validated as it correctly
+explains the observations.   The measured seek times correlated with
+the measured merging times ($\rho$=\todo{x}), which suggest that the
+observed time reductions were indeed caused by reduced seek times.
 \begin{figure}[h]
   \centering
   \includegraphics[width=\columnwidth]{figures/number-of-seeks.pdf}
@@ -772,22 +819,16 @@ solution to reduce seek time.  \todo{On figure: check that breakdowns
 \label{fig:number-of-seeks}
 \end{figure}
 
+% correlated to merging time
 
-
-Results discussion:
-\begin{itemize}
-\item Comment on calculation time.
-\item Write time is higher than read time because use nibabel for writing but not reading.
-\item It seems that the merge time is quite stable w.r.t the amount of available memory. This is good news for multiple reads. 
-\end{itemize}
-
-\subsection{Cluster reads vs Multiple reads}
-
-\subsection{Lossless Compression}
+% model error
 
 \subsection{Splitting}
 
-\subsubsection{Multiple writes}
+% Time
+
+% Number of seeks
+
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.45\columnwidth]{figures/benchmark-mwrites/mwrites-breakdown-ssd.pdf}
@@ -797,7 +838,6 @@ Results discussion:
   % Gnuplot file: scripts/blocks-slices/createboxplot.gnplt
 \label{fig:multiple-writes}
 \end{figure}
-
 
 \newpage
 
@@ -811,6 +851,13 @@ high-resolution image where data is stored linearly. Both algorithms
 performed equivalently on our benchmark and compared to the reference
 configuration where slices are merged or split without seeking. Our
 initial problem is solved.
+
+% Library is available. 
+% overall, multiple reads is recommended as default parameters for the
+% library. Cluster reads could be useful in some cases. 
+
+%Same algo works for blocks or slices.
+
 
 % Parallel algorithms
 In a real system, high-resolution images are likely to be processed on
@@ -859,8 +906,11 @@ a single block from a large image. Second, we have not considered
 on-the-fly data compression yet, which is a unique feature of MINC
 2.0.
 
-% Library is available. We recommend using xxx for most cases. Same
-% algo works for blocks or slices.
+The complete Latex sources of this paper, including the collected data
+and Gnuplot scripts used to generate the results figures are available
+at \url{https://github.com/big-data-lab-team/paper-sequential-split-merge} under
+GPLv3 license. Our \texttt{sam} library is at
+\url{https://github.com/big-data-lab-team/sam}, under MIT license.
 
 % Ideas for the future: measure the actual amount of consumed memory.
 
