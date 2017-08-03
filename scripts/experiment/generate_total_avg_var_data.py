@@ -14,6 +14,7 @@ def var(l):
         s2 += i
     return (float(s1) / len(l) - (float(s2) / len(l)) ** 2) ** 0.5
 
+# merge
 #ssd
 input_file_mreads_ssd = "./data/mreads/mreads_ssd.dat"
 input_file_creads_ssd = "./data/creads/creads_ssd.dat"
@@ -23,6 +24,17 @@ input_file_buff_slices_ssd = "./data/buff-slices/buff-slices_ssd.dat"
 input_file_mreads_hdd = "./data/mreads/mreads_hdd.dat"
 input_file_creads_hdd = "./data/creads/creads_hdd.dat"
 input_file_buff_slices_hdd = "./data/buff-slices/buff-slices_hdd.dat"
+
+# split
+#ssd
+input_file_mwrites_ssd = "./data/mwrites/mwrites_ssd.dat"
+input_file_cwrites_ssd = "./data/cwrites/cwrites_ssd.dat"
+input_file_buff_slices_split_ssd = "./data/buff-slices/buff-slices_split_ssd.dat"
+
+#hdd
+input_file_mwrites_hdd = "./data/mwrites/mwrites_hdd.dat"
+input_file_cwrites_hdd = "./data/cwrites/cwrites_hdd.dat"
+input_file_buff_slices_split_hdd = "./data/buff-slices/buff-slices_split_hdd.dat"
 
 
 
@@ -108,7 +120,11 @@ def main():
     generate(input_file_mreads_ssd, input_file_creads_ssd, input_file_buff_slices_ssd, output_file=output_file)
     output_file = "./data/total-merge-time-hdd.dat"
     generate(input_file_mreads_hdd, input_file_creads_hdd, input_file_buff_slices_hdd, output_file=output_file)
+    output_file = "./data/total-split-time-ssd.dat"
+    generate(input_file_mwrites_ssd, input_file_cwrites_ssd, input_file_buff_slices_split_ssd, output_file=output_file)
+    output_file = "./data/total-split-time-hdd.dat"
+    generate(input_file_mwrites_hdd, input_file_cwrites_hdd, input_file_buff_slices_split_hdd, output_file=output_file)
 
-    
+  
 if __name__ == '__main__':
     main()

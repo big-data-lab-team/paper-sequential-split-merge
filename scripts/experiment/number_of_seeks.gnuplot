@@ -3,7 +3,7 @@
 set terminal pdf color font ',10'
 a=0.1
 set boxwidth a
-set style fill transparent solid 0.5 noborder
+set style fill transparent solid 0.5 border rgb "black"
 set xtics ("3" 1, "6" 2, "9" 3, "12" 4)
 set xlabel "Memory (GB)"
 set ylabel "Number of seeks"

@@ -826,29 +826,42 @@ compared to naive blocks.
   \caption{Merge time by algorithm. Top: HDD. Bottom: SSD. Each
     algorithm is represented with a different color. Averages over 5
     repetitions. Error bars show $\pm$ 1 standard deviation. }
-  % Gnuplot file: scripts/experiment/number_of_seeks.gnuplot
+  % Gnuplot file: scripts/experiment/split_and_merge_total_time.gnuplot
 \label{fig:merge-time}
 \end{figure}
 
 \subsubsection{Merge time breakdown}
-Figure~\ref{fig:breakdowns-ssd} 
+Figure~\ref{fig:breakdowns-ssd} shows how the total merge time breaks
+down to read, write, seek and overhead time for our algorithms. Naive
+blocks and naive slices are shown as references. The huge difference
+between naive blocks and naive slices is coming from both the seek
+time and the write time, which suggests that seeking degrades the
+write rate importantly in addition to introducing extra delays.
+Cluster reads reduce the seek time and thus the read time very
+substantially. Multiple reads almost anihilate the seek time and bring
+the read time to a value comparable to naive slices.  The same
+behavior is observed on HDD and on SSD, although the effect of seeking
+is slightly lower on SSD, as expected. Read times are consistently and substantially lower than write times\todo{explain why}. The overhead time is small for
+both Cluster reads and Multiple reads, although it is not negligible
+for Multiple reads on HDD \todo{Overhead was not well measured for
+  mreads. Needs to be redone.}.
 \begin{figure}
   \begin{subfigure}[b]{\columnwidth}
-    \includegraphics[width=0.45\columnwidth]{figures/benchmark-buff-slices/buff-slices-breakdown-ssd.pdf}
     \includegraphics[width=0.45\columnwidth]{figures/benchmark-buff-slices/buff-slices-breakdown-hdd.pdf}
+    \includegraphics[width=0.45\columnwidth]{figures/benchmark-buff-slices/buff-slices-breakdown-ssd.pdf}
     \caption{Buffered slices}
   \end{subfigure}
   \begin{subfigure}[b]{\columnwidth}
-    \includegraphics[width=0.45\columnwidth]{figures/benchmark-creads/creads-breakdown-ssd.pdf}
     \includegraphics[width=0.45\columnwidth]{figures/benchmark-creads/creads-breakdown-hdd.pdf}
+    \includegraphics[width=0.45\columnwidth]{figures/benchmark-creads/creads-breakdown-ssd.pdf}
     \caption{Cluster reads}
   \end{subfigure}
   \begin{subfigure}[b]{\columnwidth}
-    \includegraphics[width=0.45\columnwidth]{figures/benchmark-mreads/mreads-breakdown-ssd.pdf}
     \includegraphics[width=0.45\columnwidth]{figures/benchmark-mreads/mreads-breakdown-hdd.pdf}
+    \includegraphics[width=0.45\columnwidth]{figures/benchmark-mreads/mreads-breakdown-ssd.pdf}
     \caption{Multiple reads}
   \end{subfigure}
-  \caption{Breakdown of total merge times. Left column: SSD. Right column: HDD.}
+  \caption{Breakdown of total merge times. Left column: HDD. Right column: SSD.}
   \label{fig:breakdowns-ssd}
   % Gnuplot file: scripts/experiment/compare_breakdown_errbar.gnuplot
 \end{figure}
@@ -856,20 +869,45 @@ Figure~\ref{fig:breakdowns-ssd}
 
 \subsubsection{Split time}
 
-% Time
+\todo{define cluster writes and multiple writes somewhere.}
 
-% Number of seeks
+The number of seeks for Cluster writes and Multiple writes were
+identical to the ones in Cluster reads and Multiple reads. \todo{Check
+  that.} The total split time by algorithm is shown in
+Figure~\ref{fig:split-time} and the breakdown by read, write, seek and
+overhead time is in Figure~\ref{fig:breakdowns-ssd-split}. \todo{comment on the figures when results are available.}
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\columnwidth]{figures/number-of-seeks.pdf}\\
-  \includegraphics[width=\columnwidth]{figures/number-of-seeks.pdf}
+  \includegraphics[width=\columnwidth]{figures/total-split-time-hdd.pdf}\\
+  \includegraphics[width=\columnwidth]{figures/total-split-time-ssd.pdf}
   \hfill
   \caption{Split time by algorithm. Top: HDD. Bottom: SSD. Each
     algorithm is represented with a different color. Averages over 5
     repetitions. Error bars show $\pm$ 1 standard deviation. }
-  % Gnuplot file: ???
+  % Gnuplot file: scripts/experiment/split_and_merge_total_time.gnuplot
 \label{fig:split-time}
+\end{figure}
+
+\begin{figure}
+  \begin{subfigure}[b]{\columnwidth}
+    \includegraphics[width=0.45\columnwidth]{figures/benchmark-buff-slices/buff-slices-breakdown-hdd-split.pdf}
+    \includegraphics[width=0.45\columnwidth]{figures/benchmark-buff-slices/buff-slices-breakdown-ssd-split.pdf}
+    \caption{Buffered slices}
+  \end{subfigure}
+  \begin{subfigure}[b]{\columnwidth}
+    \includegraphics[width=0.45\columnwidth]{figures/benchmark-cwrite/cwrites-breakdown-hdd.pdf}
+    \includegraphics[width=0.45\columnwidth]{figures/benchmark-cwrites/cwrites-breakdown-ssd.pdf}
+    \caption{Cluster writes}
+  \end{subfigure}
+  \begin{subfigure}[b]{\columnwidth}
+    \includegraphics[width=0.45\columnwidth]{figures/benchmark-mwrites/mwrites-breakdown-hdd.pdf}
+    \includegraphics[width=0.45\columnwidth]{figures/benchmark-mwrites/mwrites-breakdown-ssd.pdf}
+    \caption{Multiple reads}
+  \end{subfigure}
+  \caption{Breakdown of total split times. Left column: HDD. Right column: SSD.}
+  \label{fig:breakdowns-ssd-split}
+  % Gnuplot file: scripts/experiment/compare_breakdown_errbar.gnuplot
 \end{figure}
 
 \section{Discussion}
@@ -947,8 +985,9 @@ under GPLv3 license. Our \texttt{sam} library is at
 % Ideas for the future: measure the actual amount of consumed memory.
 
 \section*{Acknowledgment}
-
-(If not added as co-authors): Greg Kiar, Pierre Bellec, Claude Lepage, Lindsay B. Lewis.
+We warmly thank Lindsay B. Lewis and Claude Lepage for helping us with
+Big~Brain, Greg Kiar for useful discussion about the Open
+Connectome Data Cluster and Pierre Bellec for discussions about MINC.
 
 \bibliographystyle{IEEEtran}
 \bibliography{IEEEabrv,biblio.bib}

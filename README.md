@@ -1,7 +1,7 @@
 # How to get a pdf
 
 A pdf is uploaded for every release of the paper:
-* There is no release yet.
+* There is no release yet, this is still work in progress.
 
 See instructions below to create a pdf for the current version.
 

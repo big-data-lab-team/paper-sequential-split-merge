@@ -10,6 +10,9 @@ set xlabel "Memory (GB)"
 set ylabel "Merging time (s)"
 
 maxy=13500
+
+############# MERGE #################
+
 ## HDD
 set output "./figures/benchmark-mreads/mreads-breakdown-hdd.pdf"
 plot [][0:maxy] \
@@ -57,5 +60,27 @@ plot [][0:maxy] \
      './data/buff-slices/buff-slices_ssd_avg_var.dat' using ($2):xtic(1) lt 5 fs solid 0.25 t "Overhead" , \
      '' using ($3) lt 5 fs solid 0.5 t "Read" , \
       '' using ($4) lt 5 fs solid 0.75 t "Write",\
+      '' using ($5) lt 7 fs solid 1.0 t "Seek",\
+      '' using 0:($2+$3+$4+$5):6 with errorbars notitle lw 2 lt -1
+
+
+############# SPLIT #################
+
+maxy=3000
+## HDD
+set output "./figures/benchmark-mwrites/mwrites-breakdown-hdd.pdf"
+plot [][0:maxy] \
+     './data/mwrites/mwrites_hdd_avg_var.dat' using ($2):xtic(1) lt 2 fs solid 0.25 t "Overhead" , \
+     '' using ($3) lt 2 fs solid 0.5 t "Read" , \
+      '' using ($4) lt 2 fs solid 0.75 t "Write",\
+      '' using ($5) lt 7 fs solid 1.0 t "Seek",\
+      '' using 0:($2+$3+$4+$5):6 with errorbars notitle lw 2 lt -1
+
+## SSD
+set output "./figures/benchmark-mwrites/mwrites-breakdown-ssd.pdf"
+plot [][0:maxy] \
+     './data/mwrites/mwrites_ssd_avg_var.dat' using ($2):xtic(1) lt 2 fs solid 0.25 t "Overhead" , \
+     '' using ($3) lt 2 fs solid 0.5 t "Read" , \
+      '' using ($4) lt 2 fs solid 0.75 t "Write",\
       '' using ($5) lt 7 fs solid 1.0 t "Seek",\
       '' using 0:($2+$3+$4+$5):6 with errorbars notitle lw 2 lt -1
