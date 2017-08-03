@@ -9,7 +9,7 @@ set xlabel "Memory (GB)"
 set ylabel "Number of seeks"
 
 set logscale y
-set xtics ("0.6" 0, "3" 1, "6" 2, "9" 3, "12" 4, "16" 5) 
+set xtics ("0.6" 0, "3" 1, "6" 2, "9" 3, "12" 4, "16" 5)
 
 set output "./figures/number-of-seeks.pdf"
 plot [0-4*a:5+5*a][1:]\
@@ -82,4 +82,4 @@ plot [0-4*a:5+5*a][1:]\
 # 			              using (1+a):10 lt 5 w boxes title "Buffered slices - real",\
 #     	                           '' using (2+a):15 lt 5 w boxes notitle	,\
 #        	                           '' using (3+a):20 lt 5 w boxes notitle	,\
-#        	                           '' using (4+a):25 lt 5 w boxes notitle	
+#        	                           '' using (4+a):25 lt 5 w boxes notitle
