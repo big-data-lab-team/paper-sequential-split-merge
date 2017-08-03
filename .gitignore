@@ -26,3 +26,7 @@ paper.out
 paper.pdf
 texput.log
 x.log
+data/buff-slices/buff-slices_hdd_avg_var.dat
+data/creads/creads_hdd_avg_var.dat
+figures/benchmark-buff-slices/buff-slices-breakdown-hdd.pdf
+figures/benchmark-creads/creads-breakdown-hdd.pdf

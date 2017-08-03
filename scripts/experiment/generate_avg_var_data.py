@@ -17,9 +17,13 @@ output_file_buff_slices_hdd = "./data/buff-slices/buff-slices_hdd_avg_var.dat"
 
 
 def avg(l):
+    if len(l) == 0:
+        return 0
     return sum(l) / float(len(l))
-
+    
 def var(l):
+    if len(l) == 0:
+        return 0
     s1 = 0
     s2 = 0
     for i in l:
@@ -177,11 +181,13 @@ def get_avg_var_naive(input_file, output_file, input_file_naive_blocks, input_fi
 def main():
     # mreads
     get_avg_var_naive(input_file_mreads_ssd, output_file_mreads_ssd, input_file_creads_ssd, input_file_buff_slices_ssd, hasnaive=False, disk="ssd")
-    #get_avg_var_naive(input_file_mreads_hdd, output_file_mreads_hdd, input_file_creads_hdd, input_file_buff_slices_hdd, hasnaive=False, disk="hdd")
+    get_avg_var_naive(input_file_mreads_hdd, output_file_mreads_hdd, input_file_creads_hdd, input_file_buff_slices_hdd, hasnaive=False, disk="hdd")
     # creads
     get_avg_var_naive(input_file_creads_ssd, output_file_creads_ssd, input_file_creads_ssd, input_file_buff_slices_ssd, hasnaive=True, disk="ssd")
+    get_avg_var_naive(input_file_creads_hdd, output_file_creads_hdd, input_file_creads_hdd, input_file_buff_slices_hdd, hasnaive=True, disk="hdd")
     # buffered slicse
     get_avg_var_naive(input_file_buff_slices_ssd, output_file_buff_slices_ssd, input_file_creads_ssd, input_file_buff_slices_ssd, hasnaive=True, disk="ssd")
+    get_avg_var_naive(input_file_buff_slices_hdd, output_file_buff_slices_hdd, input_file_creads_hdd, input_file_buff_slices_hdd, hasnaive=True, disk="hdd")
 
 if __name__ == '__main__':
     main()

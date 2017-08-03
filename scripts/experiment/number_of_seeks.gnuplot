@@ -56,30 +56,55 @@ plot [0-4*a:5+5*a][1:]\
 				   '' using (4+3*a):16 w boxes lt 5 fs transparent notitle,\
    				   '' using (5+3*a):17 w boxes lt 5 fs transparent notitle
 
+# Overall times, SSD
 
-# a=0.2
-# set boxwidth a
-# set ylabel "Merging time (s)"
-# unset logscale y
-# set output "./figures/times-ssd.pdf"
-# plot [0-4*a:5+5*a][1:]\
-#                  './data/allcreads/creads_ssd.dat'\
-# 		                      using (0-a):5 w boxes lt 3 title "Naive blocks - real",\
-#                  './data/buff-slices/buff-slices_ssd.dat'\
-# 		                      using (0):5 w boxes lt 4 title "Naive slices - real",\
-#                  './data/creads/creads_ssd.dat'\
-#                                       using (1-a):10 w boxes lt 1 title "Cluster reads - real",\
-# 				   '' using (2-a):15 w boxes lt 1 notitle,\
-# 				   '' using (3-a):20 w boxes lt 1 notitle,\
-# 				   '' using (4-a):25 w boxes lt 1 notitle,\
-#    				   '' using (5-a):30 w boxes lt 1 notitle,\
-# 	   	 './data/mreads/mreads_ssd.dat'\
-# 		                      using (1):5 w boxes lt 2 title "Multiple reads - real",\
-#      	    			   '' using (2):10 w boxes lt 2 notitle,\
-# 				   '' using (3):15 w boxes lt 2 notitle,\
-# 				   '' using (4):20 w boxes lt 2 notitle,\
-#                  './data/buff-slices/buff-slices_ssd.dat'\
-# 			              using (1+a):10 lt 5 w boxes title "Buffered slices - real",\
-#     	                           '' using (2+a):15 lt 5 w boxes notitle	,\
-#        	                           '' using (3+a):20 lt 5 w boxes notitle	,\
-#        	                           '' using (4+a):25 lt 5 w boxes notitle	
+a=0.2
+set boxwidth a
+set ylabel "Merging time (s)"
+unset logscale y
+maxy=13500
+set output "./figures/times-ssd.pdf"
+plot [0-4*a:5+5*a][1:maxy]\
+                 './data/creads/creads_ssd.dat'\
+		                      using (0-a):5 w boxes lt 3 title "Naive blocks ",\
+                 './data/buff-slices/buff-slices_ssd.dat'\
+		                      using (0):5 w boxes lt 4 title "Naive slices ",\
+                 './data/creads/creads_ssd.dat'\
+                                      using (1-a):10 w boxes lt 1 title "Cluster reads ",\
+				   '' using (2-a):15 w boxes lt 1 notitle,\
+				   '' using (3-a):20 w boxes lt 1 notitle,\
+				   '' using (4-a):25 w boxes lt 1 notitle,\
+   				   '' using (5-a):30 w boxes lt 1 notitle,\
+	   	 './data/mreads/mreads_ssd.dat'\
+		                      using (1):5 w boxes lt 2 title "Multiple reads ",\
+     	    			   '' using (2):10 w boxes lt 2 notitle,\
+				   '' using (3):15 w boxes lt 2 notitle,\
+				   '' using (4):20 w boxes lt 2 notitle,\
+                 './data/buff-slices/buff-slices_ssd.dat'\
+			              using (1+a):10 lt 5 w boxes title "Buffered slices ",\
+    	                           '' using (2+a):15 lt 5 w boxes notitle	,\
+       	                           '' using (3+a):20 lt 5 w boxes notitle	,\
+       	                           '' using (4+a):25 lt 5 w boxes notitle	
+
+set output "./figures/times-hdd.pdf"
+plot [0-4*a:5+5*a][1:maxy]\
+                 './data/creads/creads_hdd.dat'\
+		                      using (0-a):5 w boxes lt 3 title "Naive blocks ",\
+                 './data/buff-slices/buff-slices_hdd.dat'\
+		                      using (0):5 w boxes lt 4 title "Naive slices ",\
+                 './data/creads/creads_hdd.dat'\
+                                      using (1-a):10 w boxes lt 1 title "Cluster reads ",\
+				   '' using (2-a):15 w boxes lt 1 notitle,\
+				   '' using (3-a):20 w boxes lt 1 notitle,\
+				   '' using (4-a):25 w boxes lt 1 notitle,\
+   				   '' using (5-a):30 w boxes lt 1 notitle,\
+	   	 './data/mreads/mreads_hdd.dat'\
+		                      using (1):5 w boxes lt 2 title "Multiple reads ",\
+     	    			   '' using (2):10 w boxes lt 2 notitle,\
+				   '' using (3):15 w boxes lt 2 notitle,\
+				   '' using (4):20 w boxes lt 2 notitle,\
+                 './data/buff-slices/buff-slices_hdd.dat'\
+			              using (1+a):10 lt 5 w boxes title "Buffered slices ",\
+    	                           '' using (2+a):15 lt 5 w boxes notitle	,\
+       	                           '' using (3+a):20 lt 5 w boxes notitle	,\
+       	                           '' using (4+a):25 lt 5 w boxes notitle	
