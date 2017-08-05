@@ -124,7 +124,7 @@ plot  [min:max][0:]            creads(x) lw 3 title "Cluster reads",\
 			       mreads(x) lw 3 title "Multiple reads"			     
 
 # Computes and prints values to be ploted later, by scripts/mreads/number_of_seeks.gnuplot
-buffslices(x)=n+ceil((b*x)/x)
+buffslices(x)=n+ceil((b*R)/x)
 
 v0=n+n*d**2
 v1=creads(3*1024**3)
