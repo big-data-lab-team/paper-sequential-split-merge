@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Ref: imageutils.py from
-# https://github.com/big-data-lab-team/mapreduce/blob/master/python/imageutils.py
+# https://github.com/big-data-lab-team/sam/blob/master/imageutils.py
 import imageutils as img_utils
 import numpy as np
 from time import time
@@ -9,8 +9,8 @@ import random
 import os
 
 # example
-# ./benchmark_mreads.py -m 3221225472 9663676416 -r 5 -d ssd
-# ./benchmark_mreads.py -m 3221225472 9663676416 -r 5 -d hdd
+# ./benchmark_merge.py -m 3221225472 9663676416 -r 5 -d ssd
+# ./benchmark_merge.py -m 3221225472 9663676416 -r 5 -d hdd
 
 
 # on the consider
@@ -18,11 +18,11 @@ reconstructed_hdd = "/data/gao/new_image.nii"
 legend_hdd = "/data/gao/blocks125/legend.txt"
 
 reconstructed_ssd = "/home/gao/new_image.nii"
-legend_ssd = "/home/v_hayots/Documents/Thesis/mapreduce/python/bigbrain_blocks2/legend.txt"
+legend_ssd = "/home/gao/blocks125/legend.txt"
 
 
-csv_file_hdd = "./hdd.csv"
-csv_file_ssd = "./ssd.csv"
+csv_file_hdd = "./hdd.dat"
+csv_file_ssd = "./ssd.dat"
 
 
 first_dim=3850
@@ -37,13 +37,13 @@ files = {
 def benchmark_mreads(mem, reconstructed, legend):
     img = img_utils.ImageUtils(reconstructed, first_dim, second_dim, third_dim, np.uint16)
     s_time = time()
-    total_read_time, total_write_time, total_seek_time, total_seek_number = img.reconstruct_img(legend, "multiple", mem)
+    total_read_time, total_write_time, total_seek_time, total_seek_number = img.reconstruct_img(legend, "multiple", mem, benchmark=True)
     total_time = time() - s_time
     return (total_read_time, total_write_time, total_seek_time, total_seek_number, total_time)
 
-def write_to_file(data_dict, csv_file):
+def write_to_file(data_dict, dat_file):
     # (total_read_time, total_write_time, total_seek_time, total_seek_number, total_time)
-    with open(csv_file, "a") as f:
+    with open(dat_file, "a") as f:
         for k in sorted(data_dict.keys()):
             for e in data_dict[k]:
                 f.write(str(e) + " ")

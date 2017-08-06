@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Ref: imageutils.py from
-# https://github.com/big-data-lab-team/mapreduce/blob/master/python/imageutils.py
+# https://github.com/big-data-lab-team/sam/blob/master/imageutils.py
 import imageutils as img_utils
 import numpy as np
 from time import time
@@ -9,15 +9,15 @@ import random
 import os
 
 # example
-# ./benchmark_mwrites.py -m 3221225472 9663676416 6442450944 13043807040 -r 5 -d ssd
-# ./benchmark_mwrites.py -m 3221225472 9663676416 6442450944 13043807040 -r 5 -d hdd
+# ./benchmark_split.py -m 3221225472 9663676416 6442450944 13043807040 -r 5 -d ssd
+# ./benchmark_split.py -m 3221225472 9663676416 6442450944 13043807040 -r 5 -d hdd
 
 
 # on the consider
 ori_image_hdd = "/data/bigbrain_40microns.nii"
 out_dir_hdd = "/data/gao/blocks_split"
 
-ori_image_ssd = "/home/gao/reconstructed.nii"
+ori_image_ssd = "/home/gao/new_image.nii"
 out_dir_ssd = "/home/gao/blocks125"
 
 csv_file_hdd = "./hdd_mwrites.csv"
@@ -43,11 +43,11 @@ def benchmark_mwrites(mem, ori_image, out_dir):
 
     return (total_read_time, total_write_time, total_seek_time, total_seek_number, total_time)
 
-def write_to_csv(data_dict, csv_file):
-    with open(csv_file, "a") as f:
+def write_to_csv(data_dict, dat_file):
+    with open(dat_file, "a") as f:
         for k in sorted(data_dict.keys()):
             for e in data_dict[k]:
-                f.write(str(e) + ",")
+                f.write(str(e) + " ")
         f.write("\n")
 
 
