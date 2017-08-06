@@ -25,26 +25,34 @@ creads(x) = x < m1 ? f(x) : \
 ### Multiple reads
 
 # case 1: merge voxels
-p(x)=floor(x/(d*b))*d*b
-a(x)=ceil((R*b)/p(x))*(p(x)*nu/(D*b)+1)-p(x)*nu/(D*b)+(nu*D**2 % floor(x/(d*b)))
+vi1(x)=D*b
+k1(x)=floor(x/vi1(x))
+mprime1(x)=k1(x)*vi1(x)
+a(x)=ceil((R*b)/mprime1(x))*(k1(x)+1)-k1(x)+(nu*D**2 % k1(x))
 
 # case 2: merge rows
-q(x)=floor(x/(D*b))*D*b
-b(x)=ceil((R*b)/q(x))*(nu+1)
+vi2(x)=D*b
+k2(x)=floor(x/vi2(x))
+mprime2(x)=k2(x)*vi2(x)
+b(x)=ceil((R*b)/mprime2(x))*(nu+1)
 
 # case 3: merge rows of tiles
-r(x)=floor(x/(d*D*b))*D*b*d
-#c(x)=ceil((R*b)/r(x))*(r(x)*nu**2/(D**2*b)+1)
-c(x)=ceil((R*b)/r(x))*(r(x)*nu**2/(D**2*b)+1)-r(x)*nu**2/(D**2*b)+nu*(nu*D %floor(x/(d*D*b)))
+vi3(x)=D*d*b
+k3(x)=floor(x/vi3(x))
+mprime3(x)=k3(x)*vi3(x)
+c(x)=ceil((R*b)/mprime3(x))*(k3(x)*nu+1)-k3(x)*nu+nu*(nu*D % k3(x))
 
 # case 4: merge slices of tiles
-s(x)=floor(x/(D**2*b))*D**2*b
-d(x)=ceil((R*b)/s(x))*(nu**2+1)
+vi4(x)=D*D*b
+k4(x)=floor(x/vi4(x))
+mprime4(x)=k4(x)*vi4(x)
+d(x)=ceil((R*b)/mprime4(x))*(nu**2+1)
 
 # case 5: merge slices of blocks
-u(x)=floor(x/((D**2)*d*b))*(D**2*d*b)
-#e(x)=ceil((R*b)/u(x))*(u(x)*n/(R*b)+1)
-e(x)=floor((R*b)/u(x))*(u(x)*n/(R*b)+1)-u(x)*n/(R*b)+nu**2*(n/(nu**2)%floor(x/((D**2)*d*b)))
+vi5(x)=((D**2)*d*b)
+k5(x)=floor(x/vi5(x))
+mprime5(x)=k5(x)*vi5(x)
+e(x)=ceil((R*b)/mprime5(x))*(k5(x)*nu**2+1)-k5(x)*nu**2+nu**2*(nu % k5(x))
 
 mreads(x) =    x < m3 ? a(x):\
 	       x < m4 ? b(x):\
