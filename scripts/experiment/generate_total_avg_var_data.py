@@ -41,7 +41,6 @@ input_file_buff_slices_split_hdd = "./data/buff-slices/buff-slices_split_hdd.dat
 
 
 def generate(input_file_mreads, input_file_creads, input_file_buff_slices, output_file):
-    row_06g, row_3g, row_6g, row_9g, row_12g, row_16g = [],[],[],[],[],[]
     total_time_06g, total_time_3g, total_time_6g, total_time_9g, total_time_12g, total_time_16g = [], [], [], [], [], []
 
     with open(input_file_creads, 'r') as f:
@@ -79,9 +78,11 @@ def generate(input_file_mreads, input_file_creads, input_file_buff_slices, outpu
                 total_time_9g.append(float(items[14]))
                 # 12g - mr
                 total_time_12g.append(float(items[19]))
+                # 16g - mr
+                total_time_16g.append(float(items[24]))
 
-        mr_total = [0, avg(total_time_3g), avg(total_time_6g), avg(total_time_9g), avg(total_time_12g), 0]
-        mr_total_err = [0, var(total_time_3g), var(total_time_6g), var(total_time_9g), var(total_time_12g), 0]
+        mr_total = [0, avg(total_time_3g), avg(total_time_6g), avg(total_time_9g), avg(total_time_12g), avg(total_time_16g)]
+        mr_total_err = [0, var(total_time_3g), var(total_time_6g), var(total_time_9g), var(total_time_12g), var(total_time_16g)]
 
     total_time_06g, total_time_3g, total_time_6g, total_time_9g, total_time_12g, total_time_16g = [], [], [], [], [], []
     with open(input_file_buff_slices, 'r') as f:
@@ -106,8 +107,15 @@ def generate(input_file_mreads, input_file_creads, input_file_buff_slices, outpu
 
     mem = ["0.6", "3", "6", "9", "12", "16"]
     with open(output_file, 'w+') as f:
-        f.write("mem \"Naive blocks\" NBR \"Naive slices\" NSR \"Cluster reads\" CRR \"Multiple reads\" MRR \"Buffered slices \" BSR")
-        f.write('\n')
+        if "merge" in output_file:
+            f.write("mem \"Naive blocks\" NBR \"Naive slices\" NSR \"Cluster reads\" CRR \"Multiple reads\" MRR \"Buffered slices \" BSR")
+            f.write('\n')
+        elif "split" in output_file:
+            f.write("mem \"Naive blocks\" NBR \"Naive slices\" NSR \"Cluster writes\" CRR \"Multiple writes\" MRR \"Buffered slices \" BSR")
+            f.write('\n')
+        else:
+            raise ValueError("output file should contains \"split\" or \"merge\"")
+
         for i in range(0,6):
             f.write(
                 "{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10}"
@@ -115,16 +123,17 @@ def generate(input_file_mreads, input_file_creads, input_file_buff_slices, outpu
                             ,mr_total[i], mr_total_err[i], bs_total[i], bs_total_err[i]))
             f.write('\n')
 
+
+
 def main():
     output_file = "./data/total-merge-time-ssd.dat"
     generate(input_file_mreads_ssd, input_file_creads_ssd, input_file_buff_slices_ssd, output_file=output_file)
     output_file = "./data/total-merge-time-hdd.dat"
     generate(input_file_mreads_hdd, input_file_creads_hdd, input_file_buff_slices_hdd, output_file=output_file)
-    output_file = "./data/total-split-time-ssd.dat"
-    generate(input_file_mwrites_ssd, input_file_cwrites_ssd, input_file_buff_slices_split_ssd, output_file=output_file)
-    output_file = "./data/total-split-time-hdd.dat"
-    generate(input_file_mwrites_hdd, input_file_cwrites_hdd, input_file_buff_slices_split_hdd, output_file=output_file)
-
-  
+    #crash - add split data in cwrites/buff-slices
+    #output_file = "./data/total-split-time-ssd.dat"
+    #generate(input_file_mwrites_ssd, input_file_cwrites_ssd, input_file_buff_slices_split_ssd, output_file=output_file)
+    #output_file = "./data/total-split-time-hdd.dat"
+    #generate(input_file_mwrites_hdd, input_file_cwrites_hdd, input_file_buff_slices_split_hdd, output_file=output_file)
 if __name__ == '__main__':
     main()
