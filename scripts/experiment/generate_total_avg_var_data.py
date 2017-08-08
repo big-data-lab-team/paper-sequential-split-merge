@@ -99,11 +99,13 @@ def generate(input_file_mreads, input_file_creads, input_file_buff_slices, outpu
                 total_time_9g.append(float(items[19]))
                 # 12g - bs
                 total_time_12g.append(float(items[24]))
+                # 16g - bs
+                total_time_16g.append(float(items[24]))
 
         ns_total = [avg(total_time_06g), 0, 0, 0, 0, 0]
         ns_total_err = [var(total_time_06g), 0, 0, 0, 0, 0]
-        bs_total = [0, avg(total_time_3g), avg(total_time_6g), avg(total_time_9g), avg(total_time_12g), 0]
-        bs_total_err = [0, var(total_time_3g), var(total_time_6g), var(total_time_9g), var(total_time_12g), 0]
+        bs_total = [0, avg(total_time_3g), avg(total_time_6g), avg(total_time_9g), avg(total_time_12g), avg(total_time_16g)]
+        bs_total_err = [0, var(total_time_3g), var(total_time_6g), var(total_time_9g), var(total_time_12g), var(total_time_16g)]
 
     mem = ["0.6", "3", "6", "9", "12", "16"]
     with open(output_file, 'w+') as f:

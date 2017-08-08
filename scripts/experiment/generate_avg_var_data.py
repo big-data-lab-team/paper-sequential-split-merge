@@ -56,6 +56,12 @@ def get_avg_var_naive(input_file, output_file, input_file_naive_blocks, input_fi
     calculation_times_12g = []
     total_time_12g = []
 
+    read_times_16g = []
+    write_times_16g = []
+    seek_times_16g = []
+    calculation_times_16g = []
+    total_time_16g = []
+    
     read_times_slices = []
     write_times_slices = []
     seek_times_slices = []
@@ -120,6 +126,17 @@ def get_avg_var_naive(input_file, output_file, input_file_naive_blocks, input_fi
                 seek_times_12g.append(seek_time)
                 calculation_times_12g.append(calculation_time)
                 total_time_12g.append(total_time)
+                # 16g
+                read_time = float(items[offset+20])
+                write_time = float(items[offset+21])
+                seek_time = float(items[offset+22])
+                total_time = float(items[offset+24])
+                calculation_time = total_time - seek_time - write_time - read_time
+                read_times_16g.append(read_time)
+                write_times_16g.append(write_time)
+                seek_times_16g.append(seek_time)
+                calculation_times_16g.append(calculation_time)
+                total_time_16g.append(total_time)
 
     # open naive block file:
     with open(input_file_naive_blocks, 'r') as f:
@@ -173,6 +190,9 @@ def get_avg_var_naive(input_file, output_file, input_file_naive_blocks, input_fi
         f.write('\n')
         f.write("12 {} {} {} {} {} ".format(avg(calculation_times_12g), avg(read_times_12g), avg(write_times_12g),
                                              avg(seek_times_12g), var(total_time_12g)))
+        f.write('\n')
+        f.write("16 {} {} {} {} {} ".format(avg(calculation_times_16g), avg(read_times_16g), avg(write_times_16g),
+                                             avg(seek_times_16g), var(total_time_16g)))
         f.write('\n')
         f.write("naive-slice {} {} {} {} {}".format(avg(calculation_times_slices), avg(read_times_slices),
                                                     avg(write_times_slices),

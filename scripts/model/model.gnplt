@@ -79,55 +79,24 @@ m4=D**2/nu*b
 m5=D**2*b
 m6=D**3/nu*b
 
-## Cluster reads only
-ymax=8000
-set xtics ("10" 10*1024**3, "20" 20*1024**3, "30" 30*1024**3,\
-           "40" 40*1024**3, "50" 50*1024**3)	
-set output "./figures/model-big-brain-creads.pdf"
-set obj 1 rect from 0, 1 to m1,ymax fc rgb "#AAAAAAAA"
-set obj 2 rect from m1, 1 to m2,ymax fc rgb "#FFFFFFFF"
-set label 1 at m1, 0.9*ymax " Case 2"    
-set obj 3 rect from m2, 1 to b*R,ymax fc rgb "#AAAAAAAA"
-set label 2 at m2, 0.9*ymax " Case 3"
-plot [0:b*R][0:ymax] creads(x)  lw 3 lt 1 title "Cluster reads"
-unset logscale y
-unset obj 1
-unset obj 2
-unset obj 3
-unset label 1
-unset label 2
-
-## Multiple reads only
-set output "./figures/model-big-brain-mreads.pdf" 
-#ymax=3000
-set obj 1 rect from 0, 1 to m3,ymax fc rgb "#AAAAAAAA"
-set obj 2 rect from m3, 1 to m4,ymax fc rgb "#FFFFFFFF"   
-set obj 3 rect from m4, 1 to m5,ymax fc rgb "#AAAAAAAA"
-set obj 4 rect from m5, 1 to m6,ymax fc rgb "#FFFFFFFF"
-set obj 5 rect from m6, 1 to b*R,ymax fc rgb "#AAAAAAAA"
-set label 1 at m5, 0.9*ymax "   Case 4"
-set label 2 at m6, 0.9*ymax "   Case 5"
-plot [0:b*R][0:ymax] mreads(x)  lw 3 lt 2 title "Multiple reads"
-unset logscale y
-unset obj 1
-unset obj 2
-unset obj 3
-unset obj 4
-unset obj 5
-unset label 1
-unset label 2
-
 ## Comparison
 set output "./figures/model-big-brain-comparison.pdf"
 
 ### min and max plotted memory values
-min=m1	  
+min=m1
 max=m2
+
+ymax=18000
+set obj 1 rect from 0, 1 to m1,ymax fc rgb "#AAAAAAAA"
+set label 2 at 2.5*m1, 0.65*ymax "    Case 2"    
+set obj 2 rect from m1, 1 to m2,ymax fc rgb "#FFFFFFFF"
 
 # Plot
 set xtics ("2" 2*1024**3, "4" 4*1024**3, "6" 6*1024**3,\
            "8" 8*1024**3, "10" 10*1024**3, "12" 12*1024**3,\
            "14" 14*1024**3, "16" 16*1024**3)
+#set ytics ("1" 10**7, "2" 2*10**7, "3" 3*10**7, "4" 4*10**7, "5" 5*10**7)
+
 plot  [min:max][0:]            creads(x) lw 3 title "Cluster reads",\
 			       mreads(x) lw 3 title "Multiple reads"			     
 
@@ -158,10 +127,11 @@ print v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16
 
 
 ### Comparison with more blocks
-set output "./figures/model-big-brain-comparison-moreblocks.pdf" 
+set output "./figures/model-big-brain-comparison-moreblocks.pdf"
+D=3458
 R=D**3
 b=2
-nu=40
+nu=100
 n=nu**3
 d=D/nu
 
@@ -177,14 +147,29 @@ m5=D**2*b
 m6=D**3/nu*b
 
 # min and max plotted memory values
-min=m1
-max=m2
+min=m1/4
+max=m2/5
+ymax=5*10**7
+set obj 1 rect from 0, 1 to m1,ymax fc rgb "#AAAAAAAA"
+set label 2 at 8*m1, 0.65*ymax "    Case 2"    
+set obj 2 rect from m1, 1 to m2,ymax fc rgb "#FFFFFFFF"
+set label 1 at m1, 0.65*ymax "    Case 1"
+ym=0.65*ymax
+a=-5*1024**2
+set arrow from m1-a,ym rto a*1.3,0
 
+print m1
+print m2
+set xlabel "Memory (MB)"
 # Plot
-set xtics ("0.1" 0.1*1024**3, "0.3" 0.3*1024**3, "0.5" 0.5*1024**3,\
-           "0.7" 0.7*1024**3, "0.9" 0.9*1024**3, "1.1" 1.1*1024**3,\
-           "1.3" 1.3*1024**3, "1.5" 1.5*1024**3, "1.7" 1.7*1024**3)	
-set ytics ("1" 10**6, "2" 2*10**6, "3" 3*10**6, "4" 4*10**6, "5" 5*10**6)
-set ylabel "Number of seeks (x10^6)
-plot  [min:max][0:]            creads(x) lw 3 title "Cluster reads",\
+set xtics ("20" 20*1024**2,\
+           "40" 40*1024**2,\
+	   "60" 60*1024**2,\
+           "80" 80*1024**2,\
+	   "100" 100*1024**2,\
+	   "120" 120*1024**2,\
+	   "140" 140*1024**2)
+set ytics ("1" 10**7, "2" 2*10**7, "3" 3*10**7, "4" 4*10**7, "5" 5*10**7)
+set ylabel "Number of seeks (x10^7)
+plot  [min:max][0:]        creads(x) lw 3 title "Cluster reads",\
 			       mreads(x) lw 3 title "Multiple reads"			     

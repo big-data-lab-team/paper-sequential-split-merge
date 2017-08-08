@@ -588,35 +588,22 @@ N_\mathrm{MR} =
 
 \subsection{Analysis}
 \label{sec:analysis}
-Based on a few simulations of Equations~\ref{eq:seeks-cluster-reads-1}
-and~\ref{eq:seeks-multiple-reads}, we conjectured that the comparison
-between Cluster reads and Multiple reads essentially depends on the
-three Cluster reads cases. When Cluster reads merge incomplete block
-rows (case 1), they are always outperformed by Multiple reads
-(\textbf{prop 1}).  When Cluster reads merge complete block rows (case
-2), the comparison between Cluster reads and Multiple reads depends on
-the values of $D$ and $n$ (\textbf{prop 2}). When Cluster reads merge complete
-block slices (case 3), Cluster reads and Multiple reads are equivalent
-(\textbf{prop 3}).
 
-\textbf{prop 1} \todo{do it!}
-
- \textbf{prop 2} is proven by Figure~\ref{fig:model-comparison} that
- shows two situations where Cluster reads and Multiple reads are
- alternatively better than each other.
-
- \textbf{prop 3} is easy to infer from
- equations~\ref{eq:seeks-cluster-reads-1}
- and~\ref{eq:seeks-multiple-reads} when assuming that $Rb$ is an exact
- multiple of $m$. In this case, both equations boil down to
- $n+\frac{Rb}{m}$.
+Figure~\ref{fig:model-comparison} plots
+Equations~\ref{eq:seeks-cluster-reads-1}
+and~\ref{eq:seeks-multiple-reads} for different values of $n$. When
+Cluster reads are in Case 1 or 2, they may outperform Multiple reads
+only for large values of $n$. When Cluster reads are in case 3, they
+are equivalent to Multiple reads; indeed, assuming that $Rb$ is an
+exact multiple of $m$, Equations~\ref{eq:seeks-cluster-reads-1}
+and~\ref{eq:seeks-multiple-reads} both boil down to $n+\frac{Rb}{m}$.
 
 \begin{figure}
   \includegraphics[width=0.45\columnwidth]{figures/model-big-brain-comparison.pdf}
   \includegraphics[width=0.45\columnwidth]{figures/model-big-brain-comparison-moreblocks.pdf}
-  \caption{Number of seeks for Cluster reads vs Multiple reads when
-    Cluster reads merge complete block rows (case 2), for D=3458 and
-    b=2. Left: n=125; Right: n=64,000.}
+  \caption{Number of seeks for Cluster reads vs Multiple reads, for
+    D=3458 and b=2. Left: n=125; Right: n=64,000. Case 1 and Case 2
+    denote Cluster read configurations.}
   % Gnuplot file: scripts/model/model.gnplt
   \label{fig:model-comparison}
 \end{figure}
@@ -843,8 +830,7 @@ the read time to a value comparable to naive slices.  The same
 behavior is observed on HDD and on SSD, although the effect of seeking
 is slightly lower on SSD, as expected. Read times are consistently and substantially lower than write times\todo{explain why}. The overhead time is small for
 both Cluster reads and Multiple reads, although it is not negligible
-for Multiple reads on HDD \todo{Overhead was not well measured for
-  mreads. Needs to be redone.}.
+for Multiple reads on HDD.
 \begin{figure}
   \begin{subfigure}[b]{\columnwidth}
     \includegraphics[width=0.45\columnwidth]{figures/benchmark-buff-slices/buff-slices-breakdown-hdd.pdf}
@@ -903,7 +889,7 @@ overhead time is in Figure~\ref{fig:breakdowns-ssd-split}. \todo{comment on the 
   \begin{subfigure}[b]{\columnwidth}
     \includegraphics[width=0.45\columnwidth]{figures/benchmark-mwrites/mwrites-breakdown-hdd.pdf}
     \includegraphics[width=0.45\columnwidth]{figures/benchmark-mwrites/mwrites-breakdown-ssd.pdf}
-    \caption{Multiple reads}
+    \caption{Multiple writes}
   \end{subfigure}
   \caption{Breakdown of total split times. Left column: HDD. Right column: SSD.}
   \label{fig:breakdowns-ssd-split}

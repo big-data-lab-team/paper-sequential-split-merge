@@ -38,6 +38,7 @@ plot [0-4*a:5+5*a][1:]\
      	    			   '' using (2):9 w boxes lt 2 notitle,\
 				   '' using (3):14 w boxes lt 2 notitle,\
 				   '' using (4):19 w boxes lt 2 notitle,\
+				   '' using (5):24 w boxes lt 2 notitle,\
     	         './data/seeks-model.dat'\
 				   using (1+a):7 w boxes lt 2 fs transparent notitle,\
 	                           '' using (2+a):8 w boxes lt 2 fs transparent notitle,\
@@ -49,6 +50,7 @@ plot [0-4*a:5+5*a][1:]\
     	                           '' using (2+2*a):14 lt 5 w boxes notitle	,\
        	                           '' using (3+2*a):19 lt 5 w boxes notitle	,\
        	                           '' using (4+2*a):24 lt 5 w boxes notitle	,\
+				   '' using (5+2*a):29 lt 5 w boxes notitle	,\
       	         './data/seeks-model.dat'\
 				   using (1+3*a):13 w boxes lt 5 fs transparent notitle,\
 	                           '' using (2+3*a):14 w boxes lt 5 fs transparent notitle,\
