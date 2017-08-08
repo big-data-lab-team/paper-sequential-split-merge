@@ -20,8 +20,8 @@ out_dir_hdd = "/data/gao/blocks_split"
 ori_image_ssd = "/home/gao/new_image.nii"
 out_dir_ssd = "/home/gao/blocks125"
 
-csv_file_hdd = "./hdd_mwrites.csv"
-csv_file_ssd = "./ssd_mwrites.csv"
+csv_file_hdd = "./hdd_mwrites.dat"
+csv_file_ssd = "./ssd_mwrites.dat"
 
 
 Y_splits=5
