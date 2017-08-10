@@ -42,15 +42,18 @@
   Splitting and merging data is a requirement for most parallel or
   distributed processing operations. Naive algorithms, however,
   perform very poorly to split or merge 3D blocks from ultra-high
-  resolution images, due to important seek times. We propose and
-  analyze two algorithms based on in-memory reconstruction of image
-  parts. Cluster reads access image chunks only once while Multiple
-  reads minimize the accesses to the image. Evaluation on a
-  3850x3025x3500 brain image shows that our algorithms perform
-  similarly to the optimal configuration (slice merging) provided that
-  enough memory is available, which solves our initial problem.  We
-  conclude that splitting and merging large 3D images can be done
-  efficiently based on simple data formats.
+  resolution images, due to important seek times. We introduce and
+  analyze sequential algorithms that leverage memory buffering, to
+  address this issue. Cluster reads and Cluster writes access image
+  chunks only once, but they have to seek in the reconstructed
+  image. Multiple reads and Multiple writes minimize seeks in the
+  reconstructed image, but they access image chunks multiple
+  times. Evaluation on a 3850x3025x3500 brain image shows that our
+  algorithms perform similarly to the optimal configuration (slice
+  merging) provided that enough memory is available, which solves our
+  initial problem to a large extent.  We conclude that splitting and
+  merging large 3D images can be done efficiently without the need for
+  complex data formats.
 \end{abstract}
 
 
