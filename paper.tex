@@ -62,75 +62,75 @@
 % Problem definition
 Three-dimensional images that exceed typical memory size are
 increasingly found in a variety of disciplines. Big~Brain, for
-\todo{summarize sizes} instance, is a 3D histological image of the human brain that
-represents 1~TB of raw data organized in 3600 planes at full resolution
-and 76~GB at a 40-micrometer isotropic resolution
-commonly used in neurosciences~\cite{amunts2013bigbrain}. This dataset
-is being re-scanned at an even higher resolution, leading to 100~TB of
-raw data. Other examples found in medical imaging, our primary domain
-of interest, include high-resolution 3D electron microscopy (see,
-e.g., ~\cite{bock2011network}) or micro- and
+instance, is a 3D histological image of the
+human brain that represents 1~TB of raw data organized in 3600 planes
+at full resolution and 76~GB at a 40-micrometer isotropic resolution
+commonly used in neurosciences~\cite{amunts2013bigbrain}. Future
+versions of this dataset will be acquired at an even higher resolution
+and will represent 100~TB of raw data. Other examples found in medical
+imaging, our primary domain of interest, include high-resolution 3D
+electron microscopy (see, e.g., ~\cite{bock2011network}) or micro- and
 nano-tomography~\cite{10.1371/journal.pone.0035691}. As such images
 would typically be processed on a computing cluster, possibly using
-locality-aware file systems such as HDFS~\cite{shvachko2010hadoop},
-efficient software libraries are needed to split and merge them
-efficiently. In particular, data reads and writes might result in
-extensive seek times that drastically limit I/O performance.  In this
-paper we introduce and compare a family of sequential algorithms to
-split and merge images with minimal seek time.
+locality-aware file systems such as the Hadoop Distributed File System
+(HDFS~\cite{shvachko2010hadoop}), software libraries are needed to
+split and merge them efficiently, in particular to limit file
+seeks. In this paper we introduce and compare a family of sequential
+algorithms to split and merge images with limited numbers of seeks.
 
-Images are split into chunks representing 3D blocks or 2D slices,
-which we assume fit in memory. A dataset such as Big~Brain would
-perhaps be split into 125 chunks of 600~MB. The decision to split an
-image into slices or blocks, and the size of the resulting chunks, is
-usually done by the application. Some applications would commonly
-require blocks, for instance spatial filtering, while other ones such
-as acquisition artifact removal would rather work on
-slices. Applications processing voxels individually, for instance
+We assume that the high-resolution image is split into chunks
+representing 3D blocks or 2D slices that fit in memory. A dataset such
+as Big~Brain would perhaps be split into 125 chunks of 600~MB. The
+decision to split an image into slices or blocks, and the size of the
+chunks, is up to the application. Some applications, for instance spatial filtering, would
+commonly require blocks while other
+ones, such as acquisition artifact removal, would rather work on
+slices. Applications that process voxels individually, for instance
 histogram computation or k-means clustering, could work on either
 slices or blocks. Flexibility is thus required in the splitting
 scheme.
 
-Seek time is highly dependent on the byte ordering in image files,
-which we assume is arbitrary but known to the algorithm. The geometry
-of the chunks to split or merge (slices or blocks) and their sizes are
-also critical, which we again assume arbitrary but known to the
-algorithm.  The main idea of our algorithms will be to convert data
-orderings in memory before writing them to disk.
+We also assume that the byte organization in image files is arbitrary
+but known to the algorithm. Some formats, for instance the file format
+defined by the Neuroimaging Informatics Technology Initiative (NIfTI
+-- \url{https://nifti.nimh.nih.gov}) store the complete image in
+column-major order, that is, for an image of dimensions (i, j, k), i
+is the fastest changing dimension, followed by dimension j, followed
+by dimension k. Other formats, for instance HDF5-based MINC
+2.0~\cite{vincent2016minc}, provide more flexibility by allowing data
+to be partitioned in limited-sized chunks, each chunk being stored in
+a specific order. Byte organization is obviously a critical factor of
+seek time. The main idea of our algorithms will be to rearrange
+ordering in memory before or after I/O operations.
 
 The literature on this problem is remarkably scarce. Parallel and
 distributed image processing has obviously been extensively studied
 and used in various
 platforms~\cite{miguet1991elastic,tang2007eman2,yang2008parallel,braunl2013parallel,moise2013terabyte,bajcsy2013terabyte},
-but methods have focused more on geometrical approaches to partition
-images and on load-balancing and task scheduling techniques while we
+but methods have focused on geometrical approaches to partition images
+and on load-balancing and on task scheduling techniques. Instead, we
 aim at algorithms to efficiently split or merge images regardless of
-the geometry of the chunks. Seek times are, however, often identified
-as an issue but the preferred solution is usually to optimize data
-storage formats for a certain application while we are searching for
-algorithms that would reduce the seek time regardless of the data
-format. For instance, the Open Connectome Data
-Cluster~\cite{burns2013open} is a data warehouse system that allows
-users to retrieve specific chunks of large image datasets. It
-addresses seek times by designing a specific file format based on
-space-filling curves, which elegantly preserves spatial proximity on
-disk. Such specific data formats optimize the system for particular
-chunk geometries, blocks in this case, while we aim at algorithms to
-support multiple types of geometries.
-%http://dl.acm.org/citation.cfm?id=218395 also minimizes seek time using a specific format.
+the geometry of the chunks. Although important seek times are often
+identified as an issue, the preferred solution is usually to optimize
+data storage formats for a certain application.  For instance, the
+Open Connectome Data Cluster~\cite{burns2013open} is a data warehouse
+system that allows users to retrieve specific 3D blocks from large
+image datasets. It reduces seek times through a specific file format
+based on space-filling curves, which elegantly preserves spatial
+proximity on disk. On the contrary, we are searching for algorithms
+that would reduce the seek time regardless of the data format, so that
+applications with flexible splitting schemes can be served
 
-This paper makes the following contributions:
-\begin{itemize}
-  \item We propose a set of algorithms to split and merge
-    terabyte-scale 3D images from blocks or slices.
-  \item We model the performance (number of seeks) of these algorithms.
-  \item We evaluate our model and algorithms on a representative
-    use-case involving a 1~TB image a hard drive and a solid-state
-    drive.
-\end{itemize}
-Section~\ref{sec:algos} presents our algorithms and their complexity,
-Section~\ref{sec:experiments} details the results and
-Sections~\ref{sec:discussion} discusses them.\todo{Revise when outline is final.}
+%http://dl.acm.org/citation.cfm?id=218395 also minimizes seek time using a specific format.
+To summarize, our paper makes the following contributions. (1) We
+propose a set of algorithms to split and merge terabyte-scale 3D
+images from 3D blocks or 2D slices. (2) We determine the complexity of
+those algorithms in terms of numbers of seeks, as a function of the image size, splitting scheme and available memory. (3)We evaluate our algorithms using the Big~Brain dataset and two storage drives with different characteristics.
+
+Section~\ref{sec:algos} presents our algorithms,
+Section~\ref{sec:implementation} describes their implementation,
+Section~\ref{sec:experiments} reports experimental results and
+Section~\ref{sec:discussion} concludes the paper.
 
 %\href{http://dl.acm.org/citation.cfm?id=218395}
 
@@ -146,12 +146,8 @@ all chunks are of identical size, that they do not overlap, and that
 slices are squares and blocks are cubes.
 
 We consider a file format where voxels are written in column-major
-order, that is, for an image of dimensions (i, j, k), i is the fastest
-changing dimension, followed by dimension j, followed by dimension
-k. All voxels in a \emph{slice} have a the same $k$ and all voxels in
-a \emph{row} have the same $j$.  NIfTI, the file format defined by the
-Neuroimaging Informatics Technology Initiative
-NIfTI (\url{https://nifti.nimh.nih.gov}) is such a format,
+order. All voxels in a \emph{slice} have a the same $k$ and all voxels in
+a \emph{row} have the same $j$.  NIfTI is such a format,
 used by the vast majority of the neuroimaging community.
 
 \subsection{Notations}
