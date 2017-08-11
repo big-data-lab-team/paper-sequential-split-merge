@@ -3,12 +3,15 @@ set terminal pdf color font ',10'
 
 set style data histogram
 set style histogram cluster gap 1 errorbars
+set boxwidth 1
 set xlabel "Memory (GB)"
 set ylabel "Merge time (s)"
 set style fill solid 0.75 border rgb "black"
 set auto x
 set yrange [0:*]
 set key autotitle columnheader
+
+
 
 maxy=13500
 
