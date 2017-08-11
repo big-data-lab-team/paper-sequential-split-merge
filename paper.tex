@@ -677,6 +677,20 @@ Multiple writes.
 
 %% \todo{could we merge without de-compressing?}
 
+implemnted on-the-fly compression using Python's gzip library. Use
+gzip open file. We don't need on-the-fly compression for multiple
+reads. gzip can find the seek point but it still has to decompress
+everything before the seek point. Cluster reads would be very
+penalized by that. Multiple reads wouldn't care. Same conclusions for
+splitting.
+
+indexed gzip would seek faster (improve the seekk time) but
+decompression time would remain (still have to decompress from
+begining of file).
+
+if we wanted cluster reads to work well with on the fly compression,
+we would need to investigate techniques like~\cite{rajna2015speeding}
+
 \section{Experiments}
 \label{sec:experiments}
 
@@ -911,6 +925,13 @@ overhead time is in Figure~\ref{fig:breakdowns-ssd-split}. \todo{comment on the 
   \label{fig:breakdowns-ssd-split}
   % Gnuplot file: scripts/experiment/compare_breakdown_errbar.gnuplot
 \end{figure}
+
+\subsection{Compression}
+
+Naive blocks, naive slices, cluster reads and multiple reads at 3, 6,
+9, 12, 16GB, on SSD, with on-the-fly compression (graph will also show
+without compression (previous results)) for comparison.
+
 
 \section{Discussion}
 \label{sec:discussion}
