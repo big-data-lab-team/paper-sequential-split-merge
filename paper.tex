@@ -282,7 +282,7 @@ Algorithm~\ref{algo:buffered-slices}.
     \STATE initialize buffer
     \FOR{i = 0 ; i \textless n ; i+=1 }
       \STATE slice = sorted\_slices[i]
-      \IF{\texttt{sizeof}(buffer)+\texttt{sizeof}(slice) $\geq$ m}
+      \IF{sizeof(buffer)+sizeof(slice) $\geq$ m}
         \STATE write buffer in reconstructed image
         \STATE clear buffer
       \ENDIF
@@ -297,7 +297,7 @@ N_\mathrm{buff\_slices} =  n + \ceil*{\frac{bR}{m}} \label{eq:buff-slices}
 \end{equation}
 Buffered slices are straightforward to implement, however, their
 extension to block merging is not easy. The remainder of this Section
-presents our attempts for such a generalization.
+presents our attempts for such an extension.
 
 \subsection{Buffered blocks: Cluster reads}
 
@@ -306,7 +306,7 @@ blocks: they load multiple blocks in memory, concatenate them in a
 buffer and write the buffer in the reconstructed image. Seeking is
 reduced compared to naive block merging since contiguous parts of the
 buffer will be written without seeking. A given
-block is accessed only once.
+block is accessed only once during the whole merging process.
 
 The buffer might be a slightly complex data structure, for instance an
 associative array or a Python dictionary, capable of storing multiple
@@ -337,7 +337,7 @@ seeks are then required.
 \caption{Memory-load configurations in cluster reads, leading to
   different number of seeks. Red blocks need seeking before each of
   their rows ($d^2$ seeks). Blue blocks need seeking before each of
-  their slices ($d$ seeks in total). Green blocks need only a single
+  their slices ($d$ seeks). Green blocks need only a single
   seek. Grey, dashed, transparent blocks represent the contiguous
   memory loads and are added for the sake of visualization.}
 \label{fig:cluster-reads}
@@ -365,8 +365,10 @@ arithmetic, which we felt were unwieldy to report here.
 \caption{Configurations that increase the number of seeks per
   memory-load and are thus deliberately avoided by cluster
   reads. Left: configuration with incomplete block rows (multiplies
-  number of seeks by $d$). Right: configuration with block rows that
-  overlap multiple block slices (multiplies number of seeks by $2$).}
+  the number of seeks by $d$ compared to complete block rows). Right:
+  configuration with block rows that overlap multiple block slices
+  (multiplies the number of seeks by $2$ compared to non-overlapping
+  configurations).}
 \label{fig:avoided-configurations}
 \end{figure}
 
@@ -416,10 +418,10 @@ The number of seeks performed by cluster reads in each of the three cases is:
 \begin{equation*}
   N^i_{\mathrm{CR}} = n + x_ib_i, \quad i \in \llbracket 1, 3\rrbracket,
 \end{equation*}
-where $x_i$ is the number of memory loads required to reconstruct the
-image and $b_i$ is the number of seeks required to write the memory
-load. The first $n$ seeks in the equation are required to read all the
-blocks once. According to Figure~\ref{fig:cluster-reads}, we have:
+where $x_i$ is the number of required memory loads and $b_i$ is the
+number of seeks required to write a memory load. The first $n$ seeks
+in the equation correspond to the reading of all the blocks. According
+to Figure~\ref{fig:cluster-reads}, we have:
 \begin{equation*}
   b_1=d^2=\sqrt[3]{\frac{R}{n}}^2 \quad ; \quad b_2=d=\sqrt[3]{\frac{R}{n}} \quad ; \quad b_3=1
 \end{equation*}
@@ -432,9 +434,8 @@ numbers of memory loads required to reconstruct the image are:
 \end{equation*}
 Because our algorithm avoids overlapping configurations, $x_1$ is
 proportional to the total number of block rows in the image
-($\sqrt[3]{n}^2$) and $x_2$ is proportional to the total number of
-block slices ($\sqrt[3]{n}$).
-
+$\left( \sqrt[3]{n}^2 \right)$ and $x_2$ is proportional to the total number of
+block slices $\left( \sqrt[3]{n} \right)$.
 Finally, the total number of seeks
 performed by cluster reads to reconstruct the image is:
 \begin{equation}
@@ -504,10 +505,10 @@ block might be read multiple times, in different memory loads.
   \STATE write\_range = (start\_index, end\_index)
   \WHILE{end\_index \textless Rb}
     \STATE initialize buffer
-    \FOR{split in sorted\_blocks}
-      \IF{split has voxels in write\_range}
-        \STATE split\_data = read split
-        \STATE in split\_data, extract the rows in write\_range
+    \FOR{block in sorted\_blocks}
+      \IF{block has voxels in write\_range}
+        \STATE block\_data = read block
+        \STATE in block\_data, extract the rows in write\_range
         \STATE insert rows in buffer
       \ENDIF
     \ENDFOR
@@ -518,12 +519,12 @@ block might be read multiple times, in different memory loads.
   \end{algorithmic}
 \end{algorithm}
 
-As illustrated in Figure~\ref{fig:multiple-reads-cases}, we assume
-that $m'$ represents an integer number $k$ of sub-rows (case 1,
-$k_1<\sqrt[3]{n}$), of complete rows (case 2, $k_2<d$), of tile rows
-(case 3, $k_3<\sqrt[3]{n}$), of slices (case 4, $k_4<d$) or of block
-slices (case 5, $k_5<\sqrt[3]{n}$). In each of these 5 cases, we
-define $v_i$ as follows:
+In the complexity analysis, we assume that $m'$ represents an integer
+number $k$ of sub-rows (case 1, $k_1<\sqrt[3]{n}$), of complete rows
+(case 2, $k_2<d$), of tile rows (case 3, $k_3<\sqrt[3]{n}$), of slices
+(case 4, $k_4<d$) or of block slices (case 5, $k_5<\sqrt[3]{n}$), as
+illustrated in Figure~\ref{fig:multiple-reads-cases}. In each of these
+5 cases, we define $v_i$ as follows:
 \begin{equation*}
   v_1=db \text{ ; }  v_2=Db \text{ ; } v_3=Ddb \text{ ; } v_4=D^2b \text{ ; } v_5=D^2db
 \end{equation*}
@@ -538,16 +539,16 @@ The total number of seeks performed by multiple reads in case $i$ is:
   &=& x_i \left(1+b_i\right)-b_i+b_i'
 \end{eqnarray*}
 where $x_i$ is the total number of memory loads, $b_i$ is the
-number of blocks accessed by the first ($x_i$-1) memory loads and
+number of blocks accessed by the first $(x_i-1)$ memory loads and
 $b_i'$ is the number of blocks access by the last memory load. The
-first $x_i$ seeks in the equation are required to write each memory
-load (1 seek per memory load). We have:
+first $x_i$ seeks in the equation correspond to the writing of all memory
+loads (1 seek per memory load). We have:
 \begin{equation*}
   x_i = \ceil*{\frac{Rb}{m_i'}}, \quad i \in \llbracket 1,5 \rrbracket
 \end{equation*}
 and:
 \begin{equation*}
-b_1=k_1 ; \quad b_2=\sqrt[3]{n} ; \quad b_3 = k_3\sqrt[3]{n} ; \quad b_4=\sqrt[3]{n}^2 ; \quad b_5=k_5\sqrt[3]{n}^2
+b_1=k_1 ; b_2=\sqrt[3]{n} ; b_3 = k_3\sqrt[3]{n} ; b_4=\sqrt[3]{n}^2 ; b_5=k_5\sqrt[3]{n}^2
 \end{equation*}
 and:
 \begin{eqnarray*}
@@ -603,9 +604,11 @@ Equations~\ref{eq:seeks-cluster-reads-1}
 and~\ref{eq:seeks-multiple-reads} for different values of $n$. When
 Cluster reads are in Case 1 or 2, they may outperform Multiple reads
 only for large values of $n$. When Cluster reads are in case 3, they
-are equivalent to Multiple reads; indeed, assuming that $Rb$ is an
-exact multiple of $m$, Equations~\ref{eq:seeks-cluster-reads-1}
+are equivalent to Multiple reads: assuming that $Rb$ is an exact
+multiple of $m$, Equations~\ref{eq:seeks-cluster-reads-1}
 and~\ref{eq:seeks-multiple-reads} both boil down to $n+\frac{Rb}{m}$.
+\todo{We could be a bit more rigorous and detail the cases where
+  cluster reads of multiple reads will be better.}
 
 \begin{figure}
   \includegraphics[width=0.45\columnwidth]{figures/model-big-brain-comparison.pdf}
@@ -620,9 +623,10 @@ and~\ref{eq:seeks-multiple-reads} both boil down to $n+\frac{Rb}{m}$.
 \section{Implementation}
 \label{sec:implementation}
 
-The 5 algorithms presented earlier are implemented in a Python library
-called \texttt{sam} (for ``split and merge''). It uses Nibabel~\cite{matthew_brett_2016_60808} for image I/O
-and NumPy for array manipulations.
+We implemented the 5 algorithms presented earlier in a
+Python library called \texttt{sam} (for ``split and merge''). It uses
+Nibabel~\cite{matthew_brett_2016_60808} for image I/O and NumPy for
+array manipulations.
 
 % buffer implementation
 The data buffer used in Cluster reads and Multiple reads is
@@ -639,25 +643,21 @@ merge entries. In Multiple reads, dictionary entries are always
 contiguous in the reconstructed image.  We tried to use a single NumPy
 array as a buffer, but we finally abandoned it as inserting data at a
 specific position in a NumPy array copies the data in memory, which
-increases the runtime and the peak memory consumption.
+increases both the execution time and the peak memory consumption.
 
 % Split methods
 The implementation of splitting algorithms was greatly facilitated by
-the availability of so-called array proxies in Nibabel, which help to
-read specific sub-parts of large images. Nibabel's array proxies
+the availability of so-called array proxies in Nibabel, which help
+reading specific sub-parts of large images. Nibabel's array proxies
 essentially provided the buffer implementation for splitting
 algorithms. Unfortunately, they are not available to write
-data. \todo{Yongping, Valerie: any other comment on split
-  implementations?}
+data. 
 
 % Additional optimizations.
-In Multiple reads, for faster reading all the blocks, before the
-merging process start, we read all the block headers to get their
-position information and calculate each corresponding row index in the
-reconstructed image. We only read the block when there is a row in
-that writing range (available memory), otherwise, we skip it.
-\todo{Valerie, Yongping, any other implementation trick to report?}
-
+In Multiple reads, block headers are read in a first pass where row
+indices in the reconstructed image are stored in memory. Those indices
+are then processed in each memory load, to identify the blocks that
+contribute to it.
 
 %% \subsection{Lossless compression}
 
