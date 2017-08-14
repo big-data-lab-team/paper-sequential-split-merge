@@ -29,11 +29,11 @@
 
 \title{Sequential algorithms to split and merge ultra-high resolution 3D images}
 
-\author{Final ordering
-  to be discussed: Yongping Gao/Val\'erie Hayot-Sasson,
-  Yuhong Yan, Tristan Glatard\\
+\author{Val\'erie Hayot-Sasson$^*$, Yongping Gao$^*$, Yuhong Yan, Tristan Glatard\\
   Department of Computer Science and Software Engineering\\ Concordia University, Montreal, Quebec, Canada\\
-  {first.last}@concordia.ca
+  {first.last}@concordia.ca\\
+  $^*$ These authors have contributed equally
+  
 }
 
 \maketitle
@@ -663,7 +663,14 @@ We also implemented the splitting algorithms corresponding to
 Clustered reads and Multiple reads, called Clustered writes and
 Multiple writes.
 
-%% \subsection{Lossless compression}
+\subsection{Lossless compression}
+
+We implemented lossless compression for all algorithms using Python's
+gzip library. Compression is done on the fly, that is, while the data
+is being read or written. On-the-fly compression of large datasets is
+a challenge when extensive seeking is involved as the gzip library has
+to decompress all the data until the seek position to read from it,
+making access time a linear function of the seek position.
 
 %% Lossless compression might reduce overall read and write times by
 %% reducing seek time and data sizes. However, it needs to be implemented
@@ -676,6 +683,7 @@ Multiple writes.
 %% could therefore potentially use in-memory compression.
 
 %% \todo{could we merge without de-compressing?}
+
 
 \section{Experiments}
 \label{sec:experiments}
@@ -807,19 +815,17 @@ time gain.
 
 % Clustered reads
 Clustered reads provide important speed ups compared to naive blocks,
-both on HDD and on SSD. On HDD, they are up to 9.7 times faster than
-naive blocks at 16~GB and 6.8 times faster on average. On SSD, they
-are up to 5.1 times faster than naive blocks at 16~GB, and 3.1 times
-faster on average.  Surprisingly, they perform substantially faster
-than naive blocks even at 3~GB, while in Case 1. This may be explained
-by the fact that the seeks required to write incomplete block rows to
-the reconstructed image are shorter than the ones for naive blocks.
+both on HDD and on SSD. They are 6.8 times faster than naive blocks on
+HDD and 5.1 times on SSD (average accross all repetitions, all memory
+values). Surprisingly, they perform substantially faster than naive
+blocks even at 3~GB, while in Case 1. This may be explained by the
+fact that the seeks required to write incomplete block rows to the
+reconstructed image are shorter than the ones for naive blocks.
 
 % Multiple reads
-Multiple reads are even faster than Clustered reads on this dataset. On
-HDD, they are 8.4 times faster than naive blocks on average (5.3 times
-on SSD). At 16~GB, they are 9.0 times faster than naive blocks on
-average (5.8 times faster on SSD).
+Multiple reads are even faster than Clustered reads on this
+dataset. They are 8.4 times faster than naive blocks on HDD and 5.3
+times on SSD (average accross all repetitions, all memory values).
 
 \begin{figure}[h]
   \centering
@@ -912,6 +918,17 @@ overhead time is in Figure~\ref{fig:breakdowns-ssd-split}. \todo{comment on the 
   % Gnuplot file: scripts/experiment/compare_breakdown_errbar.gnuplot
 \end{figure}
 
+\subsection{Compression}
+
+Naive blocks, naive slices, cluster reads and multiple reads at 3, 6,
+9, 12, 16GB, on SSD, with on-the-fly compression (graph will also show
+without compression (previous results)) for comparison.
+
+Expected result: Compression speeds up Multiple reads. It speeds up
+Clustered reads to a smaller extent since Cluster reads still have to
+seek in the reconstructed image. \todo{finish that up when the data is
+  available}
+
 \section{Discussion}
 \label{sec:discussion}
 
@@ -958,14 +975,22 @@ slices and blocks only, while file formats inevitably assume a
 particular geometry. For instance, the format in~\cite{burns2013open}
 is not designed to naively split slices. However, we aimed to extract
 all the blocks, whereas, ~\cite{burns2013open} aimed to extract a
-single block from a large image. Furthermore, we have not considered
-on-the-fly data compression yet, which is a unique feature of MINC
-2.0.
+single block from a large image. MINC 2.0 might also help with
+on-the-fly compression.
+
+% Compression
+Due to the minimal number of seeks in the reconstructed image,
+Multiple reads greatly benefit from on-the-fly compression. This is
+not the case of Clustered reads, where compression has an important
+overhead due to residual seeking in the reconstructed
+image. Techniques such as z-indexing have been used to address this
+limitation of the NiFTI format~\cite{rajna2015speeding} and could be
+employed here too.
 
 % Parallel algorithms
-High-resolution images are likely to be processed on
-computing clusters, for instance using software from the Hadoop
-project, in particular the Hadoop Distributed File
+High-resolution images are likely to be processed on computing
+clusters, for instance using software from the Hadoop project, in
+particular the Hadoop Distributed File
 System~\cite{shvachko2010hadoop}. In this context parallel
 split-and-merge algorithms would be beneficial, since the various
 blocks of a large image could be uploaded to different disks
