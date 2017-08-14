@@ -132,10 +132,10 @@ def main():
     generate(input_file_mreads_ssd, input_file_creads_ssd, input_file_buff_slices_ssd, output_file=output_file)
     output_file = "./data/total-merge-time-hdd.dat"
     generate(input_file_mreads_hdd, input_file_creads_hdd, input_file_buff_slices_hdd, output_file=output_file)
-    #crash - add split data in cwrites/buff-slices
-    #output_file = "./data/total-split-time-ssd.dat"
-    #generate(input_file_mwrites_ssd, input_file_cwrites_ssd, input_file_buff_slices_split_ssd, output_file=output_file)
-    #output_file = "./data/total-split-time-hdd.dat"
-    #generate(input_file_mwrites_hdd, input_file_cwrites_hdd, input_file_buff_slices_split_hdd, output_file=output_file)
+    # crash
+    # output_file = "./data/total-split-time-ssd.dat"
+    # generate(input_file_mwrites_ssd, input_file_cwrites_ssd, input_file_buff_slices_split_ssd, output_file=output_file)
+    # output_file = "./data/total-split-time-hdd.dat"
+    # generate(input_file_mwrites_hdd, input_file_cwrites_hdd, input_file_buff_slices_split_hdd, output_file=output_file)
 if __name__ == '__main__':
     main()
