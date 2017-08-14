@@ -79,7 +79,8 @@ def generate(input_file_mreads, input_file_creads, input_file_buff_slices, outpu
                 # 12g - mr
                 total_time_12g.append(float(items[19]))
                 # 16g - mr
-                total_time_16g.append(float(items[24]))
+                if len(items) >= 25:
+                  total_time_16g.append(float(items[24]))
 
         mr_total = [0, avg(total_time_3g), avg(total_time_6g), avg(total_time_9g), avg(total_time_12g), avg(total_time_16g)]
         mr_total_err = [0, var(total_time_3g), var(total_time_6g), var(total_time_9g), var(total_time_12g), var(total_time_16g)]
@@ -133,9 +134,9 @@ def main():
     output_file = "./data/total-merge-time-hdd.dat"
     generate(input_file_mreads_hdd, input_file_creads_hdd, input_file_buff_slices_hdd, output_file=output_file)
     #crash - add split data in cwrites/buff-slices
-    #output_file = "./data/total-split-time-ssd.dat"
-    #generate(input_file_mwrites_ssd, input_file_cwrites_ssd, input_file_buff_slices_split_ssd, output_file=output_file)
-    #output_file = "./data/total-split-time-hdd.dat"
-    #generate(input_file_mwrites_hdd, input_file_cwrites_hdd, input_file_buff_slices_split_hdd, output_file=output_file)
+    output_file = "./data/total-split-time-ssd.dat"
+    generate(input_file_mwrites_ssd, input_file_cwrites_ssd, input_file_buff_slices_split_ssd, output_file=output_file)
+    output_file = "./data/total-split-time-hdd.dat"
+    generate(input_file_mwrites_hdd, input_file_cwrites_hdd, input_file_buff_slices_split_hdd, output_file=output_file)
 if __name__ == '__main__':
     main()

@@ -10,6 +10,11 @@ output_file_creads_ssd = "./data/creads/creads_ssd_avg_var.dat"
 input_file_creads_hdd = "./data/creads/creads_hdd.dat"
 output_file_creads_hdd = "./data/creads/creads_hdd_avg_var.dat"
 
+input_file_cwrites_ssd = "./data/cwrites/cwrites_ssd.dat"
+output_file_cwrites_ssd = "./data/cwrites/cwrites_ssd_avg_var.dat"
+input_file_cwrites_hdd = "./data/cwrites/cwrites_hdd.dat"
+output_file_cwrites_hdd = "./data/cwrites/cwrites_hdd_avg_var.dat"
+
 input_file_buff_slices_ssd = "./data/buff-slices/buff-slices_ssd.dat"
 output_file_buff_slices_ssd = "./data/buff-slices/buff-slices_ssd_avg_var.dat"
 input_file_buff_slices_hdd = "./data/buff-slices/buff-slices_hdd.dat"
@@ -205,6 +210,9 @@ def main():
     # creads
     get_avg_var_naive(input_file_creads_ssd, output_file_creads_ssd, input_file_creads_ssd, input_file_buff_slices_ssd, hasnaive=True, disk="ssd")
     get_avg_var_naive(input_file_creads_hdd, output_file_creads_hdd, input_file_creads_hdd, input_file_buff_slices_hdd, hasnaive=True, disk="hdd")
+    # cwrites
+    get_avg_var_naive(input_file_cwrites_ssd, output_file_cwrites_ssd, input_file_cwrites_ssd, input_file_buff_slices_ssd, hasnaive=True, disk="ssd")
+    get_avg_var_naive(input_file_cwrites_hdd, output_file_cwrites_hdd, input_file_cwrites_hdd, input_file_buff_slices_hdd, hasnaive=True, disk="hdd")
     # buffered slicse
     get_avg_var_naive(input_file_buff_slices_ssd, output_file_buff_slices_ssd, input_file_creads_ssd, input_file_buff_slices_ssd, hasnaive=True, disk="ssd")
     get_avg_var_naive(input_file_buff_slices_hdd, output_file_buff_slices_hdd, input_file_creads_hdd, input_file_buff_slices_hdd, hasnaive=True, disk="hdd")

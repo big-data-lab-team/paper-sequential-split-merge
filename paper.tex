@@ -883,7 +883,7 @@ The number of seeks for Clustered writes and Multiple writes were
 identical to the ones in Clustered reads and Multiple reads. \todo{Check
   that.} The total split time by algorithm is shown in
 Figure~\ref{fig:split-time} and the breakdown by read, write, seek and
-overhead time is in Figure~\ref{fig:breakdowns-ssd-split}. \todo{comment on the figures when results are available.}
+overhead time is in Figure~\ref{fig:breakdowns-ssd-split}. \todo{comment on the figures when results are available. Split time looks slightly longer than merge time.}
 
 \begin{figure}[h]
   \centering
@@ -904,7 +904,7 @@ overhead time is in Figure~\ref{fig:breakdowns-ssd-split}. \todo{comment on the 
     \caption{Buffered slices}
   \end{subfigure}
   \begin{subfigure}[b]{\columnwidth}
-    \includegraphics[width=0.45\columnwidth]{figures/benchmark-cwrite/cwrites-breakdown-hdd.pdf}
+    \includegraphics[width=0.45\columnwidth]{figures/benchmark-cwrites/cwrites-breakdown-hdd.pdf}
     \includegraphics[width=0.45\columnwidth]{figures/benchmark-cwrites/cwrites-breakdown-ssd.pdf}
     \caption{Clustered writes}
   \end{subfigure}
