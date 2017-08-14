@@ -17,11 +17,12 @@ import os
 ori_image_hdd = "/data/bigbrain_40microns.nii"
 out_dir_hdd = "/data/gao/blocks_split"
 
-ori_image_ssd = "/home/gao/new_image.nii"
+#ori_image_ssd = "/home/gao/new_image.nii"
+ori_image_ssd = "/data/bigbrain_40microns.nii"
 out_dir_ssd = "/home/gao/blocks125"
 
-csv_file_hdd = "./hdd_mwrites.csv"
-csv_file_ssd = "./ssd_mwrites.csv"
+csv_file_hdd = "./mwrites_hdd.dat"
+csv_file_ssd = "./mwrites_ssd.dat"
 
 
 Y_splits=5
