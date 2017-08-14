@@ -5,6 +5,11 @@ output_file_mreads_ssd = "./data/mreads/mreads_ssd_avg_var.dat"
 input_file_mreads_hdd = "./data/mreads/mreads_hdd.dat"
 output_file_mreads_hdd = "./data/mreads/mreads_hdd_avg_var.dat"
 
+input_file_mwrites_ssd = "./data/mwrites/mwrites_ssd.dat"
+output_file_mwrites_ssd = "./data/mwrites/mwrites_ssd_avg_var.dat"
+input_file_mwrites_hdd = "./data/mwrites/mwrites_hdd.dat"
+output_file_mwrites_hdd = "./data/mwrites/mwrites_hdd_avg_var.dat"
+
 input_file_creads_ssd = "./data/creads/creads_ssd.dat"
 output_file_creads_ssd = "./data/creads/creads_ssd_avg_var.dat"
 input_file_creads_hdd = "./data/creads/creads_hdd.dat"
@@ -15,10 +20,15 @@ output_file_cwrites_ssd = "./data/cwrites/cwrites_ssd_avg_var.dat"
 input_file_cwrites_hdd = "./data/cwrites/cwrites_hdd.dat"
 output_file_cwrites_hdd = "./data/cwrites/cwrites_hdd_avg_var.dat"
 
-input_file_buff_slices_ssd = "./data/buff-slices/buff-slices_ssd.dat"
-output_file_buff_slices_ssd = "./data/buff-slices/buff-slices_ssd_avg_var.dat"
-input_file_buff_slices_hdd = "./data/buff-slices/buff-slices_hdd.dat"
-output_file_buff_slices_hdd = "./data/buff-slices/buff-slices_hdd_avg_var.dat"
+input_file_buff_slices_reads_ssd = "./data/buff-slices/buff-slices_reads_ssd.dat"
+output_file_buff_slices_reads_ssd = "./data/buff-slices/buff-slices_reads_ssd_avg_var.dat"
+input_file_buff_slices_reads_hdd = "./data/buff-slices/buff-slices_reads_hdd.dat"
+output_file_buff_slices_reads_hdd = "./data/buff-slices/buff-slices_reads_hdd_avg_var.dat"
+
+input_file_buff_slices_writes_ssd = "./data/buff-slices/buff-slices_writes_ssd.dat"
+output_file_buff_slices_writes_ssd = "./data/buff-slices/buff-slices_writes_ssd_avg_var.dat"
+input_file_buff_slices_writes_hdd = "./data/buff-slices/buff-slices_writes_hdd.dat"
+output_file_buff_slices_writes_hdd = "./data/buff-slices/buff-slices_writes_hdd_avg_var.dat"
 
 
 def avg(l):
@@ -205,17 +215,23 @@ def get_avg_var_naive(input_file, output_file, input_file_naive_blocks, input_fi
 
 def main():
     # mreads
-    get_avg_var_naive(input_file_mreads_ssd, output_file_mreads_ssd, input_file_creads_ssd, input_file_buff_slices_ssd, hasnaive=False, disk="ssd")
-    get_avg_var_naive(input_file_mreads_hdd, output_file_mreads_hdd, input_file_creads_hdd, input_file_buff_slices_hdd, hasnaive=False, disk="hdd")
+    get_avg_var_naive(input_file_mreads_ssd, output_file_mreads_ssd, input_file_creads_ssd, input_file_buff_slices_reads_ssd, hasnaive=False, disk="ssd")
+    get_avg_var_naive(input_file_mreads_hdd, output_file_mreads_hdd, input_file_creads_hdd, input_file_buff_slices_reads_hdd, hasnaive=False, disk="hdd")
+    # mwrites
+    get_avg_var_naive(input_file_mwrites_ssd, output_file_mwrites_ssd, input_file_cwrites_ssd, input_file_buff_slices_writes_ssd, hasnaive=False, disk="ssd")
+    get_avg_var_naive(input_file_mwrites_hdd, output_file_mwrites_hdd, input_file_cwrites_hdd, input_file_buff_slices_writes_hdd, hasnaive=False, disk="hdd")
     # creads
-    get_avg_var_naive(input_file_creads_ssd, output_file_creads_ssd, input_file_creads_ssd, input_file_buff_slices_ssd, hasnaive=True, disk="ssd")
-    get_avg_var_naive(input_file_creads_hdd, output_file_creads_hdd, input_file_creads_hdd, input_file_buff_slices_hdd, hasnaive=True, disk="hdd")
+    get_avg_var_naive(input_file_creads_ssd, output_file_creads_ssd, input_file_creads_ssd, input_file_buff_slices_reads_ssd, hasnaive=True, disk="ssd")
+    get_avg_var_naive(input_file_creads_hdd, output_file_creads_hdd, input_file_creads_hdd, input_file_buff_slices_reads_hdd, hasnaive=True, disk="hdd")
     # cwrites
-    get_avg_var_naive(input_file_cwrites_ssd, output_file_cwrites_ssd, input_file_cwrites_ssd, input_file_buff_slices_ssd, hasnaive=True, disk="ssd")
-    get_avg_var_naive(input_file_cwrites_hdd, output_file_cwrites_hdd, input_file_cwrites_hdd, input_file_buff_slices_hdd, hasnaive=True, disk="hdd")
-    # buffered slicse
-    get_avg_var_naive(input_file_buff_slices_ssd, output_file_buff_slices_ssd, input_file_creads_ssd, input_file_buff_slices_ssd, hasnaive=True, disk="ssd")
-    get_avg_var_naive(input_file_buff_slices_hdd, output_file_buff_slices_hdd, input_file_creads_hdd, input_file_buff_slices_hdd, hasnaive=True, disk="hdd")
+    get_avg_var_naive(input_file_cwrites_ssd, output_file_cwrites_ssd, input_file_cwrites_ssd, input_file_buff_slices_writes_ssd, hasnaive=True, disk="ssd")
+    get_avg_var_naive(input_file_cwrites_hdd, output_file_cwrites_hdd, input_file_cwrites_hdd, input_file_buff_slices_writes_hdd, hasnaive=True, disk="hdd")
+    # buffered slices - reads
+    get_avg_var_naive(input_file_buff_slices_reads_ssd, output_file_buff_slices_reads_ssd, input_file_creads_ssd, input_file_buff_slices_reads_ssd, hasnaive=True, disk="ssd")
+    get_avg_var_naive(input_file_buff_slices_writes_hdd, output_file_buff_slices_writes_hdd, input_file_creads_hdd, input_file_buff_slices_writes_hdd, hasnaive=True, disk="hdd")
+    # buffered slices - writes
+    get_avg_var_naive(input_file_buff_slices_writes_ssd, output_file_buff_slices_writes_ssd, input_file_cwrites_ssd, input_file_buff_slices_writes_ssd, hasnaive=True, disk="ssd")
+    get_avg_var_naive(input_file_buff_slices_writes_hdd, output_file_buff_slices_writes_hdd, input_file_cwrites_hdd, input_file_buff_slices_writes_hdd, hasnaive=True, disk="hdd")
 
 if __name__ == '__main__':
     main()

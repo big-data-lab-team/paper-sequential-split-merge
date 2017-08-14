@@ -17,7 +17,7 @@ plot [0-4*a:5+5*a][1:]\
 		                      using (0-2*a):4 w boxes lt 3 title "Naive blocks",\
     	         './data/seeks-model.dat'\
 				      using (0-a):1 w boxes lt 3 fs transparent notitle,\
-                 './data/buff-slices/buff-slices_ssd.dat'\
+                 './data/buff-slices/buff-slices_reads_ssd.dat'\
 		                      using (0):4 w boxes lt 4 title "Naive slices",\
     	         './data/seeks-model.dat'\
    				      using (a):11 w boxes lt 4 fs transparent notitle,\
@@ -45,7 +45,7 @@ plot [0-4*a:5+5*a][1:]\
 				   '' using (3+a):9 w boxes lt 2 fs transparent notitle,\
 				   '' using (4+a):10 w boxes lt 2 fs transparent notitle,\
 				   '' using (5+a):11 w boxes lt 2 fs transparent notitle,\
-                 './data/buff-slices/buff-slices_ssd.dat'\
+                 './data/buff-slices/buff-slices_reads_ssd.dat'\
 			              using (1+2*a):9 lt 5 w boxes title "Buffered slices",\
     	                           '' using (2+2*a):14 lt 5 w boxes notitle	,\
        	                           '' using (3+2*a):19 lt 5 w boxes notitle	,\
