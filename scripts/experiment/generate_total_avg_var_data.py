@@ -18,12 +18,12 @@ def var(l):
 #ssd
 input_file_mreads_ssd = "./data/mreads/mreads_ssd.dat"
 input_file_creads_ssd = "./data/creads/creads_ssd.dat"
-input_file_buff_slices_ssd = "./data/buff-slices/buff-slices_reads_ssd.dat"
+input_file_buff_slices_reads_ssd = "./data/buff-slices/buff-slices_reads_ssd.dat"
 
 #hdd
 input_file_mreads_hdd = "./data/mreads/mreads_hdd.dat"
 input_file_creads_hdd = "./data/creads/creads_hdd.dat"
-input_file_buff_slices_hdd = "./data/buff-slices/buff-slices_reads_hdd.dat"
+input_file_buff_slices_reads_hdd = "./data/buff-slices/buff-slices_reads_hdd.dat"
 
 # split
 #ssd
@@ -35,9 +35,6 @@ input_file_buff_slices_writes_ssd = "./data/buff-slices/buff-slices_writes_ssd.d
 input_file_mwrites_hdd = "./data/mwrites/mwrites_hdd.dat"
 input_file_cwrites_hdd = "./data/cwrites/cwrites_hdd.dat"
 input_file_buff_slices_writes_hdd = "./data/buff-slices/buff-slices_writes_hdd.dat"
-
-
-
 
 
 def generate(input_file_mreads, input_file_creads, input_file_buff_slices, output_file):
@@ -79,8 +76,7 @@ def generate(input_file_mreads, input_file_creads, input_file_buff_slices, outpu
                 # 12g - mr
                 total_time_12g.append(float(items[19]))
                 # 16g - mr
-                if len(items) >= 25:
-                  total_time_16g.append(float(items[24]))
+                total_time_16g.append(float(items[24]))
 
         mr_total = [0, avg(total_time_3g), avg(total_time_6g), avg(total_time_9g), avg(total_time_12g), avg(total_time_16g)]
         mr_total_err = [0, var(total_time_3g), var(total_time_6g), var(total_time_9g), var(total_time_12g), var(total_time_16g)]
@@ -101,13 +97,13 @@ def generate(input_file_mreads, input_file_creads, input_file_buff_slices, outpu
                 # 12g - bs
                 total_time_12g.append(float(items[24]))
                 # 16g - bs
-                total_time_16g.append(float(items[24]))
+                total_time_16g.append(float(items[29]))
 
         ns_total = [avg(total_time_06g), 0, 0, 0, 0, 0]
         ns_total_err = [var(total_time_06g), 0, 0, 0, 0, 0]
         bs_total = [0, avg(total_time_3g), avg(total_time_6g), avg(total_time_9g), avg(total_time_12g), avg(total_time_16g)]
         bs_total_err = [0, var(total_time_3g), var(total_time_6g), var(total_time_9g), var(total_time_12g), var(total_time_16g)]
-
+        
     mem = ["0.6", "3", "6", "9", "12", "16"]
     with open(output_file, 'w+') as f:
         if "merge" in output_file:
@@ -130,9 +126,9 @@ def generate(input_file_mreads, input_file_creads, input_file_buff_slices, outpu
 
 def main():
     output_file = "./data/total-merge-time-ssd.dat"
-    generate(input_file_mreads_ssd, input_file_creads_ssd, input_file_buff_slices_ssd, output_file=output_file)
+    generate(input_file_mreads_ssd, input_file_creads_ssd, input_file_buff_slices_reads_ssd, output_file=output_file)
     output_file = "./data/total-merge-time-hdd.dat"
-    generate(input_file_mreads_hdd, input_file_creads_hdd, input_file_buff_slices_hdd, output_file=output_file)
+    generate(input_file_mreads_hdd, input_file_creads_hdd, input_file_buff_slices_reads_hdd, output_file=output_file)
     output_file = "./data/total-split-time-ssd.dat"
     generate(input_file_mwrites_ssd, input_file_cwrites_ssd, input_file_buff_slices_writes_ssd, output_file=output_file)
     output_file = "./data/total-split-time-hdd.dat"

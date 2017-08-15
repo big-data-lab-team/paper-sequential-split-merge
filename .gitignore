@@ -24,6 +24,7 @@ figures/benchmark-buff-slices/buff-slices-breakdown-hdd.pdf
 figures/benchmark-buff-slices/buff-slices-breakdown-ssd.pdf
 figures/benchmark-buff-slices/buff-slices-reads-breakdown-hdd.pdf
 figures/benchmark-buff-slices/buff-slices-reads-breakdown-ssd.pdf
+figures/benchmark-buff-slices/buff-slices-writes-breakdown-ssd.pdf
 figures/benchmark-creads/creads-breakdown-hdd.pdf
 figures/benchmark-creads/creads-breakdown-ssd.pdf
 figures/benchmark-creads/creads-number-of-seeks.pdf

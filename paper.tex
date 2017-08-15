@@ -852,13 +852,14 @@ the read time to a value comparable to naive slices.  The same
 behavior is observed on HDD and on SSD, although the effect of seeking
 is slightly smaller on SSD, as expected. Read times are consistently
 and substantially lower than write times. This may be a result of
-reading data using Python's NumPy package, which is more efficient
-than using native Python - as is the case with our writes. The
-overhead time is small for both Clustered reads and Multiple reads.
+discrepancies between disk read and writes rates, or of reading data using Python's NumPy
+package, which is more efficient than using native Python - as is the
+case with our writes. The overhead time is small for both Clustered
+reads and Multiple reads.
 \begin{figure}
   \begin{subfigure}[b]{\columnwidth}
-    \includegraphics[width=0.45\columnwidth]{figures/benchmark-buff-slices/buff-slices-breakdown-hdd.pdf}
-    \includegraphics[width=0.45\columnwidth]{figures/benchmark-buff-slices/buff-slices-breakdown-ssd.pdf}
+    \includegraphics[width=0.45\columnwidth]{figures/benchmark-buff-slices/buff-slices-reads-breakdown-hdd.pdf}
+    \includegraphics[width=0.45\columnwidth]{figures/benchmark-buff-slices/buff-slices-reads-breakdown-ssd.pdf}
     \caption{Buffered slices}
   \end{subfigure}
   \begin{subfigure}[b]{\columnwidth}
@@ -899,8 +900,8 @@ overhead time is in Figure~\ref{fig:breakdowns-ssd-split}. \todo{comment on the 
 
 \begin{figure}
   \begin{subfigure}[b]{\columnwidth}
-    \includegraphics[width=0.45\columnwidth]{figures/benchmark-buff-slices/buff-slices-breakdown-hdd-split.pdf}
-    \includegraphics[width=0.45\columnwidth]{figures/benchmark-buff-slices/buff-slices-breakdown-ssd-split.pdf}
+    \includegraphics[width=0.45\columnwidth]{figures/benchmark-buff-slices/buff-slices-writes-breakdown-hdd.pdf}
+    \includegraphics[width=0.45\columnwidth]{figures/benchmark-buff-slices/buff-slices-writes-breakdown-ssd.pdf}
     \caption{Buffered slices}
   \end{subfigure}
   \begin{subfigure}[b]{\columnwidth}
