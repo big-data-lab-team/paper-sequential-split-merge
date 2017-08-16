@@ -443,8 +443,7 @@ N_\mathrm{CR} =
 \begin{cases}
   n + \ceil*{\frac{Rb}{\sqrt[3]{n}^2m_1'}}\sqrt[3]{R}^2     & \text{if } m < \frac{Rb}{\sqrt[3]{n}^2}\\[0.4em]
   n + \ceil*{\frac{Rb}{\sqrt[3]{n}m_2'}}\sqrt[3]{R}        & \text{if } \frac{Rb}{\sqrt[3]{n}^2} \leq m < \frac{Rb}{\sqrt[3]{n}}\\[0.4em]
-  n + \ceil*{\frac{Rb}{m_3'}}                              & \text{if } \frac{Rb}{\sqrt[3]{n}} \leq Rb < n\\[0.4em]
-  n + 1                                                          & \text{otherwise}
+  n + \ceil*{\frac{Rb}{m_3'}}                              & \text{if } \frac{Rb}{\sqrt[3]{n}} \leq m < Rb
 \end{cases} \label{eq:seeks-cluster-reads-1}
 \end{equation}
 It should be noted that $N_{CR}$ is not a continuous function of m,
@@ -880,11 +879,18 @@ reads and Multiple reads.
 
 \subsubsection{Split time}
 
-The number of seeks for Clustered writes and Multiple writes were
-identical to the ones in Clustered reads and Multiple reads. \todo{Check
-  that.} The total split time by algorithm is shown in
-Figure~\ref{fig:split-time} and the breakdown by read, write, seek and
-overhead time is in Figure~\ref{fig:breakdowns-ssd-split}. \todo{comment on the figures when results are available. Split time looks slightly longer than merge time.}
+The total split time by algorithm is shown in
+Figure~\ref{fig:split-time}. The difference between naive blocks and
+naive slices is still significant (average ratio is 1.4 on SSD,
+\todo{x} on HDD) although less than on HDD. Clustered writes and
+Multiple writes both perform similarly to naive slices. Buffered
+slices don't provide any significant speed-up compared to naive
+slices.
+
+The breakdown by read, write and overhead time is shown in
+Figure~\ref{fig:breakdowns-ssd-split}. We were not able to measure
+seek time for splitting algorithms as it was blended in read time by the Nibabel library. \todo{comment on the figures when results are
+  available. Split time looks slightly longer than merge time.}
 
 \begin{figure}[h]
   \centering
