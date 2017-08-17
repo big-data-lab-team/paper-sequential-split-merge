@@ -74,23 +74,18 @@ def main():
     rep = args.rep
     disk = args.disk
 
-
-
-
-
-    # print "mreads..."
-    # ## MREADS:
-    # for i in range(0, rep):
-    #     data_dict = {}
-    #     print "Repetition: {}".format(i)
-    #     random.shuffle(mem_list)
-    #     for mem in mem_list:
-    #         print "mem = {}".format(mem)
-    #         os.system("echo 3 | sudo tee /proc/sys/vm/drop_caches")
-    #         os.system("rm {}".format(files[disk][0]))
-    #         data = benchmark_mreads(mem=mem, reconstructed=files[disk][0], legend=files[disk][1])
-    #         data_dict[mem] = data
-    #     write_to_file(data_dict, files[disk][2])
+    ## MREADS:
+    for i in range(0, rep):
+        data_dict = {}
+        print "Repetition: {}".format(i)
+        random.shuffle(mem_list)
+        for mem in mem_list:
+            print "mem = {}".format(mem)
+            os.system("echo 3 | sudo tee /proc/sys/vm/drop_caches")
+            os.system("rm {}".format(files[disk][0]))
+            data = benchmark_mreads(mem=mem, reconstructed=files[disk][0], legend=files[disk][1])
+            data_dict[mem] = data
+        write_to_file(data_dict, files[disk][2])
 
 
 
