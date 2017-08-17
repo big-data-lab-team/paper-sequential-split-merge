@@ -20,6 +20,11 @@ input_file_mreads_ssd = "./data/mreads/mreads_ssd.dat"
 input_file_creads_ssd = "./data/creads/creads_ssd.dat"
 input_file_buff_slices_reads_ssd = "./data/buff-slices/buff-slices_reads_ssd.dat"
 
+#ssd-compressed
+input_file_mreads_ssd_compressed = "./data/mreads/mreads_ssd_compressed.dat"
+input_file_creads_ssd_compressed = "./data/creads/creads_ssd_compressed.dat"
+input_file_buff_slices_reads_ssd_compressed = "./data/buff-slices/buff-slices_reads_ssd_compressed.dat"
+
 #hdd
 input_file_mreads_hdd = "./data/mreads/mreads_hdd.dat"
 input_file_creads_hdd = "./data/creads/creads_hdd.dat"
@@ -37,7 +42,7 @@ input_file_cwrites_hdd = "./data/cwrites/cwrites_hdd.dat"
 input_file_buff_slices_writes_hdd = "./data/buff-slices/buff-slices_writes_hdd.dat"
 
 
-def generate(input_file_mreads, input_file_creads, input_file_buff_slices, output_file):
+def generate(input_file_mreads, input_file_creads, input_file_buff_slices, output_file, compressed=False):
     total_time_06g, total_time_3g, total_time_6g, total_time_9g, total_time_12g, total_time_16g = [], [], [], [], [], []
 
     with open(input_file_creads, 'r') as f:
@@ -107,10 +112,16 @@ def generate(input_file_mreads, input_file_creads, input_file_buff_slices, outpu
     mem = ["0.6", "3", "6", "9", "12", "16"]
     with open(output_file, 'w+') as f:
         if "merge" in output_file:
-            f.write("mem \"Naive blocks\" NBR \"Naive slices\" NSR \"Cluster reads\" CRR \"Multiple reads\" MRR \"Buffered slices \" BSR")
+            if compressed:
+                f.write("mem \"Naive blocks (compressed)\" NBR \"Naive slices (compressed)\" NSR \"Cluster reads (compressed)\" CRR \"Multiple reads (compressed)\" MRR \"Buffered slices (compressed) \" BSR")
+            else:
+                f.write("mem \"Naive blocks\" NBR \"Naive slices\" NSR \"Cluster reads\" CRR \"Multiple reads\" MRR \"Buffered slices \" BSR")
             f.write('\n')
         elif "split" in output_file:
-            f.write("mem \"Naive blocks\" NBR \"Naive slices\" NSR \"Cluster writes\" CRR \"Multiple writes\" MRR \"Buffered slices \" BSR")
+            if compressed:
+                f.write("mem \"Naive blocks (compressed)\" NBR \"Naive slices (compressed)\" NSR \"Cluster writes (compressed)\" CRR \"Multiple writes (compressed)\" MRR \"Buffered slices (compressed)\" BSR")
+            else:
+                f.write("mem \"Naive blocks\" NBR \"Naive slices\" NSR \"Cluster writes\" CRR \"Multiple writes\" MRR \"Buffered slices \" BSR")
             f.write('\n')
         else:
             raise ValueError("output file should contains \"split\" or \"merge\"")
@@ -127,6 +138,8 @@ def generate(input_file_mreads, input_file_creads, input_file_buff_slices, outpu
 def main():
     output_file = "./data/total-merge-time-ssd.dat"
     generate(input_file_mreads_ssd, input_file_creads_ssd, input_file_buff_slices_reads_ssd, output_file=output_file)
+    output_file = "./data/total-merge-time-ssd-compressed.dat"
+    generate(input_file_mreads_ssd_compressed, input_file_creads_ssd_compressed, input_file_buff_slices_reads_ssd_compressed, output_file=output_file, compressed=True)
     output_file = "./data/total-merge-time-hdd.dat"
     generate(input_file_mreads_hdd, input_file_creads_hdd, input_file_buff_slices_reads_hdd, output_file=output_file)
     output_file = "./data/total-split-time-ssd.dat"
