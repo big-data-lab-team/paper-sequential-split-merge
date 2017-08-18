@@ -228,7 +228,7 @@ def main():
     get_avg_var_naive(input_file_cwrites_hdd, output_file_cwrites_hdd, input_file_cwrites_hdd, input_file_buff_slices_writes_hdd, hasnaive=True, disk="hdd")
     # buffered slices - reads
     get_avg_var_naive(input_file_buff_slices_reads_ssd, output_file_buff_slices_reads_ssd, input_file_creads_ssd, input_file_buff_slices_reads_ssd, hasnaive=True, disk="ssd")
-    get_avg_var_naive(input_file_buff_slices_writes_hdd, output_file_buff_slices_writes_hdd, input_file_creads_hdd, input_file_buff_slices_writes_hdd, hasnaive=True, disk="hdd")
+    get_avg_var_naive(input_file_buff_slices_reads_hdd, output_file_buff_slices_reads_hdd, input_file_creads_hdd, input_file_buff_slices_reads_hdd, hasnaive=True, disk="hdd")
     # buffered slices - writes
     get_avg_var_naive(input_file_buff_slices_writes_ssd, output_file_buff_slices_writes_ssd, input_file_cwrites_ssd, input_file_buff_slices_writes_ssd, hasnaive=True, disk="ssd")
     get_avg_var_naive(input_file_buff_slices_writes_hdd, output_file_buff_slices_writes_hdd, input_file_cwrites_hdd, input_file_buff_slices_writes_hdd, hasnaive=True, disk="hdd")

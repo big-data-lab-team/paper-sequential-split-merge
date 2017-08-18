@@ -1,0 +1,36 @@
+# creads - 16g - read compressed, write compressed on ssd.
+# 1. naive read time
+# 2. naive write time
+# 3. naive compress time
+# 4. naive num seeks
+# 5. naive total time
+# 6. 3GB read time
+# 7. 3GB write time
+# 8. 3GB seek time
+# 9. 3GB num seeks
+# 10. 3GB total time
+# 11. 6GB read time
+# 12. 6GB write time
+# 13. 6GB seek time
+# 14. 6GB num seeks
+# 15. 6GB total time
+# 16. 9GB read time
+# 17. 9GB write time
+# 18. 9GB seek time
+# 19. 9GB num seeks
+# 20. 9GB total time
+# 21. 12GB read time
+# 22. 12GB write time
+# 23. 12GB seek time
+# 24. 12GB num seeks
+# 25. 12GB total time
+# 26. 16GB read time
+# 27. 16GB write time
+# 28. 16GB seek time
+# 29. 16GB num seeks
+# 30. 16GB total time
+609.099471331 4872.60759234 1368.37049913 52937620 7140.38957214 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 430.000192165 1958.43604112 0 125 2785.03625512
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 525.883815765 1953.66060281 0 125 2897.332654 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 605.163740158 1952.55472779 0 125 2970.03738499 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 430.988102436 1955.1088419 0 125 2775.38316798
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 577.651607752 1955.62337971 0 125 2944.10468483
