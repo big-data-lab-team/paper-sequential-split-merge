@@ -21,14 +21,14 @@ plot [][0:maxy] './data/total-merge-time-ssd.dat' using 2:3:xtic(1) lt 3 title c
         '' using 10:11 lt 5 title col(10)
 
 set output "./figures/total-merge-time-ssd-compressed.pdf"
-plot [][0:maxy] './data/total-merge-time-ssd-compressed.dat'\
+plot [][0:maxy] './data/total-merge-time-ssd.dat' using 4:5:xtic(1) lt 4 title col(4), \
+        './data/total-merge-time-ssd-compressed.dat'\
            using 4:5:xtic(1) lt 4 fillstyle pattern 2 title col(4), \
-        '' using 6:7 lt 1 fillstyle pattern 2 title col(6), \
-        '' using 8:9 lt 2 fillstyle pattern 2 title col(8), \
-        '' using 10:11 lt 5 fillstyle pattern 2 title col(10),\
-        './data/total-merge-time-ssd.dat' using 4:5:xtic(1) lt 4 title col(4), \
-        '' using 8:9 lt 2 title col(8), \
-        '' using 10:11 lt 5 title col(10)
+        '' using 6:7:xtic(1) lt 1 fillstyle pattern 2 title col(6), \
+        '' using 8:9:xtic(1) lt 2 fillstyle pattern 2 title col(8), \
+        '' using 10:11:xtic(1) lt 5 fillstyle pattern 2 title col(10),\
+'./data/total-merge-time-ssd.dat'  using 8:9:xtic(1) lt 2 title col(8), \
+        '' using 10:11:xtic(1) lt 5 title col(10)
 
 set output "./figures/total-merge-time-hdd.pdf"
 plot [][0:maxy] './data/total-merge-time-hdd.dat' using 2:3:xtic(1) lt 3 title col(2),\

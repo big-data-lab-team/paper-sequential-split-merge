@@ -301,7 +301,7 @@ presents our attempts for such an extension.
 
 \subsection{Buffered blocks: Clustered reads}
 
-Clustered reads are the more direct extension of buffered slices to
+Clustered reads are the more direct extension of Buffered slices to
 blocks: they load multiple blocks in memory, concatenate them in a
 buffer and write the buffer in the reconstructed image. Seeking is
 reduced compared to Naive blocks since contiguous parts of the
@@ -734,6 +734,16 @@ page, dentry and inode caches before each run (\texttt{echo 3 | sudo
   tee /proc/sys/vm/drop\_caches}). We measured the cumulative read,
 write and seek time in each run, as well as the overhead time defined
 as the total time minus the sum of all other times.
+
+Compressed blocks and slices were also merged into a compressed
+image. On-the-fly gzip compression was used for Naive slices, Buffered
+slices and Multiple reads. As explained before, Clustered reads could
+only be applied to compressed data while in Case 3, i.e., for 16~GB,
+and Naive blocks could not be used at all with on-the-fly
+compression. To give a reference, with used Naive blocks with
+\emph{offline} compression, that it, we wrote an uncompressed image
+and compressed it sequentially afterwards. \todo{confirm that.}
+
 \begin{table}
   \centering
 \begin{footnotesize}
@@ -929,11 +939,12 @@ caching effects in Naive blocks and slices.
 \subsection{Compression}
 
 Figure~\ref{fig:compression} shows the impact of gzip compression on
-the merging time, for Multiple reads and Naive slices. As explained
-before, Clustered reads could only be applied to compressed data while
-in Case 3, i.e., for 16~GB, and Naive blocks could not be
-used. Compression dramatically slows down merging time for all
-algorithms \todo{Check that once all results are available}.
+the merging time, for Multiple reads and Naive slices.
+Unsurprisingly, compression dramatically slows down merging time for
+all algorithms. Multiple reads, however, still provide important
+speed-up compared to Naive blocks \todo{check that}, although they do
+not completely reach the performance of Buffered slices and Naive
+slices.
 
 \begin{figure}[h]
   \centering
@@ -973,7 +984,7 @@ on the split or merge algorithm used. In some disks, seek time greatly
 varies with the seek distance, which would open the door to additional
 opportunities for I/O optimization. Interactions between those
 components might also result in performance differences particular to
-a particular algorithm. To ensure the portability of our library
+a specific algorithm. To ensure the portability of our library
 across systems and configurations, we focused on reducing the overall
 number of seeks and ignored specific system configurations. We
 demonstrated the performance of our methods on both an HDD and an SSD
@@ -983,7 +994,7 @@ disk, using state-of-the-art and widely used versions of Linux
 % File formats
 In terms of file formats, our results demonstrate that simple imaging
 formats may be split and merged without performance loss compared to
-more complex formats that try to preserve spatial locality on disk,
+more complex formats that can preserve spatial locality on disk,
 for instance MINC 2.0 or the format based on space-filling curves
 mentioned in~\cite{burns2013open}. This is of major interest in the
 current open-science context since simpler formats favor data-sharing
