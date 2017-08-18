@@ -1,8 +1,0 @@
-# naive blocks - read compressed, write uncompressed and compress offline on ssd.
-# 1. naive blocks read time
-# 2. naive blocks write time
-# 3. naive blocks seek time
-# 4. naive blocks num seeks
-# 5. naive blocks compress time
-# 6. naive blocks total time
-609.099471331 4872.60759234 147.337734938 52937620 1368.37049913 7140.38957214

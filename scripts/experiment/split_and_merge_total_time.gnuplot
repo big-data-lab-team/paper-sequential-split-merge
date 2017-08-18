@@ -21,7 +21,8 @@ plot [][0:maxy] './data/total-merge-time-ssd.dat' using 2:3:xtic(1) lt 3 title c
         '' using 10:11 lt 5 title col(10)
 
 set output "./figures/total-merge-time-ssd-compressed.pdf"
-plot [][0:maxy] './data/total-merge-time-ssd.dat' using 4:5:xtic(1) lt 4 title col(4), \
+plot [][0:maxy] './data/total-merge-time-ssd-compressed.dat' using 2:3:xtic(1) lt 3 fillstyle pattern 2 title col(2),\
+        './data/total-merge-time-ssd.dat' using 4:5:xtic(1) lt 4 title col(4), \
         './data/total-merge-time-ssd-compressed.dat'\
            using 4:5:xtic(1) lt 4 fillstyle pattern 2 title col(4), \
         '' using 6:7:xtic(1) lt 1 fillstyle pattern 2 title col(6), \
