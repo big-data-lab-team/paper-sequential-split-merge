@@ -81,11 +81,12 @@ def main():
             print "---------------------- mem = {} ----------------------".format(mem)
             os.system("echo 3 | sudo tee /proc/sys/vm/drop_caches")
             os.system("rm {}".format(files[disk][0]))
+            os.system("rm {}".format(reconstructed_ssd_compressed))
 
             data = benchmark_creads(mem=mem, reconstructed=files[disk][0], legend=files[disk][1])
             data_dict[mem] = data
 
-            os.system("rm {}".format(reconstructed_ssd_compressed))
+
 
         write_to_file(data_dict, files[disk][2])
 
