@@ -44,16 +44,18 @@
   perform very poorly to split or merge 3D blocks from ultra-high
   resolution images, due to important seek times. We introduce and
   analyze sequential algorithms that leverage memory buffering, to
-  address this issue. Clustered reads and Clustered writes access image
-  chunks only once, but they have to seek in the reconstructed
+  address this issue. Clustered reads and Clustered writes access
+  image chunks only once, but they have to seek in the reconstructed
   image. Multiple reads and Multiple writes minimize seeks in the
   reconstructed image, but they access image chunks multiple
   times. Evaluation on a 3850x3025x3500 brain image shows that our
   algorithms perform similarly to the optimal configuration (slice
   merging) provided that enough memory is available, which solves our
-  initial problem to a large extent.  We conclude that splitting and
-  merging large 3D images can be done efficiently without the need for
-  complex data formats.
+  initial problem to a large extent. Besides, Multiple reads
+  support on-the-fly compression of the merged image transparently but
+  Cluster reads do not due to their use of negative seeking. We
+  conclude that splitting and merging large 3D images can be done
+  efficiently without relying on complex data formats.
 \end{abstract}
 
 
@@ -62,21 +64,20 @@
 % Problem definition
 Three-dimensional images that exceed typical memory size are
 increasingly found in a variety of disciplines. Big~Brain, for
-instance, is a 3D histological image of the
-human brain that represents 1~TB of raw data organized in 3600 planes
-at full resolution and 76~GB at a 40-micrometer isotropic resolution
-commonly used in neurosciences~\cite{amunts2013bigbrain}. Future
-versions of this dataset will be acquired at an even higher resolution
-and will represent 100~TB of raw data. Other examples found in medical
-imaging, our primary domain of interest, include high-resolution 3D
-electron microscopy (see, e.g., ~\cite{bock2011network}) or micro- and
+instance, is a 3D histological image of the human brain that
+represents 1~TB of raw data organized in 3600 planes at full
+resolution and 76~GB at a 40-micrometer isotropic resolution commonly
+used in neurosciences~\cite{amunts2013bigbrain}. Other examples found
+in medical imaging, our primary domain of interest, include
+high-resolution 3D electron microscopy (see, e.g.,
+~\cite{bock2011network}) or micro- and
 nano-tomography~\cite{10.1371/journal.pone.0035691}. As such images
 would typically be processed on a computing cluster, possibly using
 locality-aware file systems such as the Hadoop Distributed File System
 (HDFS~\cite{shvachko2010hadoop}), software libraries are needed to
 split and merge them efficiently, in particular to limit file
 seeks. In this paper we introduce and compare a family of sequential
-algorithms to split and merge images with limited numbers of seeks.
+algorithms to split and merge images with reduced seeking.
 
 We assume that the high-resolution image is split into chunks
 representing 3D blocks or 2D slices that fit in memory. A dataset such
@@ -107,8 +108,8 @@ The literature on this problem is remarkably scarce. Parallel and
 distributed image processing has obviously been extensively studied
 and used in various
 platforms~\cite{miguet1991elastic,tang2007eman2,yang2008parallel,braunl2013parallel,moise2013terabyte,bajcsy2013terabyte},
-but methods have focused on geometrical approaches to partition images
-and on load-balancing and on task scheduling techniques. Instead, we
+but methods have focused on geometrical approaches to partition images,
+and on load-balancing or task scheduling techniques. Instead, we
 aim at algorithms to efficiently split or merge images regardless of
 the geometry of the chunks. Although important seek times are often
 identified as an issue, the preferred solution is usually to optimize
@@ -123,14 +124,15 @@ applications with flexible splitting schemes can be served
 
 %http://dl.acm.org/citation.cfm?id=218395 also minimizes seek time using a specific format.
 To summarize, our paper makes the following contributions. (1) We
-propose a set of algorithms to split and merge terabyte-scale 3D
-images from 3D blocks or 2D slices. (2) We determine the complexity of
-those algorithms in terms of numbers of seeks, as a function of the image size, splitting scheme and available memory. (3)We evaluate our algorithms using the Big~Brain dataset and two storage drives with different characteristics.
-
-Section~\ref{sec:algos} presents our algorithms,
-Section~\ref{sec:implementation} describes their implementation,
-Section~\ref{sec:experiments} reports experimental results and
-Section~\ref{sec:discussion} concludes the paper.
+propose a set of algorithms to split and merge large 3D images from 3D
+blocks or 2D slices. (2) We determine the complexity of those
+algorithms in terms of numbers of seeks, as a function of the image
+size, splitting scheme and available memory. (3) We evaluate our
+algorithms using the Big~Brain dataset and two storage drives with
+different characteristics.  Section~\ref{sec:algos} presents our
+algorithms, Section~\ref{sec:implementation} describes their
+implementation, Section~\ref{sec:experiments} reports experimental
+results and Section~\ref{sec:discussion} concludes the paper.
 
 %\href{http://dl.acm.org/citation.cfm?id=218395}
 
@@ -169,16 +171,16 @@ We also have the following relations:
 
 A disk is characterized by its read and write rates, its access time
 and its seek time. For common file sizes, seek time is negligible
-compared to read or write time as typical seek times range from about 0.1~ms
-for Solid-State Drives (SSD) to 10~ms for Hard-Disk
-Drives (HDD). However, as we will shown later, naive algorithms might
-seek up to $10^7$ times to merge a high-resolution image, which
-renders seek time comparable to read and write times. In addition,
-extensive seeking also has an effect on read and write rates, as these
-are typically increasing with the duration of uninterrupted reads or
+compared to read or write time as typical seek times range from about
+0.1~ms for Solid-State Drives (SSD) to 10~ms for Hard-Disk Drives
+(HDD). However, as we will shown later, naive algorithms might seek up
+to $10^7$ times to merge a high-resolution image, which renders total
+seek time comparable to read and write times. In addition, extensive
+seeking also has an effect on read and write rates, as these are
+typically increasing with the duration of uninterrupted reads or
 writes.
 
-In our complexity analysis, we do not distinguish between access time
+In our analysis, we do not distinguish between access time
 and seek time.  We also assume that seeks require a constant amount of
 time, regardless of the position seeked to. That is, we focus on the
 average seek time. In practice, large variations would be expected
@@ -206,7 +208,7 @@ remainder.
   \begin{minipage}[b]{0.42\columnwidth}
     \def\svgwidth{0.8\columnwidth}
     \input{figures/svg/buffer.pdf_tex}
-    \caption{Buffer used in cluster reads (d=4).  White portions in
+    \caption{Buffer used in Clustered reads (d=4).  White portions in
       the buffer are not allocated. }
     \label{fig:cluster-reads-buffer}
   \end{minipage}
@@ -316,7 +318,7 @@ sequences. Figure~\ref{fig:cluster-reads-buffer} illustrates how the
 buffer would fill up for the two first blocks in a reconstructed
 image, assuming that blocks are of size 4x4x4.
 
-The number of seeks performed by cluster reads depends on how blocks
+The number of seeks performed by Clustered reads depends on how blocks
 loaded in memory arrange in the reconstructed image. In the best case,
 complete contiguous slices of the reconstructed image can be assembled
 in memory and written in a single seek. In the worst case, the
@@ -334,7 +336,7 @@ seeks are then required.
 \input{figures/svg/case2-a.pdf_tex}
 \def\svgwidth{0.3\columnwidth}
 \input{figures/svg/case3.pdf_tex}
-\caption{Memory-load configurations in cluster reads, leading to
+\caption{Memory-load configurations in Clustered reads, leading to
   different number of seeks. Red blocks need seeking before each of
   their rows ($d^2$ seeks). Blue blocks need seeking before each of
   their slices ($d$ seeks). Green blocks need only a single
@@ -342,7 +344,7 @@ seeks are then required.
   memory loads and are added for the sake of visualization.}
 \label{fig:cluster-reads}
 \end{figure}
-Our cluster reads algorithm focuses on the three memory load
+Clustered reads focus on the three memory load
 configurations represented in Figure~\ref{fig:cluster-reads}, that is,
 the amount of memory $m'$ used by the algorithm is rounded down to the
 closest number of complete blocks (Case 1), of complete block rows (Case
@@ -363,7 +365,7 @@ arithmetic, which we felt were unwieldy to report here.
 \def\svgwidth{0.3\columnwidth}
 \input{figures/svg/overlap.pdf_tex}
 \caption{Configurations that increase the number of seeks per
-  memory-load and are thus deliberately avoided by cluster
+  memory-load and are thus deliberately avoided by Clustered
   reads. Left: configuration with incomplete block rows (multiplies
   the number of seeks by $d$ compared to complete block rows). Right:
   configuration with block rows that overlap multiple block slices
@@ -388,7 +390,7 @@ false.  Function \texttt{sizeof} (line 8) returns the actual memory
 used by its argument, including only its allocated segments in case
 the argument is a buffer.
 \begin{algorithm}[h]
-  \caption{Buffered merging of blocks with cluster reads}
+  \caption{Buffered merging of blocks with Clustered reads}
   \label{algo:cluster-reads}
   \begin{algorithmic}[1]
     \STATE sorted\_blocks = sort blocks by increasing (k,j,i)
@@ -414,7 +416,7 @@ The amount of memory used $m'$ is set as follows in each of the 3 cases:
   m_2' = \frac{Rb}{\sqrt[3]{n}^2}\floor*{\frac{m\sqrt[3]{n}^2}{Rb}};
   m_3' = \frac{Rb}{\sqrt[3]{n}}\floor*{\frac{m\sqrt[3]{n}}{Rb}}
 \end{equation*}
-The number of seeks performed by cluster reads in each of the three cases is:
+The number of seeks performed by Clustered reads in each of the three cases is:
 \begin{equation*}
   N^i_{\mathrm{CR}} = n + x_ib_i, \quad i \in \llbracket 1, 3\rrbracket,
 \end{equation*}
@@ -437,7 +439,7 @@ proportional to the total number of block rows in the image
 $\left( \sqrt[3]{n}^2 \right)$ and $x_2$ is proportional to the total number of
 block slices $\left( \sqrt[3]{n} \right)$.
 Finally, the total number of seeks
-performed by cluster reads to reconstruct the image is:
+performed by Clustered reads to reconstruct the image is:
 \begin{equation}
 N_\mathrm{CR} =
 \begin{cases}
@@ -622,6 +624,7 @@ and~\ref{eq:seeks-multiple-reads} both boil down to $n+\frac{Rb}{m}$.
 \section{Implementation}
 \label{sec:implementation}
 
+\todo{writing in this section could be improved.}
 We implemented the 5 algorithms presented earlier in a
 Python library called \texttt{sam} (for ``split and merge''). It uses
 Nibabel~\cite{matthew_brett_2016_60808} for image I/O and NumPy for
@@ -795,13 +798,14 @@ observations.
 \end{figure}
 
 As expected, the difference between Naive blocks and Naive slices is
-tremendous, in the order of 50 million seeks. For 3~GB, the number of
-seeks in Clustered reads is 4 orders of magnitude higher than for
-Multiple reads, and 5 orders of magnitude higher than Naive
-slices. This huge difference comes from the fact that at 3~GB Clustered
-reads are in Case 1. For 6~GB, 9~GB and 12~GB, Clustered reads are in
-case 2 and the difference with Multiple reads and Buffered slices
-reduces. At 16~GB, all algorithms perform the same.
+tremendous, in the order of 50 million seeks. Regarding the difference between
+Clustered reads and Multiple reads, it is consistent with our analysis. For
+3~GB, the number of seeks in Clustered reads is 4 orders of magnitude
+higher than for Multiple reads, and 5 orders of magnitude higher than
+Naive slices. This huge difference comes from the fact that at 3~GB
+Clustered reads are in Case 1. For 6~GB, 9~GB and 12~GB, Clustered
+reads are in Case 2 and the difference with Multiple reads and
+Buffered slices reduces. At 16~GB, all algorithms perform the same.
 
 \subsubsection{Merge time}
 
@@ -962,10 +966,10 @@ slices.
 \label{sec:discussion}
 
 % Problem solved!
-Clustered reads and multiple reads are able to reduce to a negligible
+Clustered reads and Multiple reads reduce to a negligible
 amount the overall seek time required to split or merge 3D blocks in a
 high-resolution image where data is stored linearly. Both algorithms
-performed equivalently on our benchmark and compared to the reference
+performed equivalently and compared to the reference
 configuration where slices are merged or split without seeking. Our
 initial problem is solved.
 
@@ -975,24 +979,8 @@ initial problem is solved.
 
 %Same algo works for blocks or slices.
 
-% Several other factors might influence performance
-I/O optimization is a holistic problem that is in practice highly
-dependent on the hardware used, firmware, operating system, file
-system and programming language. Caching occurs at various levels and
-might always influence performance, potentially differently depending
-on the split or merge algorithm used. In some disks, seek time greatly
-varies with the seek distance, which would open the door to additional
-opportunities for I/O optimization. Interactions between those
-components might also result in performance differences particular to
-a specific algorithm. To ensure the portability of our library
-across systems and configurations, we focused on reducing the overall
-number of seeks and ignored specific system configurations. We
-demonstrated the performance of our methods on both an HDD and an SSD
-disk, using state-of-the-art and widely used versions of Linux
-(CentOS7) and file systems (XFS v4.5.0).
-
 % File formats
-In terms of file formats, our results demonstrate that simple imaging
+Our results demonstrate that simple imaging
 formats may be split and merged without performance loss compared to
 more complex formats that can preserve spatial locality on disk,
 for instance MINC 2.0 or the format based on space-filling curves
@@ -1013,9 +1001,24 @@ due to their use of negative seeking. This was not a problem for
 Multiple reads since Multiple reads completely remove seeking in the
 large image. Likewise, Multiple writes would not benefit from
 techniques aiming at accelerating random access reads in compressed
-images since they do not need to seek in it. Nonetheless, in our
-experimental setup compression drastically slowed down merging
-algorithms and proved of little use unless storage was limited.
+images since they do not need to seek in it. 
+
+% Several other factors might influence performance
+I/O optimization is a holistic problem that is in practice highly
+dependent on the hardware used, firmware, operating system, file
+system and programming language. Caching occurs at various levels and
+might always influence performance, potentially differently depending
+on the split or merge algorithm used. In some disks, seek time greatly
+varies with the seek distance, which would open the door to additional
+opportunities for I/O optimization. Interactions between those
+components might also result in performance differences particular to
+a specific algorithm. To ensure the portability of our library
+across systems and configurations, we focused on reducing the overall
+number of seeks and ignored specific system configurations. We
+demonstrated the performance of our methods on both an HDD and an SSD
+disk, using state-of-the-art and widely used versions of Linux
+(CentOS7) and file systems (XFS v4.5.0).
+
 
 % Parallel algorithms
 High-resolution images are likely to be processed on computing
@@ -1026,13 +1029,13 @@ split-and-merge algorithms would be beneficial, since the various
 blocks of a large image could be uploaded to different disks
 concurrently. In the same vein, ``re-spliting'' algorithms would be
 beneficial in case an image already split needs to be split in a
-different geometry. Clustered reads and multiple reads could be used
-as starting points for such algorithms.
+different geometry. Designing such algorithms is part of our future
+work. Clustered reads and multiple reads could be used as starting
+points.
 
 Our \texttt{sam} library is available at
-\url{https://github.com/big-data-lab-team/sam}, under MIT license.
+\url{https://github.com/big-data-lab-team/sam} under MIT license.
 
-% Ideas for the future: measure the actual amount of consumed memory.
 
 \section*{Acknowledgment}
 We warmly thank Lindsay B. Lewis and Claude Lepage for helping us with
