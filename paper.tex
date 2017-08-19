@@ -42,7 +42,7 @@
   Splitting and merging data is a requirement for most parallel or
   distributed processing operations. Naive algorithms, however,
   perform very poorly to split or merge 3D blocks from ultra-high
-  resolution images, due to important seek times. We introduce and
+  resolution images, due to seek times. We introduce and
   analyze sequential algorithms that leverage memory buffering, to
   address this issue. Clustered reads and Clustered writes access
   image chunks only once, but they have to seek in the reconstructed
@@ -53,7 +53,7 @@
   merging) provided that enough memory is available, which solves our
   initial problem to a large extent. Besides, Multiple reads
   support on-the-fly compression of the merged image transparently but
-  Cluster reads do not due to their use of negative seeking. We
+  Clustered reads do not, due to their use of negative seeking. We
   conclude that splitting and merging large 3D images can be done
   efficiently without relying on complex data formats.
 \end{abstract}
@@ -111,7 +111,7 @@ platforms~\cite{miguet1991elastic,tang2007eman2,yang2008parallel,braunl2013paral
 but methods have focused on geometrical approaches to partition images,
 and on load-balancing or task scheduling techniques. Instead, we
 aim at algorithms to efficiently split or merge images regardless of
-the geometry of the chunks. Although important seek times are often
+the geometry of the chunks. Although seek times are often
 identified as an issue, the preferred solution is usually to optimize
 data storage formats for a certain application.  For instance, the
 Open Connectome Data Cluster~\cite{burns2013open} is a data warehouse
@@ -387,8 +387,8 @@ the identifier of the selected case. Function \texttt{check\_overlap}
 (line 7) determines whether two blocks overlap multiple block slices
 (case 2) or multiple block rows (Case 1). For case 3 it always returns
 false.  Function \texttt{sizeof} (line 8) returns the actual memory
-used by its argument, including only its allocated segments in case
-the argument is a buffer.
+used by its argument, including only its allocated segments in the
+case that the argument is a buffer.
 \begin{algorithm}[h]
   \caption{Buffered merging of blocks with Clustered reads}
   \label{algo:cluster-reads}
@@ -624,7 +624,6 @@ and~\ref{eq:seeks-multiple-reads} both boil down to $n+\frac{Rb}{m}$.
 \section{Implementation}
 \label{sec:implementation}
 
-\todo{writing in this section could be improved.}
 We implemented the 5 algorithms presented earlier in a
 Python library called \texttt{sam} (for ``split and merge''). It uses
 Nibabel~\cite{matthew_brett_2016_60808} for image I/O and NumPy for
@@ -637,15 +636,16 @@ reconstructed image and the values are NumPy arrays containing the
 data starting at this offset. When the memory load is complete,
 dictionary entries are written sequentially to the reconstructed
 image. In Clustered reads, some seeking might be required between
-writes. We implemented a defragmentation procedure for the dictionary
-that merges contiguous dictionary entries in a single one, but we
-abandoned it as it proved more time-consuming than going through all
-the initial entries, due to the overhead of resizing NumPy arrays to
-merge entries. In Multiple reads, dictionary entries are always
-contiguous in the reconstructed image.  We tried to use a single NumPy
-array as a buffer, but we finally abandoned it as inserting data at a
-specific position in a NumPy array copies the data in memory, which
-increases both the execution time and the peak memory consumption.
+writes. In Multiple reads, dictionary entries are always contiguous in
+the reconstructed image.  We tried to use a single NumPy array as a
+buffer, but we finally abandoned it as inserting data at a specific
+position in a NumPy array copies the data in memory, which increases
+both the execution time and the peak memory consumption.  We also
+implemented a defragmentation procedure for the dictionary that merges
+contiguous dictionary entries in a single one, but we abandoned it as
+it proved more time-consuming than going through all the initial
+entries, due to the overhead of resizing NumPy arrays to merge
+entries.
 
 % Split methods
 The implementation of splitting algorithms was greatly facilitated by
@@ -701,7 +701,7 @@ We used the blocks of the 2015 Big~Brain release with 40-micrometer
 isotropic resolution available at
 \url{ftp://bigbrain.loris.ca/BigBrainRelease.2015/3D\_Blocks/40um}. We
 converted them to NiFTI 1.0 using Nibabel and left them uncompressed.
-We generated NiFTI slices of size 3850x3025x28 from the reconstructed
+We generated NiFTI slabs of size 3850x3025x28 from the reconstructed
 image, using our naive split algorithm. 
 
 \subsection{Hardware}
@@ -719,7 +719,7 @@ our measures.
 
 \subsection{Execution conditions}
 
-We used Git tag 0.1.1 of our \texttt{sam} library \todo{tag it}. Our
+We used Git tag 0.1.1 of our \texttt{sam} library. Our
 experiment scripts are available at
 \url{https://github.com/big-data-lab-team/paper-sequential-split-merge/blob/master/scripts/experiment}. We
 used them to split and merge using Buffered slices, Clustered reads and
@@ -745,7 +745,7 @@ only be applied to compressed data while in Case 3, i.e., for 16~GB,
 and Naive blocks could not be used at all with on-the-fly
 compression. To give a reference, with used Naive blocks with
 \emph{offline} compression, that it, we wrote an uncompressed image
-and compressed it sequentially afterwards. \todo{confirm that.}
+and compressed it sequentially afterwards. 
 
 \begin{table}
   \centering
@@ -823,7 +823,7 @@ slices. In most cases, their memory overhead would not be worth the
 time gain.
 
 % Clustered reads
-Clustered reads provide important speed ups compared to Naive blocks,
+Clustered reads provide substantial speed ups compared to Naive blocks,
 both on HDD and on SSD. They are 6.8 times faster than Naive blocks on
 HDD and 5.1 times on SSD (average accross all repetitions, all memory
 values). Surprisingly, they perform substantially faster than Naive
@@ -854,7 +854,7 @@ down to read, write, seek and overhead time for our algorithms. Naive
 blocks and Naive slices are shown as references. The huge difference
 between Naive blocks and Naive slices is coming from both the seek
 time and the write time, which suggests that seeking degrades the
-write rate importantly in addition to introducing extra delays.
+write rate in addition to introducing extra delays.
 Clustered reads reduce the seek time and thus the read time very
 substantially. Multiple reads almost anihilate the seek time and bring
 the read time to a value comparable to Naive slices.  The same
@@ -945,8 +945,8 @@ caching effects in Naive blocks and slices.
 Figure~\ref{fig:compression} shows the impact of gzip compression on
 the merging time, for Multiple reads and Naive slices.
 Unsurprisingly, compression dramatically slows down merging time for
-all algorithms. Multiple reads, however, still provide important
-speed-up compared to Naive blocks \todo{check that}, although they do
+all algorithms. Multiple reads, however, still provide 
+speed-up compared to Naive blocks, although they do
 not completely reach the performance of Buffered slices and Naive
 slices.
 
