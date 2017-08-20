@@ -5,7 +5,8 @@ import numpy as np
 import sys
 import argparse
 
-
+# slightly modified version of _get_dimensions function 
+# obtained from  https://github.com/nipy/nibabel/blob/master/nibabel/minc2.py
 def get_dimensions(var):
     try:
         dimorder = var.attrs['dimorder']
