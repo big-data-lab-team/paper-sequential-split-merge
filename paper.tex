@@ -779,11 +779,11 @@ to~\ref{eq:seeks-multiple-reads}). Note the logarithmic y scale. Error
 bars are not reported as numbers of seeks were constant across all
 repetitions. The average relative model errors are 12.7\% (Naive
 blocks), 0\% (Naive slices), 3.3\% (Clustered reads), 26.8\% (Multiple
-reads) and 0.9\% (Buffered slices), presumably explained by the fact
-that the model assumes cubic blocks while we used non-cubic ones in
+reads) and 0.9\% (Buffered slices), explained by the fact
+that the model assumes cuboid blocks while we used non-cuboid ones in
 the experiment. For Multiple reads, our complexity analysis also
 assumed that one of the 5 Cases in
-Figure~\ref{fig:multiple-reads-cases} was used while they are usually
+Figure~\ref{fig:multiple-reads-cases} was used while they are 
 blended in practice. Overall, the model correctly explains the
 observations.
 \begin{figure}[h]
@@ -798,8 +798,8 @@ observations.
 \end{figure}
 
 As expected, the difference between Naive blocks and Naive slices is
-tremendous, in the order of 50 million seeks. Regarding the difference between
-Clustered reads and Multiple reads, it is consistent with our analysis. For
+tremendous, in the order of 50 million seeks. The difference between
+Clustered reads and Multiple reads is consistent with our analysis. For
 3~GB, the number of seeks in Clustered reads is 4 orders of magnitude
 higher than for Multiple reads, and 5 orders of magnitude higher than
 Naive slices. This huge difference comes from the fact that at 3~GB
@@ -813,8 +813,7 @@ Buffered slices reduces. At 16~GB, all algorithms perform the same.
 Figure~\ref{fig:merge-time} shows the merge time for all algorithms by
 memory values. Naive blocks are 9.5 times slower than Naive slices on
 HDD (6.7 times on SSD), which quantifies the effect of the targeted
-problem. It also shows that SSDs might not be the only solution to
-reduce the impact of seek time. In the remainder we use Naive blocks
+problem.  In the remainder we use Naive blocks
 and Naive slices as references to evaluate our algorithms.
 
 % Buffered slices
@@ -895,7 +894,7 @@ Naive slices is still significant (average ratio is 1.4 on SSD, 2.0 on
 HDD) although less than for merging. On SSD, Clustered writes and
 Multiple writes both perform similarly to Naive slices. On HDD,
 Clustered writes are slightly slower than Multiple writes until
-16~GB. Buffered slices don't provide any significant speed-up compared
+16~GB. Buffered slices provide no speed-up compared
 to Naive slices.
 
 The breakdown by read, write and overhead time is shown in
@@ -980,7 +979,7 @@ initial problem is solved.
 %Same algo works for blocks or slices.
 
 % File formats
-Our results demonstrate that simple imaging
+Our results demonstrate that large images stored in simple 
 formats may be split and merged without performance loss compared to
 more complex formats that can preserve spatial locality on disk,
 for instance MINC 2.0 or the format based on space-filling curves
@@ -1030,8 +1029,8 @@ blocks of a large image could be uploaded to different disks
 concurrently. In the same vein, ``re-spliting'' algorithms would be
 beneficial in case an image already split needs to be split in a
 different geometry. Designing such algorithms is part of our future
-work. Clustered reads and multiple reads could be used as starting
-points.
+work, in which Clustered reads and Multiple reads will be used as
+starting points.
 
 Our \texttt{sam} library is available at
 \url{https://github.com/big-data-lab-team/sam} under MIT license.
