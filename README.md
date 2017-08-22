@@ -1,7 +1,7 @@
 # How to get a pdf
 
 A pdf is uploaded for every release of the paper:
-* There is no release yet, this is still work in progress.
+* [Release 0.1] (https://github.com/big-data-lab-team/paper-sequential-split-merge/releases/download/0.1/paper.pdf) (submitted to IEEE BigData 2017).
 
 See instructions below to create a pdf for the current version.
 
@@ -28,7 +28,6 @@ authors should be amended.
 # Figure sources
 
 See https://drive.google.com/drive/folders/0BzT7pbvPDUdQRXppVlhfdS0ycGc?usp=sharing
-
 
 # Latex installation
 
