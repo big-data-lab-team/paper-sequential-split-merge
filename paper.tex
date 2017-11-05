@@ -40,20 +40,20 @@
 
 \begin{abstract}
   Splitting and merging data is a requirement for most parallel or
-  distributed processing operations. Naive algorithms, however,
-  perform very poorly to split or merge 3D blocks from ultra-high
-  resolution images, due to seek times. We introduce and
-  analyze sequential algorithms that leverage memory buffering, to
-  address this issue. Clustered reads and Clustered writes access
+  distributed processing operations. Naive algorithms to split and
+  merge 3D blocks from ultra-high resolution images perform very poorly,
+  as a result of seek times. In contrast, naive algorithms to split and 
+  merge 2D slices or 3D slabs perform optimally as seek time is significantly minimized.
+  We introduce and analyze sequential algorithms (Clustered reads, Multiple reads, Clustered write and Multiple writes)
+  that leverage memory buffering to
+  address this issue. Clustered reads and Clustered writes, access
   image chunks only once, but they have to seek in the reconstructed
   image. Multiple reads and Multiple writes minimize seeks in the
   reconstructed image, but they access image chunks multiple
   times. Evaluation on a 3850x3025x3500 brain image shows that our
-  algorithms perform similarly to the optimal configuration (slice
-  merging) provided that enough memory is available, which solves our
-  initial problem to a large extent. Besides, Multiple reads
-  support on-the-fly compression of the merged image transparently but
-  Clustered reads do not, due to their use of negative seeking. We
+  algorithms perform similarly to the optimal configuration provided that enough memory is available. 
+  Additionally, Multiple reads support on-the-fly compression of the 
+  merged image transparently but Clustered reads do not, due to their use of negative seeking. We
   conclude that splitting and merging large 3D images can be done
   efficiently without relying on complex data formats.
 \end{abstract}
@@ -83,10 +83,9 @@ We assume that the high-resolution image is split into chunks
 representing 3D blocks or 2D slices that fit in memory. A dataset such
 as Big~Brain would perhaps be split into 125 chunks of 600~MB. The
 decision to split an image into slices or blocks, and the size of the
-chunks, is up to the application. Some applications, for instance spatial filtering, would
-commonly require blocks while other
-ones, such as acquisition artifact removal, would rather work on
-slices. Applications that process voxels individually, for instance
+chunks, is up to the application. For instance, spatial filtering would
+commonly require blocks, whereas slices would be preferable for acquisition artifact removal. 
+Applications that process voxels individually, for instance
 histogram computation or k-means clustering, could work on either
 slices or blocks. Flexibility is thus required in the splitting
 scheme.
@@ -95,9 +94,8 @@ We also assume that the byte organization in image files is arbitrary
 but known to the algorithm. Some formats, for instance the file format
 defined by the Neuroimaging Informatics Technology Initiative (NIfTI
 -- \url{https://nifti.nimh.nih.gov}) store the complete image in
-column-major order, that is, for an image of dimensions (i, j, k), i
-is the fastest changing dimension, followed by dimension j, followed
-by dimension k. Other formats, for instance HDF5-based MINC
+column-major order, that is, elements belonging to the same column are
+stored in a contiguous order. Other formats, such as HDF5-based MINC
 2.0~\cite{vincent2016minc}, provide more flexibility by allowing data
 to be partitioned in limited-sized chunks, each chunk being stored in
 a specific order. Byte organization is obviously a critical factor of
@@ -119,8 +117,8 @@ system that allows users to retrieve specific 3D blocks from large
 image datasets. It reduces seek times through a specific file format
 based on space-filling curves, which elegantly preserves spatial
 proximity on disk. On the contrary, we are searching for algorithms
-that would reduce the seek time regardless of the data format, so that
-applications with flexible splitting schemes can be served
+that would reduce the seek time regardless of the data format, such that
+applications with flexible splitting schemes can be served.
 
 %http://dl.acm.org/citation.cfm?id=218395 also minimizes seek time using a specific format.
 To summarize, our paper makes the following contributions. (1) We
@@ -310,13 +308,14 @@ reduced compared to Naive blocks since contiguous parts of the
 buffer will be written without seeking. A given
 block is accessed only once during the whole merging process.
 
-The buffer might be a slightly complex data structure, for instance an
-associative array or a Python dictionary, capable of storing multiple
+The buffer, capable of storing multiple
 disjoint sequences of contiguous bytes without having to allocate
 memory for the bytes between such
-sequences. Figure~\ref{fig:cluster-reads-buffer} illustrates how the
+sequences, can be represented by an
+associative array or a Python dictionary.
+Figure~\ref{fig:cluster-reads-buffer} illustrates how the
 buffer would fill up for the two first blocks in a reconstructed
-image, assuming that blocks are of size 4x4x4.
+image, assuming, for the sake of this particular example, that blocks are of size 4x4x4.
 
 The number of seeks performed by Clustered reads depends on how blocks
 loaded in memory arrange in the reconstructed image. In the best case,
@@ -345,7 +344,7 @@ seeks are then required.
 \label{fig:cluster-reads}
 \end{figure}
 Clustered reads focus on the three memory load
-configurations represented in Figure~\ref{fig:cluster-reads}, that is,
+configurations represented in Figure~\ref{fig:cluster-reads}:
 the amount of memory $m'$ used by the algorithm is rounded down to the
 closest number of complete blocks (Case 1), of complete block rows (Case
 2) or of complete block slices (Case 3). This is in general reasonable
@@ -669,7 +668,8 @@ Multiple writes.
 
 We implemented lossless compression for all algorithms using Python's
 gzip library. Compression is done on the fly, that is, while the data
-is being read or written. On-the-fly compression of large datasets is
+is being read or written during splitting and merging. 
+On-the-fly compression of large datasets is
 a challenge when extensive seeking is involved as the gzip library has
 to decompress all the data until the seek position to read from it,
 making access time a linear function of the seek position. This is
@@ -689,9 +689,12 @@ since they do not seek in the large image.
 \label{sec:experiments}
 
 \subsection{Data}
-We used the 3850x3025x3500 Big~Brain image split in 125
-non-overlapping chunks of size 770x605x700 with 2 bytes per voxel
-(total size uncompressed is 75.92~GB). Big~Brain is a reference brain
+We used the 3850x3025x3500 Big~Brain image split into 125
+non-overlapping chunks of size 770x605x700, with 2 bytes per voxel
+(total size uncompressed is 75.92~GB). The Big~Brain image was also split
+into 125 non-overlapping slabs of size 3850x3025x28 for our experiments.
+
+Big~Brain is a reference brain
 based on the reconstruction of 7404 histological sections at nearly
 cellular resolution of 20 micrometers~\cite{amunts2013bigbrain}. It is
 a freely, publicly available tool with numerous applications in
@@ -701,8 +704,8 @@ We used the blocks of the 2015 Big~Brain release with 40-micrometer
 isotropic resolution available at
 \url{ftp://bigbrain.loris.ca/BigBrainRelease.2015/3D\_Blocks/40um}. We
 converted them to NiFTI 1.0 using Nibabel and left them uncompressed.
-We generated NiFTI slabs of size 3850x3025x28 from the reconstructed
-image, using our naive split algorithm. 
+These blocks were then used to reconstruct the Big~Brain that was split into our desired block and slab
+configurations using our naive splitting algorithms. 
 
 \subsection{Hardware}
 We used a Dell Precision Tower 3620 workstation with CentOS Linux
@@ -738,13 +741,13 @@ page, dentry and inode caches before each run (\texttt{echo 3 | sudo
 write and seek time in each run, as well as the overhead time defined
 as the total time minus the sum of all other times.
 
-Compressed blocks and slices were also merged into a compressed
+Compressed blocks and slabs were also merged into a compressed
 image. On-the-fly gzip compression was used for Naive slices, Buffered
 slices and Multiple reads. As explained before, Clustered reads could
 only be applied to compressed data while in Case 3, i.e., for 16~GB,
 and Naive blocks could not be used at all with on-the-fly
-compression. To give a reference, with used Naive blocks with
-\emph{offline} compression, that it, we wrote an uncompressed image
+compression. To give a reference, we used Naive blocks with
+\emph{offline} compression, that is, we wrote an uncompressed image
 and compressed it sequentially afterwards. 
 
 \begin{table}
@@ -1001,6 +1004,11 @@ Multiple reads since Multiple reads completely remove seeking in the
 large image. Likewise, Multiple writes would not benefit from
 techniques aiming at accelerating random access reads in compressed
 images since they do not need to seek in it. 
+
+
+It should be noted that in some cases, splitting and merging can be considered to be an independent process
+from the other tasks. As such, the performance impact splitting and 
+merging has on the main tasks depends largely on the duration of the main tasks. 
 
 % Several other factors might influence performance
 I/O optimization is a holistic problem that is in practice highly
