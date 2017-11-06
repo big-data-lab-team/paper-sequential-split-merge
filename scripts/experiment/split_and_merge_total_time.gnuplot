@@ -1,5 +1,5 @@
 #!/usr/bin/env gnuplot
-set terminal pdf color font ',10'
+set terminal pdf color font ',20'
 
 set style data histogram
 set style histogram cluster gap 1 errorbars
