@@ -1005,11 +1005,6 @@ large image. Likewise, Multiple writes would not benefit from
 techniques aiming at accelerating random access reads in compressed
 images since they do not need to seek in it. 
 
-
-It should be noted that in some cases, splitting and merging can be considered to be an independent process
-from the other tasks. As such, the performance impact splitting and 
-merging has on the main tasks depends largely on the duration of the main tasks. 
-
 % Several other factors might influence performance
 I/O optimization is a holistic problem that is in practice highly
 dependent on the hardware used, firmware, operating system, file
