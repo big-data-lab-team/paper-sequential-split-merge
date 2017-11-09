@@ -43,8 +43,8 @@
   distributed processing operations. Naive algorithms to split and
   merge 3D blocks from ultra-high resolution images perform very poorly,
   as a result of seek times. In contrast, naive algorithms to split and 
-  merge 2D slices or 3D slabs perform optimally as seek time is significantly minimized.
-  We introduce and analyze sequential algorithms (Clustered reads, Multiple reads, Clustered write and Multiple writes)
+  merge 3D slabs perform optimally as seek time is significantly minimized.
+  We introduce and analyze sequential algorithms (Clustered reads, Multiple reads, Clustered writes, and Multiple writes)
   that leverage memory buffering to
   address this issue. Clustered reads and Clustered writes, access
   image chunks only once, but they have to seek in the reconstructed
@@ -80,9 +80,11 @@ seeks. In this paper we introduce and compare a family of sequential
 algorithms to split and merge images with reduced seeking.
 
 We assume that the high-resolution image is split into chunks
-representing 3D blocks, 3D slabs, or  2D slices that fit in memory. A dataset such
+representing 3D blocks or 3D slabs that fit in memory. A 3D block
+consists of a stack of one or more 2D tiles (incomplete slices) spanning sequentially occuring slices, whereas a 3D slab is 
+a stack of one of more contiguous 2D slices. A dataset such
 as Big~Brain would perhaps be split into 125 chunks of 600~MB. The
-decision to split an image into slices, slabs or blocks, and the size of the
+decision to split an image into slabs or blocks, and the size of the
 chunks, is up to the application. For instance, spatial filtering would
 commonly require blocks, whereas slices would be preferable for acquisition artifact removal. 
 Applications that process voxels individually, for instance
@@ -347,7 +349,7 @@ Clustered reads focus on the three memory load
 configurations represented in Figure~\ref{fig:cluster-reads}:
 the amount of memory $m'$ used by the algorithm is rounded down to the
 closest number of complete blocks (Case 1), of complete block rows (Case
-2) or of complete block slabs (Case 3). This is in general reasonable
+2) or of complete block slices (Case 3). This is in general reasonable
 since adding an incomplete row to a set of complete ones multiplies
 the number of required seeks by $d$, as illustrated in
 Figure~\ref{fig:avoided-configurations}-Left. In some cases though,
@@ -367,7 +369,7 @@ arithmetic, which we felt were unwieldy to report here.
   memory-load and are thus deliberately avoided by Clustered
   reads. Left: configuration with incomplete block rows (multiplies
   the number of seeks by $d$ compared to complete block rows). Right:
-  configuration with block rows that overlap multiple block slabs
+  configuration with block rows that overlap multiple block slices
   (multiplies the number of seeks by $2$ compared to non-overlapping
   configurations).}
 \label{fig:avoided-configurations}
@@ -436,7 +438,7 @@ numbers of memory loads required to reconstruct the image are:
 Because our algorithm avoids overlapping configurations, $x_1$ is
 proportional to the total number of block rows in the image
 $\left( \sqrt[3]{n}^2 \right)$ and $x_2$ is proportional to the total number of
-block slabs $\left( \sqrt[3]{n} \right)$.
+block slices $\left( \sqrt[3]{n} \right)$.
 Finally, the total number of seeks
 performed by Clustered reads to reconstruct the image is:
 \begin{equation}
@@ -521,8 +523,8 @@ block might be read multiple times, in different memory loads.
 
 In the complexity analysis, we assume that $m'$ represents an integer
 number $k$ of sub-rows (Case 1, $k_1<\sqrt[3]{n}$), of complete rows
-(Case 2, $k_2<d$), of tile rows (Case 3, $k_3<\sqrt[3]{n}$), of slabs
-(Case 4, $k_4<d$) or of block slabs (Case 5, $k_5<\sqrt[3]{n}$), as
+(Case 2, $k_2<d$), of tile rows (Case 3, $k_3<\sqrt[3]{n}$), of slices
+(Case 4, $k_4<d$) or of block slices (Case 5, $k_5<\sqrt[3]{n}$), as
 illustrated in Figure~\ref{fig:multiple-reads-cases}. In each of these
 5 cases, we define $v_i$ as follows:
 \begin{equation*}
@@ -858,7 +860,7 @@ between Naive blocks and Naive slabs is coming from both the seek
 time and the write time, which suggests that seeking degrades the
 write rate in addition to introducing extra delays.
 Clustered reads reduce the seek time and thus the read time very
-substantially. Multiple reads almost anihilate the seek time and bring
+substantially. Multiple reads almost annihilate the seek time and bring
 the read time to a value comparable to Naive slabs.  The same
 behavior is observed on HDD and on SSD, although the effect of seeking
 is slightly smaller on SSD, as expected. Read times are consistently
