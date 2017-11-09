@@ -1,6 +1,6 @@
 #!/usr/bin/env gnuplot
 
-set terminal pdf color font ',20'
+set terminal pdf color font ',18'
 a=0.1
 set boxwidth a
 set style fill transparent solid 0.5 border rgb "black"
