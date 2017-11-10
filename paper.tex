@@ -53,7 +53,7 @@
   times. Evaluation on a 3850x3025x3500 brain image shows that our
   algorithms perform similarly to the optimal configuration provided that enough memory is available. 
   Additionally, Multiple reads supports on-the-fly compression of the 
-  merged image transparently but Clustered reads do not, due to their use of negative seeking. We
+  merged image transparently but Clustered reads does not, due to its use of negative seeking. We
   conclude that splitting and merging large 3D images can be done
   efficiently without relying on complex data formats.
 \end{abstract}
@@ -81,7 +81,7 @@ algorithms to split and merge images with reduced seeking.
 
 We assume that the high-resolution image is split into chunks
 representing 3D blocks or 3D slabs that fit in memory. A 3D block
-consists of a stack of one or more 2D tiles (incomplete slices and/or columns) spanning sequentially occuring slices, whereas a 3D slab is 
+consists of a stack of one or more 2D tiles (incomplete slices or incomplete columns) spanning sequentially occuring slices, whereas a 3D slab is 
 a series of one of more contiguous 2D slices. A dataset such
 as Big~Brain would perhaps be split into 125 chunks of 600~MB. The
 decision to split an image into slabs or blocks, and the size of the
