@@ -1,6 +1,6 @@
 #!/usr/bin/env gnuplot
 
-set terminal pdf font ',30'
+set terminal pdf font ',20'
 set xlabel "Memory (GB)"
 set ylabel "Number of seeks"
 
