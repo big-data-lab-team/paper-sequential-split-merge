@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-for name in buffer case1-a case2-a case3 incomplete-rows overlap mreads-case1 \
+for name in buffer case1-a case2-a case3 incomplete-columns overlap mreads-case1 \
         mreads-case2 mreads-case3 mreads-case4 mreads-case5 Notations
 do
   #echo "Exporting ${name}.svg"

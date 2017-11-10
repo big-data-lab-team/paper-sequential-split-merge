@@ -6,11 +6,11 @@ set ylabel "Number of seeks"
 
 ### Cluster reads 
 
-# case 1: merge only incomplete rows of blocks
+# case 1: merge only incomplete columns of blocks
 m(x)=(R*b)/n*floor(x*n/(R*b))
 f(x)=n+ceil((R*b)/(nu**2*m(x)))*D**2
 
-# case 2: merge complete rows of blocks
+# case 2: merge complete columns of blocks
 n(x)=R*b/(nu**2)*floor(x*nu**2/(R*b))
 g(x)=n+ceil((R*b)/(nu*n(x)))*D
 
@@ -30,13 +30,13 @@ k1(x)=floor(x/vi1(x))
 mprime1(x)=k1(x)*vi1(x)
 a(x)=ceil((R*b)/mprime1(x))*(k1(x)+1)-k1(x)+(nu*D**2 % k1(x))
 
-# case 2: merge rows
+# case 2: merge columns
 vi2(x)=D*b
 k2(x)=floor(x/vi2(x))
 mprime2(x)=k2(x)*vi2(x)
 b(x)=ceil((R*b)/mprime2(x))*(nu+1)
 
-# case 3: merge rows of tiles
+# case 3: merge columns of tiles
 vi3(x)=D*d*b
 k3(x)=floor(x/vi3(x))
 mprime3(x)=k3(x)*vi3(x)
