@@ -52,7 +52,7 @@
   reconstructed image, but they access image chunks multiple
   times. Evaluation on a 3850x3025x3500 brain image shows that our
   algorithms perform similarly to the optimal configuration provided that enough memory is available. 
-  Additionally, Multiple reads support on-the-fly compression of the 
+  Additionally, Multiple reads supports on-the-fly compression of the 
   merged image transparently but Clustered reads do not, due to their use of negative seeking. We
   conclude that splitting and merging large 3D images can be done
   efficiently without relying on complex data formats.
@@ -81,8 +81,8 @@ algorithms to split and merge images with reduced seeking.
 
 We assume that the high-resolution image is split into chunks
 representing 3D blocks or 3D slabs that fit in memory. A 3D block
-consists of a stack of one or more 2D tiles (incomplete slices) spanning sequentially occuring slices, whereas a 3D slab is 
-a stack of one of more contiguous 2D slices. A dataset such
+consists of a stack of one or more 2D tiles (incomplete slices and/or columns) spanning sequentially occuring slices, whereas a 3D slab is 
+a series of one of more contiguous 2D slices. A dataset such
 as Big~Brain would perhaps be split into 125 chunks of 600~MB. The
 decision to split an image into slabs or blocks, and the size of the
 chunks, is up to the application. For instance, spatial filtering would
@@ -125,7 +125,7 @@ applications with flexible splitting schemes can be served.
 %http://dl.acm.org/citation.cfm?id=218395 also minimizes seek time using a specific format.
 To summarize, our paper makes the following contributions. (1) We
 propose a set of algorithms to split and merge large 3D images from 3D
-blocks, 3D slabs or 2D slices. (2) We determine the complexity of those
+blocks or 3D slabs. (2) We determine the complexity of those
 algorithms in terms of numbers of seeks, as a function of the image
 size, splitting scheme and available memory. (3) We evaluate our
 algorithms using the Big~Brain dataset and two storage drives with
@@ -164,7 +164,7 @@ We adopt the following notations (see Figure~\ref{fig:notations}):
 We also have the following relations:
 \begin{itemize}
 \item Number of slices/rows/columns in a block: $\sqrt[3]{\frac{R}{n}}=d$.
-\item Number of blocks in a block row: $\sqrt[3]{n}$.
+\item Number of blocks in a block column: $\sqrt[3]{n}$.
 \end{itemize}
 
 \subsection{Disk model}
@@ -200,7 +200,7 @@ remainder.
   \begin{minipage}[b]{0.42\columnwidth}
     \def\svgwidth{0.8\columnwidth}
     \input{figures/svg/Notations.pdf_tex}
-    \caption{Notations. A \emph{block row} is shown in red. A
+    \caption{Notations. A \emph{block column} is shown in red. A
       \emph{block slab} is shown in blue.}
     \label{fig:notations}
   \end{minipage}
@@ -224,7 +224,7 @@ required to read the slabs and $n$ seeks are required to write them:
   N_\mathrm{slabs} = 2n \label{eq:naive-blocks}
 \end{equation}
 However,
-Algorithm~\ref{algo:naive-blocks} has to do extra seeks for each row
+Algorithm~\ref{algo:naive-blocks} has to do extra seeks for each column
 in each slice of each block:
 \begin{equation*}
 N_\mathrm{blocks} = n+nd^2  
@@ -297,15 +297,15 @@ per memory load. Therefore:
 \begin{equation}
 N_\mathrm{buff\_slabs} =  n + \ceil*{\frac{bR}{m}} \label{eq:buff-slabs}
 \end{equation}
-Buffered slabs are straightforward to implement, however, their
+Buffered slabs is straightforward to implement, however, its
 extension to block merging is not easy. The remainder of this Section
 presents our attempts for such an extension.
 
 \subsection{Buffered blocks: Clustered reads}
 
-Clustered reads are the more direct extension of Buffered slabs to
-blocks: they load multiple blocks in memory, concatenate them in a
-buffer and write the buffer in the reconstructed image. Seeking is
+Clustered reads is the more direct extension of Buffered slabs to
+blocks: it loads multiple blocks in memory, concatenates them in a
+buffer and writes the buffer in the reconstructed image. Seeking is
 reduced compared to Naive blocks since contiguous parts of the
 buffer will be written without seeking. A given
 block is accessed only once during the whole merging process.
@@ -323,9 +323,9 @@ The number of seeks performed by Clustered reads depends on how blocks
 loaded in memory arrange in the reconstructed image. In the best case,
 complete contiguous slabs of the reconstructed image can be assembled
 in memory and written in a single seek. In the worst case, the
-memory load only partially covers rows in the reconstructed image:
+memory load only partially covers columns in the reconstructed image:
 O($d^2$) seeks are then required during writing, one for every partial
-row in every partial slabs. In the intermediary case, rows are
+column in every partial slabs. In the intermediary case, columns are
 complete but some slabs can only be partially reconstructed: O($d$)
 seeks are then required.
 
@@ -339,18 +339,18 @@ seeks are then required.
 \input{figures/svg/case3.pdf_tex}
 \caption{Memory-load configurations in Clustered reads, leading to
   different number of seeks. Red blocks need seeking before each of
-  their rows ($d^2$ seeks). Blue blocks need seeking before each of
+  their columns ($d^2$ seeks). Blue blocks need seeking before each of
   their slices ($d$ seeks). Green blocks need only a single
   seek. Grey, dashed, transparent blocks represent the contiguous
   memory loads and are added for the sake of visualization.}
 \label{fig:cluster-reads}
 \end{figure}
-Clustered reads focus on the three memory load
+Clustered reads focuses on the three memory load
 configurations represented in Figure~\ref{fig:cluster-reads}:
 the amount of memory $m'$ used by the algorithm is rounded down to the
-closest number of complete blocks (Case 1), of complete block rows (Case
+closest number of complete blocks (Case 1), of complete block columns (Case
 2) or of complete block slices (Case 3). This is in general reasonable
-since adding an incomplete row to a set of complete ones multiplies
+since adding an incomplete columns to a set of complete ones multiplies
 the number of required seeks by $d$, as illustrated in
 Figure~\ref{fig:avoided-configurations}-Left. In some cases though,
 rounding $m$ down to $m'$ might increase the number of required
@@ -367,20 +367,20 @@ arithmetic, which we felt were unwieldy to report here.
 \input{figures/svg/overlap.pdf_tex}
 \caption{Configurations that increase the number of seeks per
   memory-load and are thus deliberately avoided by Clustered
-  reads. Left: configuration with incomplete block rows (multiplies
+  reads. Left: configuration with incomplete block columns (multiplies
   the number of seeks by $d$ compared to complete block rows). Right:
-  configuration with block rows that overlap multiple block slices
+  configuration with block columns that overlap multiple block slices
   (multiplies the number of seeks by $2$ compared to non-overlapping
   configurations).}
 \label{fig:avoided-configurations}
 \end{figure}
 
 Our algorithm also avoids configurations where the memory load
-overlaps multiple block slabs in Case 2 or multiple block rows in
+overlaps multiple block slabs in Case 2 or multiple block columns in
 Case 1, as such overlaps multiply the number of required seeks (see
 Figure~\ref{fig:avoided-configurations}-Right).
 
-Clustered reads are described in
+Clustered reads is described in
 Algorithm~\ref{algo:cluster-reads}. Function \texttt{switch} (line 3)
 selects one of the three cases based on the amount of available memory
 and the number of blocks. It returns \texttt{m'} and \texttt{case},
@@ -467,7 +467,7 @@ due to the differences among $b_i$ values.
    
 \subsection{Buffered blocks: Multiple reads}
 
-Multiple reads are shown in Algorithm~\ref{algo:multiple-reads}.  The
+Multiple reads is shown in Algorithm~\ref{algo:multiple-reads}.  The
 main idea of this algorithm is that blocks are read partially (line 9)
 to ensure that the memory buffer only contains contiguous
 bytes. Therefore, the buffer can be written continuously to the
@@ -522,8 +522,8 @@ block might be read multiple times, in different memory loads.
 \end{algorithm}
 
 In the complexity analysis, we assume that $m'$ represents an integer
-number $k$ of sub-rows (Case 1, $k_1<\sqrt[3]{n}$), of complete rows
-(Case 2, $k_2<d$), of tile rows (Case 3, $k_3<\sqrt[3]{n}$), of slices
+number $k$ of sub-columns (Case 1, $k_1<\sqrt[3]{n}$), of complete columns
+(Case 2, $k_2<d$), of tile columns (Case 3, $k_3<\sqrt[3]{n}$), of slices
 (Case 4, $k_4<d$) or of block slices (Case 5, $k_5<\sqrt[3]{n}$), as
 illustrated in Figure~\ref{fig:multiple-reads-cases}. In each of these
 5 cases, we define $v_i$ as follows:
@@ -604,9 +604,9 @@ N_\mathrm{MR} =
 Figure~\ref{fig:model-comparison} plots
 Equations~\ref{eq:seeks-cluster-reads-1}
 and~\ref{eq:seeks-multiple-reads} for different values of $n$. When
-Clustered reads are in Case 1 or 2, they may outperform Multiple reads
-only for large values of $n$. When Clustered reads are in case 3, they
-are equivalent to Multiple reads: assuming that $Rb$ is an exact
+Clustered reads is in Case 1 or 2, it may outperform Multiple reads
+only for large values of $n$. When Clustered reads is in case 3, it
+is equivalent to Multiple reads: assuming that $Rb$ is an exact
 multiple of $m$, Equations~\ref{eq:seeks-cluster-reads-1}
 and~\ref{eq:seeks-multiple-reads} both boil down to $n+\frac{Rb}{m}$.
 %\todo{We could be a bit more rigorous and detail the cases where
@@ -657,7 +657,7 @@ algorithms. Unfortunately, they are not available to write
 data. 
 
 % Additional optimizations.
-In Multiple reads, block headers are read in a first pass where row
+In Multiple reads, block headers are read in a first pass where column
 indices in the reconstructed image are stored in memory. Those indices
 are then processed in each memory load, to identify the blocks that
 contribute to it.
@@ -679,13 +679,13 @@ potentially an issue for Clustered writes, which could be addressed by
 indexing techniques such as described in~\cite{rajna2015speeding} for
 the NiFTI format and implemented in
 \url{https://github.com/pauldmccarthy/indexed\_gzip}. Multiple writes
-are not impacted since they do not seek in the large image.
+is not impacted since it does not seek in the large image.
 
 In addition, ``negative'' seeking (seeking to a position that precedes
 the current one) is not possible while writing a compressed file,
 which renders Naive blocks unusable with compressed data and Clustered
-reads usable only in Case 3.  Again, Multiple reads are not impacted
-since they do not seek in the large image.
+reads usable only in Case 3.  Again, Multiple reads is not impacted
+since it does not seek in the large image.
 
 \section{Experiments}
 \label{sec:experiments}
@@ -822,21 +822,21 @@ problem.  In the remainder we use Naive blocks
 and Naive slabs as references to evaluate our algorithms.
 
 % Buffered slabs
-Buffered slabs provide a negligible speed-up compared to Naive
+Buffered slabs provides a negligible speed-up compared to Naive
 slabs. In most cases, their memory overhead would not be worth the
 time gain.
 
 % Clustered reads
-Clustered reads provide substantial speed ups compared to Naive blocks,
-both on HDD and on SSD. They are 6.8 times faster than Naive blocks on
+Clustered reads provides substantial speed ups compared to Naive blocks,
+both on HDD and on SSD. It is 6.8 times faster than Naive blocks on
 HDD and 5.1 times on SSD (average accross all repetitions, all memory
-values). Surprisingly, they perform substantially faster than Naive
+values). Surprisingly, it performs substantially faster than Naive
 blocks even at 3~GB, while in Case 1. This may be explained by the
 fact that the seeks required to write incomplete block rows to the
 reconstructed image are shorter than the ones for Naive blocks.
 
 % Multiple reads
-Multiple reads are even faster than Clustered reads on this
+Multiple reads is even faster than Clustered reads on this
 dataset. They are 8.4 times faster than Naive blocks on HDD and 5.3
 times on SSD (average accross all repetitions, all memory values).
 
@@ -859,8 +859,8 @@ blocks and Naive slabs are shown as references. The huge difference
 between Naive blocks and Naive slabs is coming from both the seek
 time and the write time, which suggests that seeking degrades the
 write rate in addition to introducing extra delays.
-Clustered reads reduce the seek time and thus the read time very
-substantially. Multiple reads almost annihilate the seek time and bring
+Clustered reads reduces the seek time and thus the read time very
+substantially. Multiple reads almost annihilates the seek time and brings
 the read time to a value comparable to Naive slabs.  The same
 behavior is observed on HDD and on SSD, although the effect of seeking
 is slightly smaller on SSD, as expected. Read times are consistently
@@ -898,8 +898,8 @@ Figure~\ref{fig:split-time}. The difference between Naive blocks and
 Naive slabs is still significant (average ratio is 1.4 on SSD, 2.0 on
 HDD) although less than for merging. On SSD, Clustered writes and
 Multiple writes both perform similarly to Naive slabs. On HDD,
-Clustered writes are slightly slower than Multiple writes until
-16~GB. Buffered slabs provide no speed-up compared
+Clustered writes is slightly slower than Multiple writes until
+16~GB. Buffered slabs provides no speed-up compared
 to Naive slabs.
 
 The breakdown by read, write and overhead time is shown in
@@ -907,7 +907,7 @@ Figure~\ref{fig:breakdowns-ssd-split}. We were not able to measure
 seek time for splitting algorithms as it was blended in read time by
 the Nibabel library. Naive blocks are strongly penalized by important
 read times coming from extensive seeking. Buffered slabs, Clustered
-writes and multiple writes all reduce the read time compared to Naive
+writes and Multiple writes all reduce the read time compared to Naive
 blocks, but they also increase the write time, most likely due to
 caching effects in Naive blocks and slabs.
 
@@ -949,8 +949,8 @@ caching effects in Naive blocks and slabs.
 Figure~\ref{fig:compression} shows the impact of gzip compression on
 the merging time, for Multiple reads and Naive slabs.
 Unsurprisingly, compression dramatically slows down merging time for
-all algorithms. Multiple reads, however, still provide 
-speed-up compared to Naive blocks, although they do
+all algorithms. Multiple reads, however, still provides 
+speed-up compared to Naive blocks, although it does
 not completely reach the performance of Buffered slabs and Naive
 slabs.
 
@@ -1001,8 +1001,8 @@ on-the-fly compression for Clustered reads.
 
 % Compression
 On-the-fly compression, indeed, could not be used with Clustered reads
-due to their use of negative seeking. This was not a problem for
-Multiple reads since Multiple reads completely remove seeking in the
+due to its use of negative seeking. This was not a problem for
+Multiple reads since Multiple reads completely removes seeking in the
 large image. Likewise, Multiple writes would not benefit from
 techniques aiming at accelerating random access reads in compressed
 images since they do not need to seek in it. 
