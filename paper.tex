@@ -39,7 +39,7 @@
 \maketitle
 
 \begin{abstract}
-  Splitting and merging data is a requirement for most parallel or
+  Splitting and merging data is a requirement for many parallel or
   distributed processing operations. Naive algorithms to split and
   merge 3D blocks from ultra-high resolution images perform very poorly,
   as a result of seek times. In contrast, naive algorithms to split and 
@@ -76,21 +76,22 @@ would typically be processed on a computing cluster, possibly using
 locality-aware file systems such as the Hadoop Distributed File System
 (HDFS~\cite{shvachko2010hadoop}), software libraries are needed to
 split and merge them efficiently, in particular to limit file
-seeks. In this paper we introduce and compare a family of sequential
+seeks. In this paper we introduce and compare sequential
 algorithms to split and merge images with reduced seeking.
 
 We assume that the high-resolution image is split into chunks
 representing 3D blocks or 3D slabs that fit in memory. A 3D block
-consists of a stack of one or more 2D tiles (incomplete slices or incomplete columns) spanning sequentially occuring slices, whereas a 3D slab is 
-a series of one of more contiguous 2D slices. A dataset such
-as Big~Brain would perhaps be split into 125 chunks of 600~MB. The
+consists of a stack of one or more 2D tiles (incomplete slices or
+incomplete columns) spanning contiguous slices, whereas a 3D slab is a
+series of one of more complete contiguous 2D slices. A dataset such as
+Big~Brain would perhaps be split into 125 chunks of 600~MB. The
 decision to split an image into slabs or blocks, and the size of the
-chunks, is up to the application. For instance, spatial filtering would
-commonly require blocks, whereas slices would be preferable for acquisition artifact removal. 
-Applications that process voxels individually, for instance
-histogram computation or k-means clustering, could work on either
-slices or blocks. Flexibility is thus required in the splitting
-scheme.
+chunks, is up to the application. For instance, spatial filtering
+would commonly require blocks, whereas slabs might be preferable for
+acquisition artifact removal.  Applications that process voxels
+individually, for instance histogram computation or k-means
+clustering, could work on either slabs or blocks. Flexibility is thus
+required in the splitting scheme.
 
 We also assume that the byte organization in image files is arbitrary
 but known to the algorithm. Some formats, for instance the file format
