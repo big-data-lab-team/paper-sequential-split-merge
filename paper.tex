@@ -39,7 +39,7 @@
 \maketitle
 
 \begin{abstract}
-  Splitting and merging data is a requirement for most parallel or
+  Splitting and merging data is a requirement for many parallel or
   distributed processing operations. Naive algorithms to split and
   merge 3D blocks from ultra-high resolution images perform very poorly,
   as a result of seek times. In contrast, naive algorithms to split and 
@@ -76,21 +76,22 @@ would typically be processed on a computing cluster, possibly using
 locality-aware file systems such as the Hadoop Distributed File System
 (HDFS~\cite{shvachko2010hadoop}), software libraries are needed to
 split and merge them efficiently, in particular to limit file
-seeks. In this paper we introduce and compare a family of sequential
+seeks. In this paper we introduce and compare sequential
 algorithms to split and merge images with reduced seeking.
 
 We assume that the high-resolution image is split into chunks
 representing 3D blocks or 3D slabs that fit in memory. A 3D block
-consists of a stack of one or more 2D tiles (incomplete slices or incomplete columns) spanning sequentially occuring slices, whereas a 3D slab is 
-a series of one of more contiguous 2D slices. A dataset such
-as Big~Brain would perhaps be split into 125 chunks of 600~MB. The
+consists of a stack of one or more 2D tiles (incomplete slices or
+incomplete columns) spanning contiguous slices, whereas a 3D slab is a
+series of one of more complete contiguous 2D slices. A dataset such as
+Big~Brain would perhaps be split into 125 chunks of 600~MB. The
 decision to split an image into slabs or blocks, and the size of the
-chunks, is up to the application. For instance, spatial filtering would
-commonly require blocks, whereas slices would be preferable for acquisition artifact removal. 
-Applications that process voxels individually, for instance
-histogram computation or k-means clustering, could work on either
-slices or blocks. Flexibility is thus required in the splitting
-scheme.
+chunks, is up to the application. For instance, spatial filtering
+would commonly require blocks, whereas slabs might be preferable for
+acquisition artifact removal.  Applications that process voxels
+individually, for instance histogram computation or k-means
+clustering, could work on either slabs or blocks. Flexibility is thus
+required in the splitting scheme.
 
 We also assume that the byte organization in image files is arbitrary
 but known to the algorithm. Some formats, for instance the file format
@@ -149,7 +150,7 @@ chunks are non-overlapping cuboids that all have the same dimension.
 Although our algorithms could be applied to any byte organization, we
 consider a file format where voxels are written in column-major
 order. All voxels in a \emph{slice} have the same $k$ and all voxels
-in a \emph{row} have the same $j$.  
+in a \emph{column} have the same $j$.  
 
 \subsection{Notations}
 
@@ -213,13 +214,13 @@ remainder.
     \label{fig:cluster-reads-buffer}
   \end{minipage}
 \end{figure}
-Algorithms~\ref{algo:naive-slabs} and~\ref{algo:naive-blocks} show
-the naive merging methods for slabs and blocks. These algorithms
-actually have very different complexities even though blocks and
-slabs have identical sizes. Since slabs are stored contiguously in
-the reconstructed image, the number of seeks in
-Algorithm~\ref{algo:naive-slabs} is only $2n$ as $n$ seeks are
-required to read the slabs and $n$ seeks are required to write them:
+Algorithms~\ref{algo:naive-slabs} and~\ref{algo:naive-blocks} show the
+naive merging methods for slabs and blocks. These algorithms have very
+different complexities even though blocks and slabs have identical
+sizes. Since slabs are stored contiguously in the reconstructed image,
+the number of seeks in Algorithm~\ref{algo:naive-slabs} is only $2n$
+as $n$ seeks are required to read the slabs and $n$ seeks are required
+to write them:
 \begin{equation}
   N_\mathrm{slabs} = 2n \label{eq:naive-blocks}
 \end{equation}
@@ -292,7 +293,8 @@ Algorithm~\ref{algo:buffered-slabs}.
     \ENDFOR
   \end{algorithmic}
 \end{algorithm}
-This algorithm writes in the reconstructed image using a single seek
+
+\noindent This algorithm writes in the reconstructed image using a single seek
 per memory load. Therefore:
 \begin{equation}
 N_\mathrm{buff\_slabs} =  n + \ceil*{\frac{bR}{m}} \label{eq:buff-slabs}
@@ -307,7 +309,7 @@ Clustered reads is the more direct extension of Buffered slabs to
 blocks: it loads multiple blocks in memory, concatenates them in a
 buffer and writes the buffer in the reconstructed image. Seeking is
 reduced compared to Naive blocks since contiguous parts of the
-buffer will be written without seeking. A given
+buffer are written without seeking. A given
 block is accessed only once during the whole merging process.
 
 The buffer, capable of storing multiple
@@ -322,12 +324,12 @@ image, assuming, for the sake of this particular example, that blocks are of siz
 The number of seeks performed by Clustered reads depends on how blocks
 loaded in memory arrange in the reconstructed image. In the best case,
 complete contiguous slabs of the reconstructed image can be assembled
-in memory and written in a single seek. In the worst case, the
-memory load only partially covers columns in the reconstructed image:
-O($d^2$) seeks are then required during writing, one for every partial
-column in every partial slabs. In the intermediary case, columns are
-complete but some slabs can only be partially reconstructed: O($d$)
-seeks are then required.
+in memory and written in a single seek. In the worst case, the memory
+load only partially covers columns in the reconstructed image:
+O($d^2$) seeks are then required during writing, one for every column
+of every tile. In the intermediary case, columns are complete but some
+slices can only be partially reconstructed: O($d$) seeks are then
+required.
 
 \begin{figure}
 \centering
@@ -340,7 +342,7 @@ seeks are then required.
 \caption{Memory-load configurations in Clustered reads, leading to
   different number of seeks. Red blocks need seeking before each of
   their columns ($d^2$ seeks). Blue blocks need seeking before each of
-  their slices ($d$ seeks). Green blocks need only a single
+  their tiles ($d$ seeks). Green blocks need only a single
   seek. Grey, dashed, transparent blocks represent the contiguous
   memory loads and are added for the sake of visualization.}
 \label{fig:cluster-reads}
@@ -361,14 +363,14 @@ arithmetic, which we felt were unwieldy to report here.
 \begin{figure}
   \centering
 \def\svgwidth{0.3\columnwidth}
-\input{figures/svg/incomplete-rows.pdf_tex}
+\input{figures/svg/incomplete-columns.pdf_tex}
 \quad \quad \quad
 \def\svgwidth{0.3\columnwidth}
 \input{figures/svg/overlap.pdf_tex}
 \caption{Configurations that increase the number of seeks per
   memory-load and are thus deliberately avoided by Clustered
   reads. Left: configuration with incomplete block columns (multiplies
-  the number of seeks by $d$ compared to complete block rows). Right:
+  the number of seeks by $d$ compared to complete block columns). Right:
   configuration with block columns that overlap multiple block slices
   (multiplies the number of seeks by $2$ compared to non-overlapping
   configurations).}
@@ -376,7 +378,7 @@ arithmetic, which we felt were unwieldy to report here.
 \end{figure}
 
 Our algorithm also avoids configurations where the memory load
-overlaps multiple block slabs in Case 2 or multiple block columns in
+overlaps multiple block slices in Case 2 or multiple block columns in
 Case 1, as such overlaps multiply the number of required seeks (see
 Figure~\ref{fig:avoided-configurations}-Right).
 
@@ -386,7 +388,7 @@ selects one of the three cases based on the amount of available memory
 and the number of blocks. It returns \texttt{m'} and \texttt{case},
 the identifier of the selected case. Function \texttt{check\_overlap}
 (line 7) determines whether two blocks overlap multiple block slabs
-(case 2) or multiple block rows (Case 1). For case 3 it always returns
+(Case 2) or multiple block columns (Case 1). For Case 3 it always returns
 false.  Function \texttt{sizeof} (line 8) returns the actual memory
 used by its argument, including only its allocated segments in the
 case that the argument is a buffer.
@@ -436,7 +438,7 @@ numbers of memory loads required to reconstruct the image are:
   x_3 = \ceil*{\frac{Rb}{m_3'}}
 \end{equation*}
 Because our algorithm avoids overlapping configurations, $x_1$ is
-proportional to the total number of block rows in the image
+proportional to the total number of block columns in the image
 $\left( \sqrt[3]{n}^2 \right)$ and $x_2$ is proportional to the total number of
 block slices $\left( \sqrt[3]{n} \right)$.
 Finally, the total number of seeks
@@ -492,7 +494,7 @@ block might be read multiple times, in different memory loads.
 \caption{Memory-load configurations in multiple reads (d=4, D=16,
   n=64, $k_1=k_2=k_3=k_4=k_5=1$). Red color shows the content of the
   memory load. Small dots depict block frontiers and long dashes
-  depict rows and slices within blocks.}
+  depict columns and slices within blocks.}
 \label{fig:multiple-reads-cases}
 \end{figure}
 
@@ -510,8 +512,8 @@ block might be read multiple times, in different memory loads.
     \FOR{block in sorted\_blocks}
       \IF{block has voxels in write\_range}
         \STATE block\_data = read block
-        \STATE in block\_data, extract the rows in write\_range
-        \STATE insert rows in buffer
+        \STATE in block\_data, extract the columns in write\_range
+        \STATE insert columns in buffer
       \ENDIF
     \ENDFOR
     \STATE write buffer to reconstructed\_image
@@ -535,7 +537,7 @@ so that we have:
 k_i=\floor*{\frac{m}{v_i}} \quad \mathrm{and} \quad m_i'=k_iv_i, \quad i \in \llbracket 1,5 \rrbracket
 \end{equation*}
 
-The total number of seeks performed by multiple reads in case $i$ is:
+The total number of seeks performed by multiple reads in Case $i$ is:
 \begin{eqnarray*}
   N^i_{\mathrm{MR}} &=& x_i + (x_i-1)b_i +b_i', \quad i \in \llbracket 1,5 \rrbracket\\
   &=& x_i \left(1+b_i\right)-b_i+b_i'
@@ -605,7 +607,7 @@ Figure~\ref{fig:model-comparison} plots
 Equations~\ref{eq:seeks-cluster-reads-1}
 and~\ref{eq:seeks-multiple-reads} for different values of $n$. When
 Clustered reads is in Case 1 or 2, it may outperform Multiple reads
-only for large values of $n$. When Clustered reads is in case 3, it
+only for large values of $n$. When Clustered reads is in Case 3, it
 is equivalent to Multiple reads: assuming that $Rb$ is an exact
 multiple of $m$, Equations~\ref{eq:seeks-cluster-reads-1}
 and~\ref{eq:seeks-multiple-reads} both boil down to $n+\frac{Rb}{m}$.
@@ -817,9 +819,9 @@ Buffered slabs reduces. At 16~GB, all algorithms perform the same.
 % Slices and blocks
 Figure~\ref{fig:merge-time} shows the merge time for all algorithms by
 memory values. Naive blocks are 9.5 times slower than Naive slabs on
-HDD (6.7 times on SSD), which quantifies the effect of the targeted
-problem.  In the remainder we use Naive blocks
-and Naive slabs as references to evaluate our algorithms.
+HDD (6.7 times on SSD), which quantifies the effect of the problem
+targeted by our algorithms.  In the remainder we use Naive blocks and
+Naive slabs as references to evaluate our algorithms.
 
 % Buffered slabs
 Buffered slabs provides a negligible speed-up compared to Naive
@@ -832,7 +834,7 @@ both on HDD and on SSD. It is 6.8 times faster than Naive blocks on
 HDD and 5.1 times on SSD (average accross all repetitions, all memory
 values). Surprisingly, it performs substantially faster than Naive
 blocks even at 3~GB, while in Case 1. This may be explained by the
-fact that the seeks required to write incomplete block rows to the
+fact that the seeks required to write incomplete block columns to the
 reconstructed image are shorter than the ones for Naive blocks.
 
 % Multiple reads
@@ -866,7 +868,7 @@ behavior is observed on HDD and on SSD, although the effect of seeking
 is slightly smaller on SSD, as expected. Read times are consistently
 and substantially lower than write times. This may be a result of
 discrepancies between disk read and writes rates, or of reading data using Python's NumPy
-package, which is more efficient than using native Python - as is the
+package, which is more efficient than using native Python as is the
 case with our writes. The overhead time is small for both Clustered
 reads and Multiple reads.
 \begin{figure}
@@ -984,20 +986,20 @@ initial problem is solved.
 %Same algo works for blocks or slices.
 
 % File formats
-Our results demonstrate that large images stored in simple 
-formats may be split and merged without performance loss compared to
-more complex formats that can preserve spatial locality on disk,
-for instance MINC 2.0 or the format based on space-filling curves
-mentioned in~\cite{burns2013open}. This is of major interest in the
-current open-science context since simpler formats favor data-sharing
-and interoperability.  Moreover, our algorithms could potentially be
-adapted to any split geometry, even though we demonstrated them on
-slabs and blocks only, while file formats inevitably assume a
-particular geometry. For instance, the format in~\cite{burns2013open}
-is not designed to naively split slabs. However, we aimed to extract
-all the blocks, whereas, ~\cite{burns2013open} aimed to extract a
-single block from a large image. MINC 2.0 might also help with
-on-the-fly compression for Clustered reads.
+Our results demonstrate that large images stored in simple formats may
+be split and merged without performance loss compared to more complex
+formats, for instance MINC 2.0 or the format based on space-filling
+curves mentioned in~\cite{burns2013open}. This is of major interest in
+the current open-science context since simpler formats favor
+data-sharing and interoperability.  Moreover, our algorithms could
+potentially be adapted to any chunk geometry, even though we
+demonstrated them on slabs and blocks only, while file formats
+inevitably assume a particular geometry. For instance, the format
+in~\cite{burns2013open} is not designed to naively split
+slabs. However, we aimed to extract all the blocks, whereas
+~\cite{burns2013open} aimed to extract a single block from a large
+image. MINC 2.0 might also help with on-the-fly compression for
+Clustered reads.
 
 % Compression
 On-the-fly compression, indeed, could not be used with Clustered reads
@@ -1048,5 +1050,6 @@ Data Cluster and Pierre Bellec for discussions about MINC.
 
 \bibliographystyle{IEEEtran}
 \bibliography{IEEEabrv,biblio.bib}
+
 
 \end{document}
