@@ -6,9 +6,9 @@ set boxwidth 0.75 absolute
 set style fill solid 1.00 border lt -1
 set style histogram rowstacked
 set style data histograms
-set xlabel "Memory (GB)"
-set ylabel "Merging time (s)"
-
+set xlabel "Memory (GB)" font ",20"
+set ylabel "Merging time (s)" font ",20"
+set key font ",20"
 maxy=13500
 
 ############# MERGE #################
